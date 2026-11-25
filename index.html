@@ -551,6 +551,7 @@ function openDialog(id) {
   $('#drop').classList.remove('has', 'existing'); $('#pq').value = ''; $('#file').value = '';
   fillList(); renderPreview(); showExisting();
   if (!dlg.open) dlg.showModal();
+  markSel(true);
   if (!id) $('#pq').focus();
 }
 $('#add').onclick = () => openDialog(null);
