@@ -338,18 +338,25 @@ const store = {
     const alt = typeof key === 'string', id = alt ? +key.split(':')[0] : +key;
     const blob = val instanceof Blob ? val : val.blob, label = val instanceof Blob ? '' : (val.label || '');
     const arr = this.vers.get(id) || [], old = arr.findIndex(v => v.key === key);
-    if (old >= 0) { URL.revokeObjectURL(arr[old].url); arr.splice(old, 1); }
-    arr.push({ key, id, alt, blob, label, url: URL.createObjectURL(blob) });
+    if (old >= 0) { URL.revokeObjectURL(arr[old].url); if (arr[old].turl !== arr[old].url) URL.revokeObjectURL(arr[old].turl); arr.splice(old, 1); }
+    arr.push({ key, id, alt, blob, label, url: URL.createObjectURL(blob), turl: val.thumb ? URL.createObjectURL(val.thumb) : null });
+    arr[arr.length - 1].turl ||= arr[arr.length - 1].url;
     arr.sort((x, y) => (x.alt - y.alt) || String(x.key).localeCompare(String(y.key), undefined, { numeric: true }));
     this.vers.set(id, arr); this.items.set(id, arr[0]);
   },
   del(key) {
-    const id = typeof key === 'string' ? +key.split(':')[0] : +key, arr = (this.vers.get(id) || []).filter(v => { if (v.key === key) URL.revokeObjectURL(v.url); return v.key !== key; });
+    const id = typeof key === 'string' ? +key.split(':')[0] : +key, arr = (this.vers.get(id) || []).filter(v => { if (v.key === key) { URL.revokeObjectURL(v.url); if (v.turl !== v.url) URL.revokeObjectURL(v.turl); } return v.key !== key; });
     if (arr.length) { this.vers.set(id, arr); this.items.set(id, arr[0]); } else { this.vers.delete(id); this.items.delete(id); }
   }
 };
-const putV = (key, blob, label = '') => { const val = typeof key === 'string' ? { blob, label } : blob;
-  return tx('readwrite', s => s.put(val, key)).then(() => store.add(key, val)); };
+async function makeThumb(blob) {
+  const im = await loadImage(URL.createObjectURL(blob)), k = Math.min(1, 380 / Math.max(im.naturalWidth, im.naturalHeight));
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(im.src);
+  return await new Promise(r => c.toBlob(b => r(b || blob), 'image/webp', .88));
+}
+const putV = async (key, blob, label = '') => { const val = { blob, label, thumb: await makeThumb(blob) };
+  await tx('readwrite', s => s.put(val, key)); store.add(key, val); };
 const removeV = key => tx('readwrite', s => s.delete(key)).then(() => store.del(key));
 const nextAltKey = id => { let n = 0; for (const v of store.vers.get(id) || []) if (v.alt) n = Math.max(n, +v.key.split(':')[1]); return `${id}:${n + 1}`; };
 
@@ -406,7 +413,7 @@ function buildGrid() {
 function paint(id, animate) {
   const c = cards.get(id), it = store.items.get(id), pic = c.el.querySelector('.pic');
   pic.innerHTML = '';
-  if (it) { const im = new Image(); im.src = it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; if (animate) im.className = 'stick'; pic.appendChild(im);
+  if (it) { const im = new Image(); im.src = it.turl || it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; if (animate) im.className = 'stick'; pic.appendChild(im);
     const nv = store.vers.get(id).length; if (nv > 1) { const bd = document.createElement('span'); bd.className = 'vbadge'; bd.textContent = '✦ ' + nv; bd.title = nv + ' versions'; pic.appendChild(bd); } }
   c.el.classList.toggle('empty', !it); c.el.classList.toggle('done', !!it);
 }
@@ -488,12 +495,13 @@ addEventListener('keydown', e => { if (e.key === '/' && !dlg.open && document.ac
 const MAXW = 640;
 function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
 
-function cutout(img, tol, erodeN) {
-  const sc = Math.min(1, MAXW / Math.max(img.naturalWidth, img.naturalHeight));
-  const w = Math.max(1, Math.round(img.naturalWidth * sc)), h = Math.max(1, Math.round(img.naturalHeight * sc));
+function cutout(img, tol, erodeN, region, maxW = MAXW) {
+  const R = region || { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+  const sc = Math.min(1, maxW / Math.max(R.w, R.h));
+  const w = Math.max(1, Math.round(R.w * sc)), h = Math.max(1, Math.round(R.h * sc));
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
   const cx = cv.getContext('2d', { willReadFrequently: true });
-  cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); cx.drawImage(img, 0, 0, w, h);
+  cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, R.x, R.y, R.w, R.h, 0, 0, w, h);
   const id = cx.getImageData(0, 0, w, h), d = id.data, N = w * h;
 
   // couleur du fond = médiane du pourtour
@@ -548,7 +556,7 @@ function cutout(img, tol, erodeN) {
     if (a[p] > 0.5) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
   if (x1 < 0) return null;
   cx.putImageData(id, 0, 0);
-  return { cv, box: [x0, y0, x1 - x0 + 1, y1 - y0 + 1] };
+  return { cv, sc, box: [x0, y0, x1 - x0 + 1, y1 - y0 + 1] };
 }
 
 /* contour d'un masque binaire (Moore) + simplification Douglas-Peucker -> coupe « aux ciseaux » */
@@ -587,7 +595,9 @@ function simplifyClosed(pts, eps) {
 }
 
 function sticker(co, border, shape = 'round', k = .5) {
-  const [bx, by, bw, bh] = co.box, cut = shape === 'cut' && border > 0;
+  const [bx, by, bw, bh] = co.box;
+  border = border * Math.max(bw, bh) / 180; // l'épaisseur suit la taille du Pokémon
+  const cut = shape === 'cut' && border > 0;
   const eps = cut ? Math.max(3, border * k) : 0, pd = Math.ceil(border + eps + 6);
   const W = bw + pd*2, H = bh + pd*2;
   const out = document.createElement('canvas'); out.width = W; out.height = H;
@@ -666,7 +676,12 @@ function renderPreview() {
   if (!curImg) return;
   clearTimeout(timer); setBusy(true);
   timer = setTimeout(() => {
-    const co = cutout(curImg, +$('#tol').value, +$('#ero').value);
+    const tol = +$('#tol').value, ero = +$('#ero').value;
+    let co = cutout(curImg, tol, ero, null, 480);   // passe rapide : repère le Pokémon
+    if (co) { const [bx, by, bw, bh] = co.box, m = Math.max(24, .1 * Math.max(bw, bh)), W = curImg.naturalWidth, H = curImg.naturalHeight;
+      const x = Math.max(0, Math.floor((bx - m) / co.sc)), y = Math.max(0, Math.floor((by - m) / co.sc));
+      const region = { x, y, w: Math.min(W - x, Math.ceil((bw + 2 * m) / co.sc)), h: Math.min(H - y, Math.ceil((bh + 2 * m) / co.sc)) };
+      co = cutout(curImg, tol, ero, region, 1100) || co; }   // passe fine : pleine résolution sur le Pokémon
     setBusy(false);
     if (!co) { lastCanvas = null; upd(); toast('😕 Rien détecté : augmente la tolérance ?'); return; }
     lastCanvas = sticker(co, +$('#bor').value, shape, +$('#cutk').value / 10);
