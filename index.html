@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mon Pokédex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="pokemon-data.js"></script>
 <style>
 :root{
   --red:#e0323f; --red2:#a91d31; --gold:#ffd84d; --gold2:#ffb703;
   --bg:#f5f0e6; --bg2:#ece5d6; --card:#ffffff; --ink:#23262f; --mute:#8b8f9c; --line:#e5dfd0; --ok:#25a55f;
   --glass:rgba(255,255,255,.14); --shadow:0 2px 0 rgba(0,0,0,.04),0 6px 16px rgba(60,40,10,.12);
-  --font:"Fredoka",ui-rounded,"SF Pro Rounded",system-ui,sans-serif;
-  --ease:cubic-bezier(.22,1.2,.36,1); --cs:132px;
+  --font:"Barlow Semi Condensed","Segoe UI",system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1.2,.36,1); --cs:132px;--sh:3px;
 }
 :root[data-theme=dark]{
   --bg:#13151c; --bg2:#191c25; --card:#232733; --ink:#eef0f6; --mute:#8d94a6; --line:#323747;
@@ -21,7 +21,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{margin:0;font:15px/1.4 var(--font);background:var(--bg);color:var(--ink);transition:background .4s,color .4s;
+body{margin:0;font:16px/1.4 var(--font);background:var(--bg);color:var(--ink);transition:background .4s,color .4s;
   background-image:radial-gradient(var(--line) 1.2px,transparent 1.4px);background-size:22px 22px}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;transition:transform .15s var(--ease),filter .15s,background .2s,box-shadow .2s}
@@ -90,7 +90,7 @@ main{max-width:1500px;margin:0 auto;padding:22px 18px 90px}
 .slot:hover{transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-5px) scale(1.03);border-color:var(--gold2);box-shadow:0 14px 28px rgba(60,40,10,.25)}
 .slot .num{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;text-align:left;font-weight:500}
 .slot .pic{height:calc(var(--cs)*.8);display:grid;place-items:center;position:relative}
-.slot .pic img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));transition:transform .35s var(--ease);position:relative}
+.slot .pic img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(calc(var(--sh)*.6) var(--sh) calc(var(--sh)*.7) rgba(0,0,0,.4));transition:transform .35s var(--ease);position:relative}
 .slot:hover .pic img{transform:scale(1.1) rotate(-3deg)}
 .slot .name{font-weight:600;font-size:14px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative}
 .slot.empty{background:color-mix(in srgb,var(--card) 70%,transparent);border-style:dashed}
@@ -138,7 +138,7 @@ dialog.closing::backdrop{animation:bOut .18s forwards}
 .drop:hover{border-color:var(--red);transform:scale(1.01)}
 .drop.over{border-color:var(--red);transform:scale(1.03);background-color:#e0323f14;animation:pulse .8s infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 10px #e0323f22}}
-.drop canvas{max-width:100%;max-height:340px;display:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}
+.drop canvas{max-width:100%;max-height:340px;display:none;filter:drop-shadow(calc(var(--sh)*.6) var(--sh) calc(var(--sh)*.7) rgba(0,0,0,.4))}
 .drop.has canvas{display:block}.drop.has .hint{display:none}
 .drop canvas.pop{animation:pop .5s var(--ease)}
 @keyframes pop{from{transform:scale(.7) rotate(-6deg);opacity:.2}}
@@ -163,6 +163,10 @@ label.row span b{color:var(--ink);float:right}
 input[type=range]{width:100%;accent-color:var(--red)}
 .note{font-size:12.5px;color:var(--mute)}
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:auto;flex-wrap:wrap;align-items:center}
+.row2{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute)}
+.shapes{display:flex;background:var(--bg2);border-radius:11px;padding:3px}
+.shapes button{background:none;padding:5px 11px;border-radius:8px;font-weight:500;color:var(--ink)}
+.shapes button.on{background:var(--red);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .b{padding:10px 16px;border-radius:12px;background:var(--bg2);font-weight:500}
 .b:hover{filter:brightness(.95)}
 .b.danger{color:#d0283a;margin-right:auto}
@@ -234,7 +238,10 @@ kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margi
         <div class="warn" id="over" hidden>⚠ Ce slot a déjà une image : elle sera remplacée.</div>
       </div>
       <label class="row"><span>Tolérance du fond <b id="vtol"></b></span><input type="range" id="tol" min="5" max="120" value="38"></label>
-      <label class="row"><span>Épaisseur du contour <b id="vbor"></b></span><input type="range" id="bor" min="0" max="40" value="14"></label>
+      <div class="row2"><span>Forme du contour</span>
+        <div class="shapes" id="shapes"><button data-s="round" class="on" title="Contour arrondi">◖ Arrondi</button><button data-s="cut" title="Découpé aux ciseaux, bords droits">✂ Découpé droit</button></div></div>
+      <label class="row"><span>Épaisseur du contour <b id="vbor"></b></span><input type="range" id="bor" min="0" max="60" value="14"></label>
+      <label class="row"><span>Ombre portée <b id="vsh"></b></span><input type="range" id="sh" min="0" max="10" value="3"></label>
       <label class="row"><span>Affiner les bords <b id="vero"></b></span><input type="range" id="ero" min="0" max="5" value="1"></label>
       <div class="note">Du fond reste ? Augmente la tolérance. Le Pokémon est grignoté ? Diminue-la.</div>
       <div class="actions">
@@ -464,8 +471,44 @@ function cutout(img, tol, erodeN) {
   return { cv, box: [x0, y0, x1 - x0 + 1, y1 - y0 + 1] };
 }
 
-function sticker(co, border) {
-  const [bx, by, bw, bh] = co.box, pd = border + 6;
+/* contour d'un masque binaire (Moore) + simplification Douglas-Peucker -> coupe « aux ciseaux » */
+function traceOutlines(m, W, H) {
+  const seen = new Uint8Array(W * H), out = [], st = [];
+  const D = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+  for (let s = 0; s < W * H; s++) {
+    if (!m[s] || seen[s]) continue;
+    let area = 0; seen[s] = 1; st.push(s);
+    while (st.length) { const p = st.pop(); area++; const x = p % W, y = (p / W) | 0;
+      for (const [dx, dy] of D) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= W || Y >= H) continue; const q = Y * W + X; if (m[q] && !seen[q]) { seen[q] = 1; st.push(q); } } }
+    if (area < 80) continue;
+    const sx = s % W, sy = (s / W) | 0, pts = []; let cx = sx, cy = sy, sd = 4, guard = 0;
+    do { pts.push([cx, cy]); let moved = false;
+      for (let k = 0; k < 8; k++) { const d = (sd + k) % 8, X = cx + D[d][0], Y = cy + D[d][1];
+        if (X >= 0 && Y >= 0 && X < W && Y < H && m[Y * W + X]) { cx = X; cy = Y; sd = (d + 6) % 8; moved = true; break; } }
+      if (!moved) break;
+    } while ((cx !== sx || cy !== sy) && ++guard < W * H * 2);
+    out.push(pts);
+  }
+  return out;
+}
+function dp(pts, eps) {
+  const keep = new Uint8Array(pts.length); keep[0] = keep[pts.length - 1] = 1;
+  const stack = [[0, pts.length - 1]];
+  while (stack.length) { const [i, j] = stack.pop(); const A = pts[i], B = pts[j]; let md = 0, mk = -1;
+    const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy) || 1;
+    for (let k = i + 1; k < j; k++) { const d = Math.abs(dy * (pts[k][0] - A[0]) - dx * (pts[k][1] - A[1])) / L; if (d > md) { md = d; mk = k; } }
+    if (md > eps && mk > 0) { keep[mk] = 1; stack.push([i, mk], [mk, j]); } }
+  return pts.filter((_, k) => keep[k]);
+}
+function simplifyClosed(pts, eps) {
+  let f = 0, md = 0; for (let k = 1; k < pts.length; k++) { const d = Math.hypot(pts[k][0] - pts[0][0], pts[k][1] - pts[0][1]); if (d > md) { md = d; f = k; } }
+  if (!f) return pts;
+  return dp(pts.slice(0, f + 1), eps).concat(dp(pts.slice(f).concat([pts[0]]), eps).slice(1, -1));
+}
+
+function sticker(co, border, shape = 'round') {
+  const [bx, by, bw, bh] = co.box, cut = shape === 'cut' && border > 0;
+  const eps = cut ? Math.max(3, border * 0.5) : 0, pd = Math.ceil(border + eps + 6);
   const W = bw + pd*2, H = bh + pd*2;
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const o = out.getContext('2d');
@@ -473,20 +516,27 @@ function sticker(co, border) {
   const tint = col => { const t = document.createElement('canvas'); t.width = W; t.height = H;
     const c = t.getContext('2d'); c.drawImage(co.cv, bx, by, bw, bh, pd, pd, bw, bh);
     c.globalCompositeOperation = 'source-in'; c.fillStyle = col; c.fillRect(0, 0, W, H); return t; };
-  const stamp = (t, r) => { if (r <= 0) { o.drawImage(t, 0, 0); return; }
+  const stamp = (t, r, ctx = o) => { if (r <= 0) { ctx.drawImage(t, 0, 0); return; }
     const n = Math.min(160, Math.max(24, Math.ceil(r * 6)));
-    for (let k = 0; k < n; k++) { const an = k / n * Math.PI * 2; o.drawImage(t, Math.cos(an)*r, Math.sin(an)*r); }
-    for (let rr = r / 2; rr > 1; rr /= 2) for (let k = 0; k < 16; k++) { const an = k / 16 * Math.PI * 2; o.drawImage(t, Math.cos(an)*rr, Math.sin(an)*rr); }
-    o.drawImage(t, 0, 0); };
-  if (border > 0) { stamp(tint('#c9ced8'), border + 1.8); stamp(tint('#ffffff'), border); }
+    for (let k = 0; k < n; k++) { const an = k / n * Math.PI * 2; ctx.drawImage(t, Math.cos(an)*r, Math.sin(an)*r); }
+    for (let rr = r / 2; rr > 1; rr /= 2) for (let k = 0; k < 16; k++) { const an = k / 16 * Math.PI * 2; ctx.drawImage(t, Math.cos(an)*rr, Math.sin(an)*rr); }
+    ctx.drawImage(t, 0, 0); };
+  if (cut) {
+    const T = document.createElement('canvas'); T.width = W; T.height = H; const tc = T.getContext('2d', { willReadFrequently: true });
+    stamp(tint('#fff'), border + eps, tc);
+    const a = tc.getImageData(0, 0, W, H).data, m = new Uint8Array(W * H);
+    for (let p = 0; p < W * H; p++) m[p] = a[p * 4 + 3] > 127 ? 1 : 0;
+    const polys = traceOutlines(m, W, H).map(p => simplifyClosed(p, eps));
+    o.lineJoin = 'miter'; o.miterLimit = 3; o.strokeStyle = '#c9ced8'; o.lineWidth = 3.6; o.fillStyle = '#fff';
+    for (const pl of polys) { o.beginPath(); pl.forEach(([x, y], i) => i ? o.lineTo(x + .5, y + .5) : o.moveTo(x + .5, y + .5)); o.closePath(); o.stroke(); o.fill(); }
+  } else if (border > 0) { stamp(tint('#c9ced8'), border + 1.8); stamp(tint('#ffffff'), border); }
   o.drawImage(co.cv, bx, by, bw, bh, pd, pd, bw, bh);
   return out;
 }
 
-
-
 /* ---------- Boîte de dialogue ---------- */
-const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null, lastOpened = 0, listIds = [];
+const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null, lastOpened = 0, listIds = [], shape = 'round';
+const setShape = v => { shape = v === 'cut' ? 'cut' : 'round'; document.querySelectorAll('#shapes button').forEach(b => b.classList.toggle('on', b.dataset.s === shape)); };
 const closeDlg = () => { if (!dlg.open) return; dlg.classList.add('closing'); setTimeout(() => { dlg.close(); dlg.classList.remove('closing'); }, 180); };
 dlg.addEventListener('cancel', e => { e.preventDefault(); closeDlg(); });
 dlg.addEventListener('click', e => { if (e.target === dlg) closeDlg(); });
@@ -521,14 +571,14 @@ $('#pq').oninput = () => { fillList(); showExisting(); };
 const setBusy = b => $('#drop').classList.toggle('busy', b);
 function renderPreview() {
   $('#vtol').textContent = $('#tol').value; $('#vbor').textContent = $('#bor').value + ' px'; $('#vero').textContent = $('#ero').value;
-  ls.set('opt', JSON.stringify([$('#tol').value, $('#bor').value, $('#ero').value]));
+  ls.set('opt', JSON.stringify([$('#tol').value, $('#bor').value, $('#ero').value, shape]));
   if (!curImg) return;
   clearTimeout(timer); setBusy(true);
   timer = setTimeout(() => {
     const co = cutout(curImg, +$('#tol').value, +$('#ero').value);
     setBusy(false);
     if (!co) { lastCanvas = null; upd(); toast('😕 Rien détecté : augmente la tolérance ?'); return; }
-    lastCanvas = sticker(co, +$('#bor').value);
+    lastCanvas = sticker(co, +$('#bor').value, shape);
     const p = $('#prev'); p.width = lastCanvas.width; p.height = lastCanvas.height;
     p.getContext('2d').drawImage(lastCanvas, 0, 0);
     $('#drop').classList.add('has'); $('#drop').classList.remove('existing');
@@ -554,7 +604,7 @@ async function setFile(f) {
 function openDialog(id) {
   if (id) lastOpened = id;
   curId = id || null; curImg = null; lastCanvas = null;
-  const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; }
+  const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; setShape(o[3] || 'round'); }
   $('#drop').classList.remove('has', 'existing'); $('#pq').value = ''; $('#file').value = '';
   fillList(); renderPreview(); showExisting();
   if (!dlg.open) dlg.showModal();
@@ -574,6 +624,7 @@ addEventListener('dragleave', () => { if (--dc <= 0) { dc = 0; $('#veil').classL
 addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', e => { e.preventDefault(); dc = 0; $('#veil').classList.remove('on'); const f = e.dataTransfer.files[0]; if (f) setFile(f); });
 addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/')); if (f) setFile(f); });
+$('#shapes').onclick = e => { const b = e.target.closest('button'); if (!b) return; setShape(b.dataset.s); renderPreview(); };
 ['tol','bor','ero'].forEach(i => $('#'+i).addEventListener('input', () => { renderPreview.quiet = true; renderPreview(); }));
 
 async function save(next) {
@@ -620,6 +671,11 @@ $('#impf').onchange = async e => {
   } catch (err) { toast('❌ Fichier invalide'); }
   e.target.value = '';
 };
+
+/* ---------- Ombre portée (réglage global) ---------- */
+const setSh = v => { document.documentElement.style.setProperty('--sh', v + 'px'); $('#vsh').textContent = v + ' px'; };
+$('#sh').value = ls.get('sh', 3); setSh($('#sh').value);
+$('#sh').oninput = e => { setSh(e.target.value); ls.set('sh', e.target.value); };
 
 /* ---------- Démarrage ---------- */
 buildGrid(); refresh(true);
