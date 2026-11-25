@@ -107,7 +107,13 @@ main{max-width:1500px;margin:0 auto;padding:22px 18px 90px}
   background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 45%),
    conic-gradient(from 0deg at var(--mx) var(--my),var(--h1),var(--h2),#ffffffcc,var(--h1),var(--h2),var(--h1));filter:saturate(1.1)}
 .slot.done:hover:before{opacity:.5}
-.slot.done{background:linear-gradient(160deg,var(--card),color-mix(in srgb,var(--card) 80%,var(--gold)))}
+.slot.done{background:linear-gradient(160deg,var(--card),color-mix(in srgb,var(--card) 86%,var(--h1)))}
+.slot>.tbar{position:absolute;left:0;right:0;top:0;height:6px;z-index:1;background:linear-gradient(90deg,var(--h1) 50%,var(--h2) 50%);opacity:.9}
+.slot.empty>.tbar{opacity:.3}
+.slot .num{display:flex;align-items:center;gap:4px;padding-top:2px}
+.slot .te{font-size:13px;letter-spacing:1px;filter:saturate(1.2)}
+.slot.empty .te{opacity:.55}
+.slot.done .num:after{margin-left:auto}
 .slot.flash{animation:flash 1.4s ease 2}
 @keyframes flash{50%{box-shadow:0 0 0 5px var(--gold),0 0 30px var(--gold);transform:scale(1.07)}}
 .slot img.stick{animation:stick .7s var(--ease)}
@@ -425,6 +431,7 @@ function loop() {
 /* ---------- Grille ---------- */
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const cards = new Map();
+const TEMOJI = { 1:'⚪', 2:'🥊', 3:'🕊️', 4:'☠️', 5:'🏜️', 6:'🪨', 7:'🐛', 8:'👻', 9:'⚙️', 10:'🔥', 11:'💧', 12:'🍃', 13:'⚡', 14:'🔮', 15:'❄️', 16:'🐉', 17:'🌑', 18:'✨' };
 const TYPES = { 1:['Normal','#a8a77a'], 2:['Combat','#c22e28'], 3:['Vol','#a98ff3'], 4:['Poison','#a33ea1'], 5:['Sol','#e2bf65'], 6:['Roche','#b6a136'], 7:['Insecte','#a6b91a'], 8:['Spectre','#735797'], 9:['Acier','#b7b7ce'], 10:['Feu','#ee8130'], 11:['Eau','#6390f0'], 12:['Plante','#7ac74c'], 13:['Électrik','#f7d02c'], 14:['Psy','#f95587'], 15:['Glace','#96d9d6'], 16:['Dragon','#6f35fc'], 17:['Ténèbres','#705746'], 18:['Fée','#d685ad'] };
 const holoVars = (el, types) => { const c1 = TYPES[types[0]][1], c2 = TYPES[types[1] || types[0]][1]; el.style.setProperty('--h1', c1); el.style.setProperty('--h2', c2); };
 const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
@@ -436,8 +443,8 @@ function buildGrid() {
   for (const [id, fr, en, gen, chain, , types] of P) {
     const el = document.createElement('div');
     el.className = 'slot empty'; el.dataset.id = id;
-    el.innerHTML = `<div class="num">#${pad(id)}</div><div class="pic"></div><div class="name">${fr}</div>`;
-    el.title = fr === en ? fr : `${fr} (${en})`;
+    el.innerHTML = `<div class="tbar"></div><div class="num">#${pad(id)} <span class="te">${types.map(t => TEMOJI[t]).join('')}</span></div><div class="pic"></div><div class="name">${fr}</div>`;
+    el.title = (fr === en ? fr : `${fr} (${en})`) + ' · ' + types.map(t => TYPES[t][0]).join(' / ');
     el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
     el.style.setProperty('--fc', `hsl(${(chain * 137) % 360} 70% 55%)`);
     holoVars(el, types);
