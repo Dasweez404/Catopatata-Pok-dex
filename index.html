@@ -177,6 +177,16 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .b.red:disabled{opacity:.4;cursor:not-allowed}
 kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margin-left:5px}
 
+/* ---------- Versions / familles ---------- */
+.vers{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.vers button{padding:4px 11px;border-radius:99px;background:var(--bg2);font-size:13px;font-weight:500}
+.vers button.on{background:var(--red);color:#fff}
+.vers button.add{border:1px dashed var(--mute);background:none;color:var(--mute)}
+.vers button.add:hover{color:var(--red);border-color:var(--red)}
+#vlabel{width:100%;margin-top:6px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);outline:none}
+#vlabel:focus{border-color:var(--red)}
+.vbadge{position:absolute;right:2px;bottom:2px;z-index:3;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+body.fam .slot{border-bottom:6px solid var(--fc)}
 /* ---------- Modes ---------- */
 #view{max-width:min(560px,95vw)}
 .mode{margin-left:6px}
@@ -193,9 +203,10 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   --rx:0deg;--ry:0deg;--mx:50%;--my:50%}
 .v-stage:after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;transition:opacity .3s;
   background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 40%),conic-gradient(from 0deg at var(--mx) var(--my),#ff6ad5,#ffd76a,#6affb1,#6ab8ff,#c36aff,#ff6ad5)}
-.v-stage:hover:after{opacity:.28}
+.v-stage:hover:after,.v-stage.gyro:after{opacity:.3}
+#vgyro{width:auto;padding:0 11px;font-size:13px}#vgyro.on{background:var(--gold);color:#4a3300}
 .v-stage img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .2s;
-  filter:drop-shadow(calc(var(--sh)*1.5) calc(var(--sh)*2) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
+  translate:var(--tx,0px) var(--ty,0px);filter:drop-shadow(calc(var(--sh)*1.5 + var(--sx,0px)) calc(var(--sh)*2 + var(--sy,0px)) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
 .v-stage img.inR{animation:inR .4s var(--ease)}.v-stage img.inL{animation:inL .4s var(--ease)}
 @keyframes inR{from{opacity:0;translate:60px 0;scale:.85}}@keyframes inL{from{opacity:0;translate:-60px 0;scale:.85}}
 .v-info{text-align:center;padding:0 16px 4px}
@@ -224,11 +235,12 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   <div class="bar">
     <div class="brand"><div class="lens"></div><h1>Mon Pokédex<small>Collection stickers</small></h1></div>
     <div class="seg mode" id="mode"><button data-m="prof" title="Éditer : ajouter et modifier les stickers">🎓 Professeur</button><button data-m="explorer" title="Observer ta collection">🔭 Explorateur</button></div>
-    <div class="counter" id="counter"><b id="cn">0</b><span>/ 1025</span></div>
+    <div class="counter" id="counter"><b id="cn">0</b><span id="ctot"></span></div>
     <div class="prog"><i id="bar"></i></div>
     <div class="controls">
       <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
       <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
+      <div class="seg" id="sort" title="Ordre d'affichage"><button data-v="num" class="on">N°</button><button data-v="fam">👪 Familles</button></div>
       <button class="btn prof-only" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
       <span class="sp"></span>
       <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
@@ -251,9 +263,10 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <canvas id="fx"></canvas>
 
 <dialog id="view">
-  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vx">✕</button></div>
+  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
   <div class="v-stage" id="vstage"><img id="vimg" alt=""></div>
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
+  <div class="vers" id="vvers" style="justify-content:center;padding:0 16px"></div>
   <div class="v-nav"><button class="b" id="vprev">←</button><em id="vcount"></em><button class="b" id="vnext">→</button></div>
 </dialog>
 
@@ -273,6 +286,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
         <div class="list" id="plist"></div>
         <div class="warn" id="over" hidden>⚠ Ce slot a déjà une image : elle sera remplacée.</div>
       </div>
+      <div class="vers" id="vers" hidden></div>
+      <input type="text" id="vlabel" placeholder="Nom de la version (ex : Shiny, Alola, Mega…)" maxlength="40" hidden>
       <label class="row"><span>Tolérance du fond <b id="vtol"></b></span><input type="range" id="tol" min="5" max="120" value="38"></label>
       <div class="row2"><span>Forme du contour</span>
         <div class="shapes" id="shapes"><button data-s="round" class="on" title="Contour arrondi">◖ Arrondi</button><button data-s="cut" title="Découpé aux ciseaux, bords droits">✂ Découpé droit</button></div></div>
@@ -312,17 +327,31 @@ const tx = async (mode, fn) => { const d = await db; return new Promise((res, re
   const t = d.transaction('stickers', mode), s = t.objectStore('stickers'); const out = fn(s);
   t.oncomplete = () => res(out.result); t.onerror = () => rej(t.error); }); };
 const store = {
-  items: new Map(),
+  items: new Map(), // id -> version de couverture (la principale, sinon la 1re alternative)
+  vers: new Map(),  // id -> toutes les versions [{key,id,alt,blob,label,url}]
   async load() {
     const d = await db;
     await new Promise(res => { const c = d.transaction('stickers').objectStore('stickers').openCursor();
-      c.onsuccess = () => { const cur = c.result; if (!cur) return res(); this.set(+cur.key, cur.value); cur.continue(); }; });
+      c.onsuccess = () => { const cur = c.result; if (!cur) return res(); this.add(cur.key, cur.value); cur.continue(); }; });
   },
-  set(id, blob) { this.drop(id); this.items.set(id, { blob, url: URL.createObjectURL(blob) }); },
-  drop(id) { const o = this.items.get(id); if (o) URL.revokeObjectURL(o.url); this.items.delete(id); }
+  add(key, val) {
+    const alt = typeof key === 'string', id = alt ? +key.split(':')[0] : +key;
+    const blob = val instanceof Blob ? val : val.blob, label = val instanceof Blob ? '' : (val.label || '');
+    const arr = this.vers.get(id) || [], old = arr.findIndex(v => v.key === key);
+    if (old >= 0) { URL.revokeObjectURL(arr[old].url); arr.splice(old, 1); }
+    arr.push({ key, id, alt, blob, label, url: URL.createObjectURL(blob) });
+    arr.sort((x, y) => (x.alt - y.alt) || String(x.key).localeCompare(String(y.key), undefined, { numeric: true }));
+    this.vers.set(id, arr); this.items.set(id, arr[0]);
+  },
+  del(key) {
+    const id = typeof key === 'string' ? +key.split(':')[0] : +key, arr = (this.vers.get(id) || []).filter(v => { if (v.key === key) URL.revokeObjectURL(v.url); return v.key !== key; });
+    if (arr.length) { this.vers.set(id, arr); this.items.set(id, arr[0]); } else { this.vers.delete(id); this.items.delete(id); }
+  }
 };
-const put = (id, blob) => tx('readwrite', s => s.put(blob, id)).then(() => store.set(id, blob));
-const remove = id => tx('readwrite', s => s.delete(id)).then(() => store.drop(id));
+const putV = (key, blob, label = '') => { const val = typeof key === 'string' ? { blob, label } : blob;
+  return tx('readwrite', s => s.put(val, key)).then(() => store.add(key, val)); };
+const removeV = key => tx('readwrite', s => s.delete(key)).then(() => store.del(key));
+const nextAltKey = id => { let n = 0; for (const v of store.vers.get(id) || []) if (v.alt) n = Math.max(n, +v.key.split(':')[1]); return `${id}:${n + 1}`; };
 
 /* ---------- Toasts & confettis ---------- */
 function toast(msg, action, fn, ms = 4500) {
@@ -357,12 +386,13 @@ let fGen = 0, fSt = 'all', mode = ls.get('mode', 'prof') === 'explorer' ? 'explo
 
 function buildGrid() {
   const frag = document.createDocumentFragment();
-  for (const [id, fr, en, gen] of P) {
+  for (const [id, fr, en, gen, chain] of P) {
     const el = document.createElement('div');
     el.className = 'slot empty'; el.dataset.id = id;
     el.innerHTML = `<div class="num">#${pad(id)}</div><div class="pic"></div><div class="name">${fr}</div>`;
     el.title = fr === en ? fr : `${fr} (${en})`;
     el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
+    el.style.setProperty('--fc', `hsl(${(chain * 137) % 360} 70% 55%)`);
     cards.set(id, { el, key: norm(fr + ' ' + en + ' ' + id + ' ' + pad(id)), gen });
     frag.appendChild(el);
   }
@@ -376,10 +406,21 @@ function buildGrid() {
 function paint(id, animate) {
   const c = cards.get(id), it = store.items.get(id), pic = c.el.querySelector('.pic');
   pic.innerHTML = '';
-  if (it) { const im = new Image(); im.src = it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; if (animate) im.className = 'stick'; pic.appendChild(im); }
+  if (it) { const im = new Image(); im.src = it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; if (animate) im.className = 'stick'; pic.appendChild(im);
+    const nv = store.vers.get(id).length; if (nv > 1) { const bd = document.createElement('span'); bd.className = 'vbadge'; bd.textContent = '✦ ' + nv; bd.title = nv + ' versions'; pic.appendChild(bd); } }
   c.el.classList.toggle('empty', !it); c.el.classList.toggle('done', !!it);
 }
 let loaded = false;
+let sortMode = ls.get('sort', 'num') === 'fam' ? 'fam' : 'num', ordIdx = {};
+function applySort() {
+  const famMin = {}; for (const p of P) famMin[p[4]] = Math.min(famMin[p[4]] ?? 1e9, p[0]);
+  const list = sortMode === 'fam' ? [...P].sort((a, b) => famMin[a[4]] - famMin[b[4]] || a[4] - b[4] || a[5] - b[5] || a[0] - b[0]) : P;
+  list.forEach((p, i) => { ordIdx[p[0]] = i; cards.get(p[0]).el.style.order = i; });
+  document.body.classList.toggle('fam', sortMode === 'fam');
+  document.querySelectorAll('#sort button').forEach(b => b.classList.toggle('on', b.dataset.v === sortMode));
+}
+$('#sort').onclick = e => { const b = e.target.closest('button'); if (!b || b.dataset.v === sortMode) return; sortMode = b.dataset.v; ls.set('sort', sortMode); applySort(); refresh(true);
+  toast(sortMode === 'fam' ? '👪 Regroupés par famille d\'évolution' : '🔢 Triés par numéro'); };
 function genCounts() { const per = {}; for (const [id, c] of cards) if (store.items.has(id)) per[c.gen] = (per[c.gen] || 0) + 1; return per; }
 function tween(el, to) { // compteur animé
   const from = +el.dataset.v || 0; el.dataset.v = to; if (reduce || from === to) { el.textContent = to; return; }
@@ -404,7 +445,9 @@ function refresh(animate) {
   tween($('#cn'), n);
   if (lastCount >= 0 && n > lastCount) { $('#counter').classList.remove('bump'); void $('#counter').offsetWidth; $('#counter').classList.add('bump'); }
   lastCount = n;
-  $('#bar').style.width = (100 * n / P.length) + '%';
+  const total = Object.keys(per).reduce((a, g) => a + genTotal[g], 0);
+  $('#ctot').textContent = total ? '/ ' + total : '';
+  $('#bar').style.width = (total ? 100 * n / total : 0) + '%';
   document.querySelectorAll('.chip[data-g]').forEach(ch => { const g = +ch.dataset.g;
     ch.hidden = g ? !per[g] : !any; if (!g) return;
     ch.querySelector('em').textContent = `${per[g] || 0}/${genTotal[g]}`; ch.classList.toggle('full', per[g] === genTotal[g]); });
@@ -572,7 +615,17 @@ function sticker(co, border, shape = 'round', k = .5) {
 }
 
 /* ---------- Boîte de dialogue ---------- */
-const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null, lastOpened = 0, listIds = [], shape = 'round';
+const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null, lastOpened = 0, listIds = [], shape = 'round', curVer = 'main';
+const verEntry = () => { const vs = store.vers.get(curId) || []; return curVer === 'new' ? null : curVer === 'main' ? vs.find(v => !v.alt) || null : vs.find(v => v.key === curVer) || null; };
+const verKey = () => curVer === 'main' ? curId : curVer === 'new' ? nextAltKey(curId) : curVer;
+function renderVers() {
+  const box = $('#vers'), vs = store.vers.get(curId) || [];
+  box.hidden = !curId; $('#vlabel').hidden = !curId || curVer === 'main'; if (!curId) return;
+  box.innerHTML = `<button data-v="main" class="${curVer === 'main' ? 'on' : ''}">Principale${vs.some(v => !v.alt) ? ' ✓' : ''}</button>` +
+    vs.filter(v => v.alt).map((v, i) => `<button data-v="${v.key}" class="${curVer === v.key ? 'on' : ''}">${(v.label || 'Alt. ' + (i + 1)).replace(/</g, '&lt;')} ✓</button>`).join('') +
+    `<button data-v="new" class="add ${curVer === 'new' ? 'on' : ''}">＋ Version alternative</button>`;
+}
+$('#vers').onclick = e => { const b = e.target.closest('button'); if (!b) return; curVer = b.dataset.v; const en = verEntry(); $('#vlabel').value = en ? en.label : ''; renderVers(); showExisting(); if (curVer !== 'main') $('#vlabel').focus(); };
 const setShape = v => { shape = v === 'cut' ? 'cut' : 'round'; document.querySelectorAll('#shapes button').forEach(b => b.classList.toggle('on', b.dataset.s === shape)); };
 const closeD = d => { if (!d.open) return; d.classList.add('closing'); setTimeout(() => { d.close(); d.classList.remove('closing'); }, 180); };
 const closeDlg = () => closeD(dlg);
@@ -594,15 +647,15 @@ function markSel(scroll) {
   upd();
 }
 function upd() {
-  const has = curId && store.items.has(curId);
-  $('#over').hidden = !(has && lastCanvas); $('#del').hidden = !has;
+  const has = !!(curId && verEntry());
+  $('#over').hidden = !(has && lastCanvas); $('#del').hidden = !has; renderVers();
   $('#save').disabled = $('#savenext').disabled = !(lastCanvas && curId);
   $('#dtitle').innerHTML = curId ? `<span>#${pad(curId)}</span>${P[curId-1][1]}` : 'Ajouter un Pokémon';
 }
-$('#plist').onclick = e => { const n = e.target.closest('[data-id]'); if (!n) return; curId = +n.dataset.id; markSel(false); showExisting(); };
+$('#plist').onclick = e => { const n = e.target.closest('[data-id]'); if (!n) return; curId = +n.dataset.id; curVer = 'main'; $('#vlabel').value = ''; markSel(false); showExisting(); };
 $('#pq').addEventListener('keydown', e => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const k = listIds.indexOf(curId) + (e.key === 'ArrowDown' ? 1 : -1);
-    if (listIds[k]) { curId = listIds[k]; markSel(false); $('#plist').querySelector('.sel')?.scrollIntoView({ block: 'nearest' }); showExisting(); } }
+    if (listIds[k]) { curId = listIds[k]; curVer = 'main'; markSel(false); $('#plist').querySelector('.sel')?.scrollIntoView({ block: 'nearest' }); showExisting(); } }
 });
 $('#pq').oninput = () => { fillList(); showExisting(); };
 
@@ -626,7 +679,7 @@ function renderPreview() {
 }
 async function showExisting() { // affiche le sticker déjà enregistré pour le Pokémon sélectionné
   if (curImg) return upd();
-  const d = $('#drop'), it = curId && store.items.get(curId);
+  const d = $('#drop'), it = curId && verEntry();
   if (!it) { d.classList.remove('has', 'existing'); return upd(); }
   const im = await loadImage(it.url), p = $('#prev'); p.width = im.naturalWidth; p.height = im.naturalHeight;
   p.getContext('2d').drawImage(im, 0, 0); d.classList.add('has', 'existing');
@@ -641,7 +694,7 @@ async function setFile(f) {
 }
 function openDialog(id) {
   if (id) lastOpened = id;
-  curId = id || null; curImg = null; lastCanvas = null;
+  curId = id || null; curImg = null; lastCanvas = null; curVer = 'main'; $('#vlabel').value = '';
   const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; setShape(o[3] || 'round'); if (o[4]) $('#cutk').value = o[4]; }
   $('#drop').classList.remove('has', 'existing'); $('#pq').value = ''; $('#file').value = '';
   fillList(); renderPreview(); showExisting();
@@ -670,7 +723,7 @@ async function save(next) {
   const id = curId;
   const blob = await new Promise(r => lastCanvas.toBlob(r, 'image/webp', .92));
   const b = blob && blob.type === 'image/webp' ? blob : await new Promise(r => lastCanvas.toBlob(r, 'image/png'));
-  const before = store.items.size, newGen = !genCounts()[P[id-1][3]]; await put(id, b);
+  const before = store.items.size, newGen = !genCounts()[P[id-1][3]]; const isAlt = curVer !== 'main'; await putV(verKey(), b, isAlt ? $('#vlabel').value.trim() : '');
   closeDlg();
   setTimeout(() => {
     paint(id, true); refresh(); goTo(id); const r = cards.get(id).el.getBoundingClientRect();
@@ -678,6 +731,7 @@ async function save(next) {
     const n = store.items.size;
     if (n > before && n % 100 === 0) { toast(`🏆 ${n} Pokémon !`); setTimeout(() => confetti(innerWidth / 2, innerHeight / 3, 160, true), 400); }
     else if (newGen) { toast(`🔓 Génération ${GEN[P[id-1][3]-1]} débloquée !`); setTimeout(() => confetti(innerWidth / 2, innerHeight / 3, 120, true), 300); }
+    else if (isAlt) toast(`✨ Version alternative de ${P[id-1][1]} ajoutée`);
     else toast(`✨ ${P[id-1][1]} ajouté au Pokédex`);
     if (n === P.length) { toast('🎉 PokéDex COMPLET !'); confetti(innerWidth / 2, innerHeight / 3, 300, true); }
     if (next) { const nx = nextMissing(id); if (nx) setTimeout(() => openDialog(nx), 650); }
@@ -686,25 +740,26 @@ async function save(next) {
 $('#save').onclick = () => save(false);
 $('#savenext').onclick = () => save(true);
 $('#del').onclick = async () => {
-  const id = curId, it = store.items.get(id); if (!it) return;
-  const blob = it.blob; await remove(id); paint(id); refresh(); closeDlg();
-  toast(`${P[id-1][1]} supprimé`, 'Annuler', async () => { await put(id, blob); paint(id, true); refresh(); });
+  const id = curId, it = verEntry(); if (!it) return;
+  const { key, blob, label } = it; await removeV(key); paint(id); refresh(); closeDlg();
+  toast(`${P[id-1][1]}${it.alt ? ' (version alt.)' : ''} supprimé`, 'Annuler', async () => { await putV(key, blob, label); paint(id, true); refresh(); });
 };
 dlg.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(e.shiftKey); } });
 
 /* ---------- Sauvegarde / restauration ---------- */
 const b2d = b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); });
 $('#exp').onclick = async () => {
-  const o = {}; for (const [id, it] of store.items) o[id] = await b2d(it.blob);
+  const o = {}, al = {}; for (const vs of store.vers.values()) for (const v of vs) { if (v.alt) al[v.key] = { img: await b2d(v.blob), label: v.label }; else o[v.key] = await b2d(v.blob); }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify({ v: 1, stickers: o })], { type: 'application/json' }));
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({ v: 2, stickers: o, alts: al })], { type: 'application/json' }));
   a.download = 'pokedex-sauvegarde.json'; a.click(); toast('💾 Sauvegarde téléchargée');
 };
 $('#imp').onclick = () => $('#impf').click();
 $('#impf').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   try { const j = JSON.parse(await f.text()); let n = 0;
-    for (const [id, url] of Object.entries(j.stickers || {})) { await put(+id, await (await fetch(url)).blob()); paint(+id, true); n++; }
+    for (const [id, url] of Object.entries(j.stickers || {})) { await putV(+id, await (await fetch(url)).blob()); paint(+id, true); n++; }
+    for (const [key, a] of Object.entries(j.alts || {})) { await putV(key, await (await fetch(a.img)).blob(), a.label || ''); paint(+key.split(':')[0], true); n++; }
     refresh(); toast(`✅ ${n} image(s) restaurée(s)`);
   } catch (err) { toast('❌ Fichier invalide'); }
   e.target.value = '';
@@ -725,25 +780,29 @@ function setMode(m, notify) {
 $('#mode').onclick = e => { const b = e.target.closest('button'); if (b && b.dataset.m !== mode) setMode(b.dataset.m, true); };
 
 /* ---------- Visionneuse (mode Explorateur) ---------- */
-const vw = $('#view'); let vIds = [], vi = 0;
+const vw = $('#view'); let vIds = [], vi = 0, vv = 0;
 vw.addEventListener('cancel', e => { e.preventDefault(); closeD(vw); });
 vw.addEventListener('click', e => { if (e.target === vw) closeD(vw); });
 $('#vx').onclick = () => closeD(vw);
 function openViewer(id) {
   if (!store.items.has(id)) { const el = cards.get(id).el; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); return; }
-  vIds = [...cards].filter(([i, c]) => !c.el.hidden && store.items.has(i)).map(x => x[0]);
-  vi = vIds.indexOf(id); if (vi < 0) { vIds = [id]; vi = 0; }
+  vIds = [...cards].filter(([i, c]) => !c.el.hidden && store.items.has(i)).map(x => x[0]).sort((a, b) => ordIdx[a] - ordIdx[b]);
+  vi = vIds.indexOf(id); vv = 0; if (vi < 0) { vIds = [id]; vi = 0; }
   showV(0); if (!vw.open) vw.showModal();
+  $('#vgyro').hidden = !hasOri; g0 = null;
+  if (hasOri && ls.get('gyro', '1') === '1' && typeof DeviceOrientationEvent.requestPermission !== 'function') setGyro(true);
 }
 function showV(dir) {
-  const id = vIds[vi], [, fr, en, g] = P[id - 1], im = $('#vimg');
-  im.src = store.items.get(id).url; im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
+  const id = vIds[vi], [, fr, en, g] = P[id - 1], im = $('#vimg'), vs = store.vers.get(id), cur = vs[vv] || vs[0];
+  $('#vvers').innerHTML = vs.length > 1 ? vs.map((v, i) => `<button data-i="${i}" class="${v === cur ? 'on' : ''}">${v.alt ? (v.label || 'Alt. ' + i).replace(/</g, '&lt;') : 'Principale'}</button>`).join('') : '';
+  im.src = cur.url; im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
   $('#vtitle').innerHTML = `<span>#${pad(id)}</span>${fr}`; $('#vname').textContent = fr;
   $('#vsub').textContent = (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
   $('#vcount').textContent = `${vi + 1} / ${vIds.length}`;
   $('#vprev').disabled = $('#vnext').disabled = vIds.length < 2;
 }
-const vgo = d => { vi = (vi + d + vIds.length) % vIds.length; showV(d); };
+$('#vvers').onclick = e => { const b = e.target.closest('button'); if (!b) return; vv = +b.dataset.i; showV(1); };
+const vgo = d => { vv = 0; vi = (vi + d + vIds.length) % vIds.length; showV(d); };
 $('#vprev').onclick = () => vgo(-1); $('#vnext').onclick = () => vgo(1);
 vw.addEventListener('keydown', e => { if (e.key === 'ArrowRight') vgo(1); if (e.key === 'ArrowLeft') vgo(-1); });
 let tx0 = null; const stg = $('#vstage');
@@ -751,11 +810,41 @@ stg.addEventListener('touchstart', e => tx0 = e.touches[0].clientX, { passive: t
 stg.addEventListener('touchend', e => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0; tx0 = null; if (Math.abs(dx) > 50) vgo(dx < 0 ? 1 : -1); });
 stg.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || reduce) return; const r = stg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   stg.style.setProperty('--ry', ((x - .5) * 16) + 'deg'); stg.style.setProperty('--rx', ((.5 - y) * 16) + 'deg'); stg.style.setProperty('--mx', x * 100 + '%'); stg.style.setProperty('--my', y * 100 + '%'); });
+/* gyroscope : le sticker s'incline avec le téléphone */
+const hasOri = 'DeviceOrientationEvent' in window && matchMedia('(pointer:coarse)').matches;
+let gyroOn = false, g0 = null, gt = { x: 0, y: 0 }, gc = { x: 0, y: 0 }, graf = 0;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function onOri(e) {
+  if (e.gamma == null || e.beta == null) return;
+  if (!g0) g0 = { b: e.beta, g: e.gamma };
+  gt.y = clamp((e.gamma - g0.g) / 28, -1, 1); gt.x = clamp(-(e.beta - g0.b) / 28, -1, 1);
+  if (!graf && vw.open) graf = requestAnimationFrame(gstep);
+}
+function gstep() {
+  gc.x += (gt.x - gc.x) * .14; gc.y += (gt.y - gc.y) * .14;
+  const st = stg.style;
+  st.setProperty('--ry', gc.y * 20 + 'deg'); st.setProperty('--rx', gc.x * 20 + 'deg');
+  st.setProperty('--mx', 50 + gc.y * 50 + '%'); st.setProperty('--my', 50 - gc.x * 50 + '%');
+  st.setProperty('--tx', gc.y * 10 + 'px'); st.setProperty('--ty', -gc.x * 10 + 'px');
+  st.setProperty('--sx', -gc.y * 12 + 'px'); st.setProperty('--sy', gc.x * 12 + 'px');
+  graf = vw.open && gyroOn ? requestAnimationFrame(gstep) : 0;
+}
+async function setGyro(on) {
+  if (on && !gyroOn) {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') { // iOS : autorisation à la demande
+      try { if (await DeviceOrientationEvent.requestPermission() !== 'granted') { toast('Gyroscope refusé'); return; } } catch { toast('Gyroscope indisponible'); return; } }
+    addEventListener('deviceorientation', onOri); gyroOn = true; g0 = null;
+  } else if (!on && gyroOn) { removeEventListener('deviceorientation', onOri); gyroOn = false; ['--tx','--ty','--sx','--sy','--rx','--ry'].forEach(k => stg.style.removeProperty(k)); }
+  ls.set('gyro', on ? '1' : '0'); $('#vgyro').classList.toggle('on', gyroOn); stg.classList.toggle('gyro', gyroOn);
+}
+$('#vgyro').onclick = () => { setGyro(!gyroOn); };
+stg.addEventListener('dblclick', () => { g0 = null; });
+vw.addEventListener('close', () => { g0 = null; });
 stg.addEventListener('pointerleave', () => { stg.style.setProperty('--rx', '0deg'); stg.style.setProperty('--ry', '0deg'); });
 
 /* ---------- Démarrage ---------- */
 setMode(mode, false);
-buildGrid(); refresh(true);
+buildGrid(); applySort(); refresh(true);
 store.load().then(() => { loaded = true; for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
 </body>
