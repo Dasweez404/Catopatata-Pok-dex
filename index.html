@@ -231,7 +231,23 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 .dragveil{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(224,50,63,.85);color:#fff;font-size:32px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
 .dragveil.on{opacity:1}
 @media(max-width:700px){header{position:relative}}
-@media(max-width:600px){h1{font-size:20px}.range{display:none}.counter{padding:4px 10px}}
+.more{display:contents}#moretoggle{display:none}
+@media(max-width:700px){
+  .bar{padding:8px 12px;gap:6px 8px}
+  .lens{width:30px;height:30px;border-width:2px;box-shadow:0 0 0 2px #1b1d25,0 0 12px #59d4ff99}
+  h1{font-size:18px}h1 small{display:none}
+  .brand{flex:1;order:1;gap:9px}.counter{order:2;margin:0;padding:3px 11px}.counter b{font-size:18px}
+  .prog{order:3;height:6px}
+  .controls{order:4;gap:6px}
+  .mode{margin:0}.mode button{padding:6px 11px}
+  .lbl{display:none}#add .plus{font-size:18px;line-height:1}
+  .search{flex:1 1 110px;max-width:none}.search kbd{display:none}.search input{padding-top:8px;padding-bottom:8px}
+  #moretoggle{display:grid}#moretoggle.on{background:#fff;color:var(--red2)}
+  .more{display:none;flex-basis:100%;flex-wrap:wrap;gap:6px;padding:8px;background:rgba(0,0,0,.2);border-radius:14px;animation:dIn .25s var(--ease)}
+  .more.open{display:flex}
+  .more .range{display:flex}.more .sp{display:none}
+  .chips{order:5;padding:0}
+}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -239,11 +255,14 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <header>
   <div class="bar">
     <div class="brand"><div class="lens"></div><h1>Mon Pokédex<small>Collection stickers</small></h1></div>
-    <div class="seg mode" id="mode"><button data-m="prof" title="Éditer : ajouter et modifier les stickers">🎓 Professeur</button><button data-m="explorer" title="Observer ta collection">🔭 Explorateur</button></div>
     <div class="counter" id="counter"><b id="cn">0</b><span id="ctot"></span></div>
     <div class="prog"><i id="bar"></i></div>
     <div class="controls">
+    <div class="seg mode" id="mode"><button data-m="prof" title="Éditer : ajouter et modifier les stickers">🎓<span class="lbl"> Professeur</span></button><button data-m="explorer" title="Observer ta collection">🔭<span class="lbl"> Explorateur</span></button></div>
       <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
+      <button class="btn icon" id="moretoggle" title="Filtres et options" aria-expanded="false">⚙</button>
+      <button class="btn gold prof-only" id="add"><span class="plus">＋</span><span class="lbl"> Ajouter une image</span></button>
+      <div class="more" id="more">
       <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
       <div class="seg" id="sort" title="Ordre d'affichage"><button data-v="num" class="on">N°</button><button data-v="fam">👪 Familles</button></div>
       <button class="btn explorer-only" id="onlyhave" title="Ne montrer que les Pokémon débloqués">👁 Débloqués seulement</button>
@@ -254,7 +273,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <button class="btn icon prof-only" id="exp" title="Sauvegarder ma collection (fichier)">⬇</button>
       <button class="btn icon prof-only" id="imp" title="Restaurer une sauvegarde">⬆</button>
       <input type="file" id="impf" accept=".json" hidden>
-      <button class="btn gold prof-only" id="add">＋ Ajouter une image</button>
+      </div>
     </div>
     <div class="chips" id="chips"></div>
   </div>
@@ -473,6 +492,7 @@ function refresh(animate) {
 let qt; $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => refresh(true), 120); });
 $('#seg').onclick = e => { const b = e.target.closest('button'); if (!b) return; fSt = b.dataset.v;
   $('#seg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); refresh(true); };
+$('#moretoggle').onclick = () => { const o = $('#more').classList.toggle('open'); $('#moretoggle').classList.toggle('on', o); $('#moretoggle').setAttribute('aria-expanded', o); };
 $('#cs').value = ls.get('cs', 132); document.documentElement.style.setProperty('--cs', $('#cs').value + 'px');
 $('#cs').oninput = e => { document.documentElement.style.setProperty('--cs', e.target.value + 'px'); ls.set('cs', e.target.value); };
 
