@@ -117,7 +117,7 @@ main{max-width:1500px;margin:0 auto;padding:22px 18px 90px}
 /* ---------- Dialogue ---------- */
 dialog{border:none;border-radius:24px;padding:0;max-width:min(940px,95vw);width:100%;background:var(--card);color:var(--ink);overflow:hidden;
   box-shadow:0 20px 70px rgba(0,0,0,.55);font-family:var(--font)}
-dialog[open]{animation:dIn .35s var(--ease)}
+dialog[open]{animation:dIn .35s var(--ease);display:flex;flex-direction:column;max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
 dialog.closing{animation:dOut .18s ease forwards}
 dialog::backdrop{background:rgba(8,8,18,.6);backdrop-filter:blur(6px);animation:bIn .3s}
 dialog.closing::backdrop{animation:bOut .18s forwards}
@@ -129,8 +129,9 @@ dialog.closing::backdrop{animation:bOut .18s forwards}
 .dh h2 span{opacity:.75;font-weight:500;margin-right:6px}
 .dh .x{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:16px}
 .dh .x:hover{background:rgba(0,0,0,.45);transform:rotate(90deg)}
-.m{display:grid;grid-template-columns:1.05fr 1fr}
-@media(max-width:720px){.m{grid-template-columns:1fr}}
+.m{display:grid;grid-template-columns:1.05fr 1fr;overflow-y:auto;flex:1;min-height:0;overscroll-behavior:contain}
+.dh{flex:none}
+@media(max-width:720px){.m{grid-template-columns:1fr}.drop{min-height:220px}.drop canvas{max-height:240px}.left{padding:12px}.right{padding:14px}.actions{position:sticky;bottom:-14px;background:var(--card);padding:10px 0 14px;margin:0;box-shadow:0 -10px 14px -8px var(--card);z-index:3}.list{height:140px}}
 .left{padding:18px;background:var(--bg2)}
 .right{padding:18px;display:flex;flex-direction:column;gap:12px}
 .drop{position:relative;border:3px dashed var(--mute);border-radius:18px;min-height:320px;display:grid;place-items:center;text-align:center;color:var(--mute);padding:12px;cursor:pointer;
@@ -241,6 +242,7 @@ kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margi
       <div class="row2"><span>Forme du contour</span>
         <div class="shapes" id="shapes"><button data-s="round" class="on" title="Contour arrondi">◖ Arrondi</button><button data-s="cut" title="Découpé aux ciseaux, bords droits">✂ Découpé droit</button></div></div>
       <label class="row"><span>Épaisseur du contour <b id="vbor"></b></span><input type="range" id="bor" min="0" max="60" value="14"></label>
+      <label class="row" id="cutrow" hidden><span>Taille des facettes (low-poly) <b id="vcutk"></b></span><input type="range" id="cutk" min="3" max="15" value="6"></label>
       <label class="row"><span>Ombre portée <b id="vsh"></b></span><input type="range" id="sh" min="0" max="10" value="3"></label>
       <label class="row"><span>Affiner les bords <b id="vero"></b></span><input type="range" id="ero" min="0" max="5" value="1"></label>
       <div class="note">Du fond reste ? Augmente la tolérance. Le Pokémon est grignoté ? Diminue-la.</div>
@@ -506,9 +508,9 @@ function simplifyClosed(pts, eps) {
   return dp(pts.slice(0, f + 1), eps).concat(dp(pts.slice(f).concat([pts[0]]), eps).slice(1, -1));
 }
 
-function sticker(co, border, shape = 'round') {
+function sticker(co, border, shape = 'round', k = .5) {
   const [bx, by, bw, bh] = co.box, cut = shape === 'cut' && border > 0;
-  const eps = cut ? Math.max(3, border * 0.5) : 0, pd = Math.ceil(border + eps + 6);
+  const eps = cut ? Math.max(3, border * k) : 0, pd = Math.ceil(border + eps + 6);
   const W = bw + pd*2, H = bh + pd*2;
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const o = out.getContext('2d');
@@ -570,15 +572,15 @@ $('#pq').oninput = () => { fillList(); showExisting(); };
 
 const setBusy = b => $('#drop').classList.toggle('busy', b);
 function renderPreview() {
-  $('#vtol').textContent = $('#tol').value; $('#vbor').textContent = $('#bor').value + ' px'; $('#vero').textContent = $('#ero').value;
-  ls.set('opt', JSON.stringify([$('#tol').value, $('#bor').value, $('#ero').value, shape]));
+  $('#vtol').textContent = $('#tol').value; $('#vcutk').textContent = $('#cutk').value; $('#cutrow').hidden = shape !== 'cut'; $('#vbor').textContent = $('#bor').value + ' px'; $('#vero').textContent = $('#ero').value;
+  ls.set('opt', JSON.stringify([$('#tol').value, $('#bor').value, $('#ero').value, shape, $('#cutk').value]));
   if (!curImg) return;
   clearTimeout(timer); setBusy(true);
   timer = setTimeout(() => {
     const co = cutout(curImg, +$('#tol').value, +$('#ero').value);
     setBusy(false);
     if (!co) { lastCanvas = null; upd(); toast('😕 Rien détecté : augmente la tolérance ?'); return; }
-    lastCanvas = sticker(co, +$('#bor').value, shape);
+    lastCanvas = sticker(co, +$('#bor').value, shape, +$('#cutk').value / 10);
     const p = $('#prev'); p.width = lastCanvas.width; p.height = lastCanvas.height;
     p.getContext('2d').drawImage(lastCanvas, 0, 0);
     $('#drop').classList.add('has'); $('#drop').classList.remove('existing');
@@ -604,7 +606,7 @@ async function setFile(f) {
 function openDialog(id) {
   if (id) lastOpened = id;
   curId = id || null; curImg = null; lastCanvas = null;
-  const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; setShape(o[3] || 'round'); }
+  const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; setShape(o[3] || 'round'); if (o[4]) $('#cutk').value = o[4]; }
   $('#drop').classList.remove('has', 'existing'); $('#pq').value = ''; $('#file').value = '';
   fillList(); renderPreview(); showExisting();
   if (!dlg.open) dlg.showModal();
@@ -625,7 +627,7 @@ addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', e => { e.preventDefault(); dc = 0; $('#veil').classList.remove('on'); const f = e.dataTransfer.files[0]; if (f) setFile(f); });
 addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/')); if (f) setFile(f); });
 $('#shapes').onclick = e => { const b = e.target.closest('button'); if (!b) return; setShape(b.dataset.s); renderPreview(); };
-['tol','bor','ero'].forEach(i => $('#'+i).addEventListener('input', () => { renderPreview.quiet = true; renderPreview(); }));
+['tol','bor','ero','cutk'].forEach(i => $('#'+i).addEventListener('input', () => { renderPreview.quiet = true; renderPreview(); }));
 
 async function save(next) {
   if (!lastCanvas || !curId) return;
