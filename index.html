@@ -350,10 +350,10 @@ const store = {
   }
 };
 async function makeThumb(blob) {
-  const im = await loadImage(URL.createObjectURL(blob)), k = Math.min(1, 380 / Math.max(im.naturalWidth, im.naturalHeight));
+  const im = await loadImage(URL.createObjectURL(blob)), k = Math.min(1, 640 / Math.max(im.naturalWidth, im.naturalHeight));
   const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
   const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(im.src);
-  return await new Promise(r => c.toBlob(b => r(b || blob), 'image/webp', .88));
+  return await new Promise(r => c.toBlob(b => r(b || blob), 'image/png'));
 }
 const putV = async (key, blob, label = '') => { const val = { blob, label, thumb: await makeThumb(blob) };
   await tx('readwrite', s => s.put(val, key)); store.add(key, val); };
@@ -681,7 +681,7 @@ function renderPreview() {
     if (co) { const [bx, by, bw, bh] = co.box, m = Math.max(24, .1 * Math.max(bw, bh)), W = curImg.naturalWidth, H = curImg.naturalHeight;
       const x = Math.max(0, Math.floor((bx - m) / co.sc)), y = Math.max(0, Math.floor((by - m) / co.sc));
       const region = { x, y, w: Math.min(W - x, Math.ceil((bw + 2 * m) / co.sc)), h: Math.min(H - y, Math.ceil((bh + 2 * m) / co.sc)) };
-      co = cutout(curImg, tol, ero, region, 1100) || co; }   // passe fine : pleine résolution sur le Pokémon
+      co = cutout(curImg, tol, ero, region, 1600) || co; }   // passe fine : résolution native du Pokémon (jusqu'à 1600 px, jamais agrandi)
     setBusy(false);
     if (!co) { lastCanvas = null; upd(); toast('😕 Rien détecté : augmente la tolérance ?'); return; }
     lastCanvas = sticker(co, +$('#bor').value, shape, +$('#cutk').value / 10);
@@ -736,8 +736,7 @@ $('#shapes').onclick = e => { const b = e.target.closest('button'); if (!b) retu
 async function save(next) {
   if (!lastCanvas || !curId) return;
   const id = curId;
-  const blob = await new Promise(r => lastCanvas.toBlob(r, 'image/webp', .92));
-  const b = blob && blob.type === 'image/webp' ? blob : await new Promise(r => lastCanvas.toBlob(r, 'image/png'));
+  const b = await new Promise(r => lastCanvas.toBlob(r, 'image/png')); // PNG = sans aucune perte
   const before = store.items.size, newGen = !genCounts()[P[id-1][3]]; const isAlt = curVer !== 'main'; await putV(verKey(), b, isAlt ? $('#vlabel').value.trim() : '');
   closeDlg();
   setTimeout(() => {
