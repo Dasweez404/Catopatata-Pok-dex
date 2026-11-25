@@ -188,59 +188,7 @@ kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margi
 #vlabel:focus{border-color:var(--red)}
 .vbadge{position:absolute;right:2px;bottom:2px;z-index:3;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
 body.fam .slot{border-bottom:6px solid var(--fc)}
-/* ---------- Fonds animés par type ---------- */
-.fxl{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;border-radius:inherit}
-.fxl i{position:absolute;inset:0;display:block;opacity:.85}
-.slot.empty .fxl{display:none}
-.slot>*{position:relative;z-index:1}.slot>.fxl{position:absolute;z-index:0}
-@keyframes fxup{to{background-position-y:calc(var(--th)*-1)}}
-@keyframes fxdown{from{background-position-y:calc(var(--th)*-1)}to{background-position-y:0}}
-@keyframes fxside{to{background-position-x:var(--tw)}}
-@keyframes fxtwinkle{0%,100%{opacity:.12}50%{opacity:1}}
-@keyframes fxpulse{0%,100%{transform:scale(.92);opacity:.55}50%{transform:scale(1.12);opacity:1}}
-@keyframes fxflame{from{transform:translateY(6%) scaleY(.9);opacity:.75}to{transform:translateY(-3%) scaleY(1.22);opacity:1}}
-@keyframes fxsweep{from{background-position:130% 0}to{background-position:-130% 0}}
-@keyframes fxdrift{from{transform:translateX(-9%)}to{transform:translateX(9%)}}
-@keyframes fxspin{to{transform:rotate(360deg)}}
-@keyframes fxring{from{transform:scale(.6);opacity:.9}to{transform:scale(1.7);opacity:0}}
-@media(hover:hover){.slot:not(:hover) .fxl i{animation-play-state:paused}}
-.v-stage .fxl i{animation-play-state:running!important}
-.a1 .fa{background:linear-gradient(to top,#ffffff40,transparent 60%)}
-.b1 .fb{background-image:radial-gradient(circle at 22% 30%,#ffffffcc 0 1.6px,transparent 2.6px),radial-gradient(circle at 68% 76%,#ffffffcc 0 1.1px,transparent 2.1px);background-size:38px 60px,56px 60px;--th:60px;animation:fxup 3.6s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a2 .fa{background:radial-gradient(circle at 50% 55%,#c22e2877,transparent 62%);animation:fxpulse 1.4s ease-in-out infinite}
-.b2 .fb{background-image:repeating-linear-gradient(115deg,transparent 0 16px,#ff5a3c44 16px 18px);background-size:34px 100%;--tw:34px;animation:fxside 1.6s linear infinite}
-.a3 .fa{background:linear-gradient(to bottom,#a98ff355,transparent 70%)}
-.b3 .fb{background-image:linear-gradient(90deg,transparent,#ffffffcc,transparent),linear-gradient(90deg,transparent,#ffffffaa,transparent),linear-gradient(90deg,transparent,#ffffffbb,transparent);background-size:160px 2px,80px 2px,160px 2px;background-position:0 22%,0 52%,0 80%;background-repeat:repeat-x;--tw:160px;animation:fxside 1.4s linear infinite}
-.a4 .fa{background:radial-gradient(circle at 50% 115%,#a33ea188,transparent 65%)}
-.b4 .fb{background-image:radial-gradient(circle at 30% 40%,transparent 0 3px,#e08ae0cc 3.5px 4.5px,transparent 5px),radial-gradient(circle at 70% 75%,transparent 0 2px,#e08ae0cc 2.5px 3.3px,transparent 4px);background-size:44px 60px,60px 60px;--th:60px;animation:fxup 4.4s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a5 .fa{background:linear-gradient(to top,#e2bf6566,transparent 60%)}
-.b5 .fb{background-image:radial-gradient(circle at 22% 30%,#d9b45acc 0 1.4px,transparent 2.4px),radial-gradient(circle at 68% 76%,#d9b45acc 0 1px,transparent 2px);background-size:50px 60px,70px 60px;--tw:70px;animation:fxside 3s linear infinite}
-.a6 .fa{background:linear-gradient(to top,#b6a13655,transparent 55%)}
-.b6 .fb{background-image:radial-gradient(circle at 22% 30%,#8b8466 0 2px,transparent 3px),radial-gradient(circle at 68% 76%,#8b8466 0 1.4px,transparent 2.4px);background-size:38px 60px,56px 60px;--th:60px;animation:fxdown 4.2s linear infinite;-webkit-mask-image:linear-gradient(to bottom,#000 5%,transparent 92%);mask-image:linear-gradient(to bottom,#000 5%,transparent 92%)}
-.a7 .fa{background:radial-gradient(circle at 25% 85%,#a6b91a66,transparent 50%),radial-gradient(circle at 80% 30%,#a6b91a44,transparent 45%)}
-.b7 .fb{background-image:radial-gradient(circle at 25% 30%,#f4ffb0 0 1.5px,#d8ff5a88 3px,transparent 7px),radial-gradient(circle at 70% 70%,#f4ffb0 0 1.2px,#d8ff5a88 3px,transparent 6px);background-size:62px 62px,86px 86px;animation:fxtwinkle 2.2s ease-in-out infinite}
-.a8 .fa{background:radial-gradient(ellipse at 20% 95%,#735797bb,transparent 55%),radial-gradient(ellipse at 85% 70%,#9a7fd077,transparent 50%);animation:fxdrift 5s ease-in-out infinite alternate}
-.b8 .fb{background-image:radial-gradient(circle at 30% 60%,#c9b6f5aa 0,transparent 22px),radial-gradient(circle at 75% 35%,#9a7fd0aa 0,transparent 18px);background-size:90px 90px,120px 120px;--th:90px;animation:fxup 6s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a9 .fa{background:linear-gradient(115deg,transparent 42%,#ffffffaa 50%,transparent 58%);background-size:250% 100%;animation:fxsweep 3.2s ease-in-out infinite}
-.b9 .fb{background-image:radial-gradient(circle at 22% 30%,#ffffff 0 1.3px,transparent 2.3px),radial-gradient(circle at 68% 76%,#ffffff 0 1px,transparent 2px);background-size:46px 46px,62px 62px;animation:fxtwinkle 1.8s ease-in-out infinite}
-.a10 .fa{background:radial-gradient(circle at 18% 108%,#ff6a1fdd 0,transparent 42%),radial-gradient(circle at 55% 112%,#ffb034dd 0,transparent 40%),radial-gradient(circle at 88% 108%,#ff4a1add 0,transparent 38%);transform-origin:50% 100%;animation:fxflame 1.3s ease-in-out infinite alternate}
-.b10 .fb{background-image:radial-gradient(circle at 22% 30%,#ffcf4a 0 1.8px,transparent 2.8px),radial-gradient(circle at 68% 76%,#ffcf4a 0 1.2px,transparent 2.2px);background-size:38px 60px,56px 60px;--th:60px;animation:fxup 3.6s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a11 .fa{background:linear-gradient(to top,#6390f088,transparent 65%),repeating-linear-gradient(100deg,transparent 0 18px,#ffffff2e 18px 26px);background-size:100% 100%,52px 100%;--tw:52px;animation:fxside 3.5s linear infinite}
-.b11 .fb{background-image:radial-gradient(circle at 30% 40%,transparent 0 3px,#d6e9ffdd 3.5px 4.5px,transparent 5px),radial-gradient(circle at 70% 75%,transparent 0 2px,#d6e9ffdd 2.5px 3.3px,transparent 4px);background-size:44px 60px,60px 60px;--th:60px;animation:fxup 4.4s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a12 .fa{background:linear-gradient(to top,#7ac74c66,transparent 60%)}
-.b12 .fb{background-image:radial-gradient(ellipse 5px 2.5px at 28% 28%,#5fb83a 90%,transparent),radial-gradient(ellipse 4px 2px at 70% 70%,#8ee05a 90%,transparent);background-size:46px 60px,64px 60px;--th:60px;animation:fxdown 4.6s linear infinite;-webkit-mask-image:linear-gradient(to bottom,#000 5%,transparent 92%);mask-image:linear-gradient(to bottom,#000 5%,transparent 92%)}
-.a13 .fa{background:linear-gradient(115deg,transparent 42%,#fff27add 50%,transparent 58%);background-size:250% 100%;animation:fxsweep 1.7s ease-in-out infinite}
-.b13 .fb{background-image:radial-gradient(circle at 25% 35%,#ffe14a 0 1.6px,transparent 3px),radial-gradient(circle at 72% 70%,#fff6a0 0 1.2px,transparent 3px);background-size:40px 40px,58px 58px;animation:fxtwinkle .7s steps(2) infinite}
-.a14 .fa{background:repeating-radial-gradient(circle at 50% 58%,transparent 0 15px,#f9558755 16px 17px);animation:fxring 2.6s linear infinite}
-.b14 .fb{background-image:radial-gradient(circle at 22% 30%,#ff9ac0 0 1.6px,transparent 2.6px),radial-gradient(circle at 68% 76%,#ff9ac0 0 1.1px,transparent 2.1px);background-size:46px 46px,62px 62px;animation:fxtwinkle 1.8s ease-in-out infinite}
-.a15 .fa{background:linear-gradient(to bottom,#bff6ff77,transparent 55%)}
-.b15 .fb{background-image:radial-gradient(circle at 22% 30%,#ffffff 0 1.8px,transparent 2.8px),radial-gradient(circle at 68% 76%,#ffffff 0 1.2px,transparent 2.2px);background-size:38px 60px,56px 60px;--th:60px;animation:fxdown 4.2s linear infinite;-webkit-mask-image:linear-gradient(to bottom,#000 5%,transparent 92%);mask-image:linear-gradient(to bottom,#000 5%,transparent 92%)}
-.a16 .fa{inset:-45%!important;background:conic-gradient(from 0deg at 50% 50%,#6f35fc66,#ffd76a44,#6f35fc66,#3a1fd666,#6f35fc66);animation:fxspin 9s linear infinite}
-.b16 .fb{background-image:radial-gradient(circle at 22% 30%,#ffd25a 0 1.8px,transparent 2.8px),radial-gradient(circle at 68% 76%,#ffd25a 0 1.2px,transparent 2.2px);background-size:38px 60px,56px 60px;--th:60px;animation:fxup 3.6s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a17 .fa{background:radial-gradient(circle at 50% 50%,transparent 25%,#2a1840cc 100%);animation:fxpulse 3.2s ease-in-out infinite}
-.b17 .fb{background-image:radial-gradient(ellipse 38px 22px at 30% 70%,#1c0f2a77,transparent),radial-gradient(ellipse 50px 30px at 75% 40%,#2a184077,transparent);background-size:110px 110px,150px 110px;--th:110px;animation:fxup 7s linear infinite;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 92%);mask-image:linear-gradient(to top,#000 5%,transparent 92%)}
-.a18 .fa{background:linear-gradient(to top,#ffb3dd77,transparent 60%)}
-.b18 .fb{background-image:radial-gradient(circle at 22% 30%,#ffffff 0 1.8px,transparent 2.8px),radial-gradient(circle at 68% 76%,#ffffff 0 1.2px,transparent 2.2px);background-size:46px 46px,62px 62px;animation:fxtwinkle 1.8s ease-in-out infinite}
+.slot>*{position:relative;z-index:1}
 @property --gx{syntax:'<percentage>';inherits:false;initial-value:50%}
 @keyframes glare{0%{--gx:-40%}55%,100%{--gx:140%}}
 .slot.done .pic:after{content:"";position:absolute;inset:2px;pointer-events:none;z-index:2;--gx:var(--mx);-webkit-mask:var(--img) center/contain no-repeat;mask:var(--img) center/contain no-repeat;
@@ -354,7 +302,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 
 <dialog id="view">
   <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨ FX</button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
-  <div class="v-stage" id="vstage"><div class="fxl"><i class="fa"></i><i class="fb"></i></div><div class="v-holo"></div><canvas id="vfxb" class="vfx"></canvas><div class="v-card"><img id="vimg" alt=""><div class="v-glare"></div></div><canvas id="vfxf" class="vfx" style="z-index:1"></canvas></div>
+  <div class="v-stage" id="vstage"><div class="v-holo"></div><canvas id="vfxb" class="vfx"></canvas><div class="v-card"><img id="vimg" alt=""><div class="v-glare"></div></div><canvas id="vfxf" class="vfx" style="z-index:1"></canvas></div>
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
   <div class="vers" id="vvers" style="justify-content:center;padding:0 16px"></div>
   <div class="v-nav"><button class="b" id="vprev">←</button><em id="vcount"></em><button class="b" id="vnext">→</button></div>
@@ -487,8 +435,8 @@ function buildGrid() {
   const frag = document.createDocumentFragment();
   for (const [id, fr, en, gen, chain, , types] of P) {
     const el = document.createElement('div');
-    el.className = `slot empty a${types[0]} b${types[1] || types[0]}`; el.dataset.id = id;
-    el.innerHTML = `<div class="fxl"><i class="fa"></i><i class="fb"></i></div><div class="num">#${pad(id)}</div><div class="pic"></div><div class="name">${fr}</div>`;
+    el.className = 'slot empty'; el.dataset.id = id;
+    el.innerHTML = `<div class="num">#${pad(id)}</div><div class="pic"></div><div class="name">${fr}</div>`;
     el.title = fr === en ? fr : `${fr} (${en})`;
     el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
     el.style.setProperty('--fc', `hsl(${(chain * 137) % 360} 70% 55%)`);
@@ -905,8 +853,7 @@ function openViewer(id) {
 function showV(dir) {
   const id = vIds[vi], [, fr, en, g] = P[id - 1], im = $('#vimg'), vs = store.vers.get(id), cur = vs[vv] || vs[0];
   $('#vvers').innerHTML = vs.length > 1 ? vs.map((v, i) => `<button data-i="${i}" class="${v === cur ? 'on' : ''}">${v.alt ? (v.label || 'Alt. ' + i).replace(/</g, '&lt;') : 'Principale'}</button>`).join('') : '';
-  im.src = cur.url; stg.style.setProperty('--img', `url("${cur.url}")`);
-  { const t = P[id - 1][6]; stg.className = stg.className.replace(/\b[ab]\d+\b/g, '').trim() + ` a${t[0]} b${t[1] || t[0]}`; } im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
+  im.src = cur.url; stg.style.setProperty('--img', `url("${cur.url}")`); im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
   $('#vtitle').innerHTML = `<span>#${pad(id)}</span>${fr}`; $('#vname').textContent = fr;
   $('#vsub').innerHTML = P[id - 1][6].map(t => `<span class="tchip" style="background:${TYPES[t][1]}">${TYPES[t][0]}</span>`).join('') + '<br>' + (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
   holoVars(stg, P[id - 1][6]); if (vw.open) fxSet(P[id - 1][6]);
@@ -921,77 +868,127 @@ let tx0 = null; const stg = $('#vstage');
 stg.addEventListener('touchstart', e => tx0 = e.touches[0].clientX, { passive: true });
 stg.addEventListener('touchend', e => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0; tx0 = null; if (Math.abs(dx) > 50) vgo(dx < 0 ? 1 : -1); });
 stg.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || reduce) return; const r = stg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-  stg.style.setProperty('--ry', ((x - .5) * 16) + 'deg'); stg.style.setProperty('--rx', ((.5 - y) * 16) + 'deg'); stg.style.setProperty('--mx', x * 100 + '%'); stg.style.setProperty('--my', y * 100 + '%'); });
+  fxState.tx = (x - .5) * 2; fxState.ty = (y - .5) * 2; stg.style.setProperty('--ry', ((x - .5) * 16) + 'deg'); stg.style.setProperty('--rx', ((.5 - y) * 16) + 'deg'); stg.style.setProperty('--mx', x * 100 + '%'); stg.style.setProperty('--my', y * 100 + '%'); });
 /* ---------- Ambiance par type (mode Explorateur) ---------- */
 const R = (a, b) => a + Math.random() * (b - a);
 const glow = (c, x, y, r, rgb, a) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); };
-const star4 = (c, x, y, r) => { c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = i % 2 ? r * .28 : r; c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } c.closePath(); };
-const env = k => Math.sin(Math.PI * Math.min(1, Math.max(0, k)));
-const bubble = (c, p, k, fill, stroke) => { const a = k > .88 ? (1 - k) / .12 : Math.min(1, k * 6); c.globalAlpha = a; c.beginPath(); c.arc(p.x, p.y, p.r * (k > .92 ? 1.25 : 1), 0, 7); c.fillStyle = fill; c.fill(); c.lineWidth = 1.4; c.strokeStyle = stroke; c.stroke();
-  c.beginPath(); c.arc(p.x - p.r * .3, p.y - p.r * .3, p.r * .25, 0, 7); c.fillStyle = 'rgba(255,255,255,.85)'; c.fill(); c.globalAlpha = 1; };
+const star4 = (c, x, y, r, inner = .26) => { c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = i % 2 ? r * inner : r; c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } c.closePath(); };
+const env = (k, a = 0.15) => k < a ? k / a : k > 1 - a ? (1 - k) / a : 1; // fondu entrée/sortie
+const leaf = (c, s) => { c.beginPath(); c.moveTo(0, -s); c.bezierCurveTo(s * .9, -s * .4, s * .9, s * .5, 0, s); c.bezierCurveTo(-s * .9, s * .5, -s * .9, -s * .4, 0, -s); };
+const trail = (c, p, rgb, w, a) => { const h = p.hist; if (!h || h.length < 2) return; for (let i = 1; i < h.length; i++) { c.strokeStyle = `rgba(${rgb},${a * i / h.length})`; c.lineWidth = w * i / h.length; c.lineCap = 'round'; c.beginPath(); c.moveTo(h[i - 1][0], h[i - 1][1]); c.lineTo(h[i][0], h[i][1]); c.stroke(); } };
+function genBolt(x1, y1, x2, y2, d) { let pts = [[x1, y1], [x2, y2]]; for (let it = 0; it < d; it++) { const n = [pts[0]]; for (let i = 1; i < pts.length; i++) { const [ax, ay] = pts[i - 1], [bx, by] = pts[i], mx = (ax + bx) / 2, my = (ay + by) / 2, l = Math.hypot(bx - ax, by - ay) * .28; n.push([mx + R(-l, l), my + R(-l, l)], pts[i]); } pts = n; } return pts; }
+const fxState = { flash: 0, shock: 0, tx: 0, ty: 0 };
+const bubble = (c, p, k, fill, stroke, hi = .9) => { const a = (k > .9 ? (1 - k) / .1 : Math.min(1, k * 6)) * (.6 + .4 * p.z), pop = k > .93; c.globalAlpha = a; c.beginPath(); c.arc(p.x, p.y, p.r * (pop ? 1.3 : 1), 0, 7); c.fillStyle = fill; c.fill(); c.lineWidth = 1.5; c.strokeStyle = stroke; c.stroke();
+  c.beginPath(); c.arc(p.x - p.r * .32, p.y - p.r * .32, Math.max(1, p.r * .28), 0, 7); c.fillStyle = `rgba(255,255,255,${hi})`; c.fill(); c.beginPath(); c.arc(p.x + p.r * .25, p.y + p.r * .3, p.r * .55, .2, 1.3); c.lineWidth = 1; c.strokeStyle = 'rgba(255,255,255,.45)'; c.stroke(); c.globalAlpha = 1; };
+const vgrad = (c, W, H, y0, y1, rgb, a0, a1) => { const g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, `rgba(${rgb},${a0})`); g.addColorStop(1, `rgba(${rgb},${a1})`); c.fillStyle = g; c.fillRect(0, 0, W, H); };
+const vign = (c, W, H, rgb, a, inner = .45) => { const g = c.createRadialGradient(W / 2, H / 2, W * inner, W / 2, H / 2, W * .78); g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(1, `rgba(${rgb},${a})`); c.fillStyle = g; c.fillRect(0, 0, W, H); };
+// s = échelle de profondeur (0.65 loin → 1.35 près). Chaque type : spawn / step / draw / aura
 const FX = {
-  1: { rate: 5, spawn: (W, H) => ({ x: R(0, W), y: R(0, H), vx: R(-8, 8), vy: R(-14, -4), life: R(3, 6), r: R(1.5, 3.5) }),
-       draw: (c, p, k) => { c.globalAlpha = env(k) * .6; c.fillStyle = '#fff'; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); c.globalAlpha = 1; } },
-  2: { rate: 2.2, spawn: (W, H) => ({ x: R(.12 * W, .88 * W), y: R(.12 * H, .88 * H), vx: 0, vy: 0, life: .4, r: R(22, 44), rot: R(0, 6) }),
-       draw: (c, p, k) => { c.save(); c.translate(p.x, p.y); c.rotate(p.rot); c.strokeStyle = '#ff5a3c'; c.lineCap = 'round'; c.lineWidth = 3 * (1 - k) + 1; c.globalAlpha = 1 - k;
-         for (let i = 0; i < 7; i++) { const a = i / 7 * 6.283; c.beginPath(); c.moveTo(Math.cos(a) * p.r * (.3 + k * .5), Math.sin(a) * p.r * (.3 + k * .5)); c.lineTo(Math.cos(a) * p.r * (.6 + k * .7), Math.sin(a) * p.r * (.6 + k * .7)); c.stroke(); } c.restore(); } },
-  3: { rate: 5, spawn: (W, H) => ({ x: -60, y: R(0, H), vx: R(260, 420), vy: R(-14, 14), life: 1.4, len: R(50, 110) }),
-       draw: (c, p, k) => { c.globalAlpha = env(k) * .55; c.strokeStyle = '#fff'; c.lineWidth = 1.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x - p.len, p.y); c.quadraticCurveTo(p.x - p.len / 2, p.y - 4, p.x, p.y); c.stroke(); c.globalAlpha = 1; } },
-  4: { rate: 6, spawn: (W, H) => ({ x: R(0, W), y: H + 10, vx: 0, vy: -R(18, 38), life: R(3, 5), r: R(3, 10), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 2 + p.sw) * 14 * dt; },
-       draw: (c, p, k) => bubble(c, p, k, 'rgba(163,62,161,.32)', 'rgba(220,130,220,.85)') },
-  5: { rate: 14, spawn: (W, H) => ({ x: R(-20, W), y: R(0, H), vx: R(30, 70), vy: R(-8, 8), life: R(2.5, 4.5), r: R(1, 2.6) }),
-       draw: (c, p, k) => { c.globalAlpha = env(k) * .7; c.fillStyle = '#d9b45a'; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); c.globalAlpha = 1; } },
-  6: { rate: 6, spawn: (W, H) => { const vy = R(50, 100); return { x: R(0, W), y: -10, vx: R(-10, 10), vy, life: (H + 20) / vy, r: R(2.5, 6), rot: R(0, 6), vr: R(-3, 3), s: R(0, 1) }; },
-       draw: (c, p) => { c.save(); c.translate(p.x, p.y); c.rotate(p.rot + p.age * p.vr); c.fillStyle = p.s > .5 ? '#a89a6b' : '#7e7452'; c.beginPath(); for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283, rr = p.r * (.7 + ((i * 37 + p.s * 100) % 10) / 20); c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.fill(); c.restore(); } },
-  7: { rate: 5, spawn: (W, H) => ({ x: R(0, W), y: R(0, H), vx: R(-15, 15), vy: R(-15, 15), life: R(3, 6), r: R(2.5, 4.5) }),
-       step: (p, dt) => { p.vx += R(-60, 60) * dt; p.vy += R(-60, 60) * dt; p.vx = Math.max(-30, Math.min(30, p.vx)); p.vy = Math.max(-30, Math.min(30, p.vy)); },
-       draw: (c, p, k) => { const a = env(k) * (.6 + .4 * Math.sin(p.age * 8)); glow(c, p.x, p.y, p.r * 4, '200,255,60', a * .6); c.globalAlpha = a; c.fillStyle = '#f4ffb0'; c.beginPath(); c.arc(p.x, p.y, p.r * .6, 0, 7); c.fill(); c.globalAlpha = 1; } },
-  8: { rate: 4, spawn: (W, H) => ({ x: R(0, W), y: H + 20, vx: 0, vy: -R(16, 34), life: R(3, 5), r: R(12, 26), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 1.5 + p.sw) * 18 * dt; },
-       draw: (c, p, k) => glow(c, p.x, p.y, p.r, '150,120,220', env(k) * (.3 + .15 * Math.sin(p.age * 9))) },
-  9: { rate: 3, spawn: (W, H) => ({ x: R(.05 * W, .95 * W), y: R(.05 * H, .95 * H), vx: 0, vy: 0, life: .9, r: R(7, 16) }),
-       draw: (c, p, k) => { c.globalAlpha = env(k); c.fillStyle = '#f2f6ff'; c.shadowColor = '#b7c4f0'; c.shadowBlur = 8; star4(c, p.x, p.y, p.r * (.5 + env(k) * .5)); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; } },
-  10: { rate: 22, spawn: (W, H) => ({ x: R(.08 * W, .92 * W), y: H + 8, vx: R(-12, 12), vy: -R(55, 115), life: R(1.2, 2.4), r: R(6, 13), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 6 + p.sw) * 22 * dt; },
-       draw: (c, p, k) => { const s = 1 - k * .6, a = Math.min(1, k * 8) * (1 - k); c.save(); c.translate(p.x, p.y); c.scale(.8, 1.5); glow(c, 0, 0, p.r * s * 1.1, '255,70,10', a * .9); glow(c, 0, 0, p.r * s * .55, '255,200,50', a); c.restore(); } },
-  11: { rate: 8, spawn: (W, H) => ({ x: R(0, W), y: H + 12, vx: 0, vy: -R(25, 55), life: R(3, 5.5), r: R(3, 11), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 2.2 + p.sw) * 12 * dt; },
-       draw: (c, p, k) => bubble(c, p, k, 'rgba(99,144,240,.22)', 'rgba(200,225,255,.9)') },
-  12: { rate: 5, spawn: (W, H) => { const vy = R(30, 60); return { x: R(0, W), y: -12, vx: R(-14, 14), vy, life: (H + 24) / vy, r: R(5, 9), sw: R(0, 6), s: Math.random() }; }, step: (p, dt) => { p.x += Math.sin(p.age * 2 + p.sw) * 26 * dt; },
-       draw: (c, p) => { c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.age * 2 + p.sw) + p.sw); c.fillStyle = p.s > .5 ? '#7ac74c' : '#4ea63a'; c.beginPath(); c.ellipse(0, 0, p.r, p.r * .45, 0, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 1; c.beginPath(); c.moveTo(-p.r, 0); c.lineTo(p.r, 0); c.stroke(); c.restore(); } },
-  13: { rate: 2.6, spawn: (W, H) => { let x = R(.05 * W, .95 * W), y = R(.05 * H, .95 * H), a = R(0, 6.283); const pts = [[x, y]]; for (let i = 0; i < R(3, 6); i++) { a += R(-1.2, 1.2); const l = R(12, 28); x += Math.cos(a) * l; y += Math.sin(a) * l; pts.push([x, y]); } return { x: 0, y: 0, vx: 0, vy: 0, life: R(.14, .3), pts }; },
-       draw: (c, p, k) => { c.globalAlpha = (1 - k) * (.6 + .4 * Math.random()); c.strokeStyle = '#ffc400'; c.lineWidth = 2.6; c.lineJoin = 'round'; c.shadowColor = '#fff27a'; c.shadowBlur = 12; c.beginPath(); p.pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1; } },
-  14: { rate: 1.3, spawn: (W, H) => ({ x: R(.2 * W, .8 * W), y: R(.2 * H, .8 * H), vx: 0, vy: 0, life: 1.7, r: R(45, 95) }),
-       draw: (c, p, k) => { c.globalAlpha = (1 - k) * .65; c.strokeStyle = '#f95587'; c.lineWidth = 2.2; c.beginPath(); c.arc(p.x, p.y, p.r * k, 0, 7); c.stroke(); c.globalAlpha = (1 - k) * .35; c.strokeStyle = '#ffb3cc'; c.beginPath(); c.arc(p.x, p.y, p.r * k * .65, 0, 7); c.stroke(); c.globalAlpha = 1; } },
-  15: { rate: 12, spawn: (W, H) => { const vy = R(22, 48); return { x: R(0, W), y: -8, vx: R(-6, 6), vy, life: (H + 16) / vy, r: R(1.5, 5), sw: R(0, 6) }; }, step: (p, dt) => { p.x += Math.sin(p.age * 1.6 + p.sw) * 14 * dt; },
-       draw: (c, p) => { c.fillStyle = c.strokeStyle = '#eafcff'; c.globalAlpha = .9; if (p.r < 3) { c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); } else { c.lineWidth = 1.2; c.save(); c.translate(p.x, p.y); c.rotate(p.age); for (let i = 0; i < 3; i++) { c.rotate(Math.PI / 3); c.beginPath(); c.moveTo(-p.r * 1.3, 0); c.lineTo(p.r * 1.3, 0); c.stroke(); } c.restore(); } c.globalAlpha = 1; } },
-  16: { rate: 10, spawn: (W, H) => ({ x: 0, y: 0, vx: 0, vy: 0, life: R(2.5, 4.5), a: R(0, 6.283), w: R(.8, 1.6) * (Math.random() < .5 ? -1 : 1), rad: R(.3, .55), r: R(1.5, 3.5), gold: Math.random() < .4 }),
-       step: (p, dt, W, H) => { p.a += p.w * dt; const rr = p.rad * W * (1 - p.age / p.life * .25); p.x = W / 2 + Math.cos(p.a) * rr; p.y = H / 2 + Math.sin(p.a) * rr * .8; },
-       draw: (c, p, k) => glow(c, p.x, p.y, p.r * 4, p.gold ? '255,190,40' : '120,70,255', env(k) * .9) },
-  17: { rate: 4, spawn: (W, H) => ({ x: R(0, W), y: H + 20, vx: 0, vy: -R(14, 30), life: R(2.8, 4.5), r: R(14, 28), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age + p.sw) * 16 * dt; p.r += 6 * dt; },
-       draw: (c, p, k) => glow(c, p.x, p.y, p.r, '50,28,72', env(k) * .38) },
-  18: { rate: 8, spawn: (W, H) => ({ x: R(0, W), y: R(0, H), vx: R(-6, 6), vy: -R(6, 18), life: R(1.4, 3), r: R(3.5, 8), pink: Math.random() < .6 }),
-       draw: (c, p, k) => { c.globalAlpha = env(k) * (.65 + .35 * Math.sin(p.age * 12)); c.fillStyle = p.pink ? '#ff9ad5' : '#ffffff'; c.shadowColor = '#ff9ad5'; c.shadowBlur = 8; star4(c, p.x, p.y, p.r); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; } }
+  1: { rate: 6, spawn: (W, H, s) => ({ x: R(0, W), y: R(0, H), vx: R(-6, 6), vy: R(-12, -3), life: R(3.5, 7), r: R(3, 9) * s }),
+       draw: (c, p, k) => { glow(c, p.x, p.y, p.r * 2.4, '255,255,255', env(k, .3) * .28 * (.6 + .4 * p.z)); } },
+  2: { rate: 1.6, spawn: (W, H, s) => ({ x: R(.15 * W, .85 * W), y: R(.2 * H, .85 * H), vx: 0, vy: 0, life: .6, r: R(40, 80) * s, rot: R(0, 6), deb: Array.from({ length: 7 }, () => [R(0, 6.28), R(.5, 1.1), R(1.5, 3.5)]) }),
+       init: () => { fxState.shock = 1; },
+       draw: (c, p, k) => { c.save(); c.translate(p.x, p.y); c.globalAlpha = 1 - k; c.strokeStyle = '#ff5a3c'; c.lineWidth = 4 * (1 - k) + 1; c.beginPath(); c.arc(0, 0, p.r * (.2 + k * .8), 0, 7); c.stroke();
+         c.rotate(p.rot); c.lineCap = 'round'; for (let i = 0; i < 9; i++) { const a = i / 9 * 6.283; c.lineWidth = 3 * (1 - k) + .8; c.beginPath(); c.moveTo(Math.cos(a) * p.r * (.35 + k * .55), Math.sin(a) * p.r * (.35 + k * .55)); c.lineTo(Math.cos(a) * p.r * (.65 + k * .85), Math.sin(a) * p.r * (.65 + k * .85)); c.stroke(); }
+         c.fillStyle = '#ffb347'; for (const [a, d, r] of p.deb) { c.beginPath(); c.arc(Math.cos(a) * p.r * d * (.3 + k * 1.2), Math.sin(a) * p.r * d * (.3 + k * 1.2) + k * k * 20, r * (1 - k), 0, 7); c.fill(); } c.restore(); },
+       aura: (c, W, H, t) => { if (fxState.shock > .01) { c.fillStyle = `rgba(255,60,40,${fxState.shock * .22})`; c.fillRect(0, 0, W, H); } vign(c, W, H, '120,20,20', .28); } },
+  3: { rate: 4.5, spawn: (W, H, s) => ({ x: -90, y: R(.05 * H, .95 * H), vx: R(300, 500) * s, vy: R(-12, 12), life: 1.5, len: R(70, 150) * s, curl: Math.random() < .5 }),
+       draw: (c, p, k) => { c.globalAlpha = env(k, .25) * .6 * (.6 + .4 * p.z); c.strokeStyle = '#fff'; c.lineWidth = 1.5 + p.z; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x - p.len, p.y); c.bezierCurveTo(p.x - p.len * .5, p.y - 3, p.x - 12, p.y + 3, p.x, p.y);
+         if (p.curl) c.arc(p.x, p.y - 7, 7, Math.PI * .5, Math.PI * 2.1, true); c.stroke(); c.globalAlpha = 1; } },
+  4: { rate: 7, spawn: (W, H, s) => ({ x: R(0, W), y: H + 15, vx: 0, vy: -R(18, 40) * s, life: R(3.5, 6), r: R(4, 13) * s, sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 1.8 + p.sw) * 16 * dt; },
+       draw: (c, p, k) => bubble(c, p, k, 'rgba(176,70,190,.32)', 'rgba(230,140,235,.9)', .7),
+       aura: (c, W, H, t) => { vgrad(c, W, H, H, H * .45, '150,50,160', .45 + .08 * Math.sin(t * 2), 0); } },
+  5: { rate: 16, spawn: (W, H, s) => ({ x: -20, y: R(.3 * H, H), vx: R(50, 110) * s, vy: R(-14, 6), life: R(2.5, 4.5), r: R(1.2, 3.2) * s, sw: R(0, 6) }), step: (p, dt) => { p.vy += Math.sin(p.age * 4 + p.sw) * 30 * dt; },
+       draw: (c, p, k) => { c.globalAlpha = env(k, .25) * .85; c.fillStyle = '#e0bf6c'; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); c.globalAlpha = 1; },
+       aura: (c, W, H, t) => { vgrad(c, W, H, H, H * .5, '190,150,70', .5, 0); } },
+  6: { rate: 4.5, spawn: (W, H, s) => { const vy = R(110, 190) * s; return { x: R(0, W), y: -12, vx: R(-12, 12), vy, life: (H * .93) / vy, r: R(4, 10) * s, rot: R(0, 6), vr: R(-4, 4), s: R(0, 1) }; },
+       draw: (c, p, k) => { c.save(); c.translate(p.x, p.y); c.rotate(p.rot + p.age * p.vr); c.fillStyle = p.s > .5 ? '#9a9172' : '#6f6850'; c.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283, rr = p.r * (.7 + ((i * 37 + p.s * 100) % 10) / 22); c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.fill(); c.fillStyle = 'rgba(255,255,255,.22)'; c.fillRect(-p.r * .4, -p.r * .5, p.r * .5, p.r * .3); c.restore(); },
+       end: (p, W, H, spawnFx) => { for (let i = 0; i < 6; i++) spawnFx(6, { x: p.x + R(-8, 8), y: H - 4, vx: R(-40, 40), vy: -R(20, 60), life: R(.5, 1), r: R(2, 5) }); },
+       aura: (c, W, H, t) => { vgrad(c, W, H, H, H * .55, '120,110,80', .4, 0); } },
+  7: { rate: 5, trail: 9, spawn: (W, H, s) => ({ x: R(0, W), y: R(0, H), vx: R(-15, 15), vy: R(-15, 15), life: R(4, 7), r: R(2.2, 4) * s }),
+       step: (p, dt) => { p.vx += R(-90, 90) * dt; p.vy += R(-90, 90) * dt; p.vx = Math.max(-38, Math.min(38, p.vx)); p.vy = Math.max(-38, Math.min(38, p.vy)); },
+       draw: (c, p, k) => { const a = env(k, .2) * (.65 + .35 * Math.sin(p.age * 9)); trail(c, p, '210,255,80', p.r * 1.6, a * .5); glow(c, p.x, p.y, p.r * 5, '200,255,60', a * .7); c.globalAlpha = a; c.fillStyle = '#fbffd0'; c.beginPath(); c.arc(p.x, p.y, p.r * .65, 0, 7); c.fill(); c.globalAlpha = 1; },
+       aura: (c, W, H, t) => { vign(c, W, H, '120,160,20', .22); } },
+  8: { rate: 3.6, trail: 12, spawn: (W, H, s) => ({ x: R(0, W), y: H + 20, vx: 0, vy: -R(28, 52) * s, life: R(3.5, 5.5), r: R(7, 14) * s, sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 2 + p.sw) * 34 * dt; },
+       draw: (c, p, k) => { const a = env(k, .25) * (.55 + .25 * Math.sin(p.age * 10)); trail(c, p, '170,140,235', p.r * 1.7, a * .55); glow(c, p.x, p.y, p.r * 2.2, '170,140,235', a); c.globalAlpha = a; c.fillStyle = '#efe6ff'; c.beginPath(); c.arc(p.x, p.y, p.r * .4, 0, 7); c.fill();
+         c.fillStyle = '#2a1650'; c.beginPath(); c.arc(p.x - p.r * .2, p.y - p.r * .05, p.r * .1, 0, 7); c.arc(p.x + p.r * .2, p.y - p.r * .05, p.r * .1, 0, 7); c.fill(); c.globalAlpha = 1; },
+       aura: (c, W, H, t) => { vign(c, W, H, '70,40,120', .3 + .1 * Math.sin(t * 1.6)); } },
+  9: { rate: 3, spawn: (W, H, s) => ({ x: R(.05 * W, .95 * W), y: R(.05 * H, .95 * H), vx: 0, vy: 0, life: 1, r: R(9, 22) * s }),
+       draw: (c, p, k) => { const e = env(k, .5); c.globalAlpha = e; c.fillStyle = '#fff'; c.shadowColor = '#bcd0ff'; c.shadowBlur = 10; star4(c, p.x, p.y, p.r * (.4 + e * .6), .12); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; },
+       aura: (c, W, H, t) => { const x = ((t % 3.6) / 3.6) * (W + H * .8) - H * .4, g = c.createLinearGradient(x - 70, 0, x + 70, H * .8); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.4)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H); } },
+  10: { rate: 26, add: true, spawn: (W, H, s) => ({ x: R(.04 * W, .96 * W), y: H + 10, vx: R(-14, 14), vy: -R(60, 130) * s, life: R(1.2, 2.4), r: R(18, 40) * s, sw: R(0, 6), ember: Math.random() < .35 }),
+        step: (p, dt) => { p.x += Math.sin(p.age * 7 + p.sw) * 26 * dt; },
+        draw: (c, p, k) => { const a = Math.min(1, k * 7) * (1 - k * k) * (.7 + .3 * p.z);
+          if (p.ember) { glow(c, p.x, p.y, p.r * .5, '255,160,40', a); c.globalAlpha = a; c.fillStyle = '#ffe9a0'; c.beginPath(); c.arc(p.x, p.y, 1.6 * (.6 + p.z), 0, 7); c.fill(); c.globalAlpha = 1; return; }
+          const h = p.r * (1.7 - k * .8), w = p.r * .75 * (1 - k * .55), x = p.x + Math.sin(p.age * 11 + p.sw) * w * .3;
+          c.save(); c.translate(x, p.y); const g = c.createLinearGradient(0, 0, 0, -h); g.addColorStop(0, `rgba(255,235,120,${a})`); g.addColorStop(.35, `rgba(255,140,30,${a * .95})`); g.addColorStop(1, `rgba(220,40,10,0)`); c.fillStyle = g;
+          c.beginPath(); c.moveTo(-w, 0); c.bezierCurveTo(-w * 1.1, -h * .35, -w * .3, -h * .55, 0, -h); c.bezierCurveTo(w * .3, -h * .55, w * 1.1, -h * .35, w, 0); c.quadraticCurveTo(0, w * .7, -w, 0); c.fill(); c.restore(); },
+        aura: (c, W, H, t) => { const f = .75 + .25 * Math.sin(t * 9) + .1 * Math.sin(t * 23); vgrad(c, W, H, H, H * .3, '255,90,20', .6 * f, 0); vgrad(c, W, H, H, H * .65, '255,200,60', .28 * f, 0); } },
+  11: { rate: 9, spawn: (W, H, s) => ({ x: R(0, W), y: H + 15, vx: 0, vy: -R(26, 60) * s, life: R(3.5, 6.5), r: R(4, 16) * s, sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 2.2 + p.sw) * 14 * dt; },
+        draw: (c, p, k) => bubble(c, p, k, 'rgba(110,160,255,.2)', 'rgba(210,232,255,.95)'),
+        aura: (c, W, H, t) => { vgrad(c, W, H, H, H * .3, '70,120,240', .45, 0); c.save(); c.globalCompositeOperation = 'lighter'; for (let i = 0; i < 3; i++) { const x = W * (.2 + i * .3) + Math.sin(t * .7 + i * 2) * 40, g = c.createLinearGradient(x, 0, x + W * .25, H); g.addColorStop(0, 'rgba(190,225,255,.17)'); g.addColorStop(1, 'rgba(190,225,255,0)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 25, 0); c.lineTo(x + 25, 0); c.lineTo(x + W * .3 + 40, H); c.lineTo(x + W * .3 - 40, H); c.fill(); } c.restore(); } },
+  12: { rate: 5, spawn: (W, H, s) => { const vy = R(28, 58) * s; return { x: R(0, W), y: -14, vx: R(-14, 14), vy, life: (H + 28) / vy, r: R(7, 14) * s, sw: R(0, 6), tone: Math.random() }; }, step: (p, dt) => { p.x += Math.sin(p.age * 1.7 + p.sw) * 32 * dt; },
+        draw: (c, p) => { c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.age * 1.5 + p.sw) * .9 + p.sw); c.scale(Math.cos(p.age * 2.2 + p.sw) * .7 + .3, 1); c.fillStyle = p.tone > .5 ? '#7ed348' : '#4ea63a'; leaf(c, p.r); c.fill(); c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, -p.r); c.lineTo(0, p.r); c.stroke(); c.restore(); },
+        aura: (c, W, H, t) => { vgrad(c, W, H, H, H * .4, '110,200,70', .42, 0); vign(c, W, H, '40,120,30', .22); } },
+  13: { rate: 1.5, spawn: (W, H, s) => { const side = Math.random(); const x1 = side < .5 ? R(0, W) : (side < .75 ? 0 : W), y1 = side < .5 ? -5 : R(0, H * .5), x2 = R(.2 * W, .8 * W), y2 = R(.5 * H, H); return { x: 0, y: 0, vx: 0, vy: 0, life: R(.22, .4), pts: genBolt(x1, y1, x2, y2, 5), br: genBolt(x2, y2, x2 + R(-90, 90), y2 + R(-60, 60), 4) }; },
+        init: () => { fxState.flash = 1; },
+        draw: (c, p, k) => { const fl = k < .15 || (k > .3 && k < .45) ? 1 : .55 * (1 - k); c.globalCompositeOperation = 'lighter'; for (const [path, wd] of [[p.pts, 1], [p.br, .6]]) { c.lineJoin = 'round'; c.lineCap = 'round';
+            for (const [w, col, al] of [[10, '#ffd21a', .22], [4, '#fff27a', .8], [1.6, '#fff', 1]]) { c.globalAlpha = fl * al * (1 - k * .5); c.strokeStyle = col; c.lineWidth = w * wd; c.beginPath(); path.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); } } c.globalAlpha = 1; },
+        aura: (c, W, H, t) => { fxState.flash *= .9; if (fxState.flash > .02) { c.fillStyle = `rgba(255,240,120,${fxState.flash * .35})`; c.fillRect(0, 0, W, H); } vign(c, W, H, '120,100,0', .18); } },
+  14: { rate: 1.3, spawn: (W, H, s) => ({ x: W / 2 + R(-30, 30), y: H / 2 + R(-30, 30), vx: 0, vy: 0, life: 2.2, r: R(W * .3, W * .55) }),
+        draw: (c, p, k) => { for (let i = 0; i < 2; i++) { c.globalAlpha = (1 - k) * (.7 - i * .3); c.strokeStyle = i ? '#ffb3cc' : '#f95587'; c.lineWidth = 3 * (1 - k) + 1; c.beginPath(); c.arc(p.x, p.y, p.r * Math.max(0, k - i * .15), 0, 7); c.stroke(); } c.globalAlpha = 1; } },
+  15: { rate: 14, spawn: (W, H, s) => { const vy = R(22, 55) * s; return { x: R(0, W), y: -10, vx: R(-8, 8), vy, life: (H + 20) / vy, r: R(2, 7) * s, sw: R(0, 6) }; }, step: (p, dt) => { p.x += Math.sin(p.age * 1.5 + p.sw) * 18 * dt; },
+        draw: (c, p) => { c.fillStyle = c.strokeStyle = '#effcff'; c.globalAlpha = .55 + .4 * p.z; if (p.r < 3.3) { c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); } else { c.lineWidth = 1.2; c.save(); c.translate(p.x, p.y); c.rotate(p.age * .8); for (let i = 0; i < 3; i++) { c.rotate(Math.PI / 3); c.beginPath(); c.moveTo(-p.r * 1.4, 0); c.lineTo(p.r * 1.4, 0); for (const sg of [-1, 1]) { c.moveTo(sg * p.r * .7, 0); c.lineTo(sg * p.r * 1.0, -p.r * .4); c.moveTo(sg * p.r * .7, 0); c.lineTo(sg * p.r * 1.0, p.r * .4); } c.stroke(); } c.restore(); } c.globalAlpha = 1; },
+        aura: (c, W, H, t) => { vign(c, W, H, '210,245,255', .55, .35); } },
+  16: { rate: 11, trail: 10, add: true, spawn: (W, H, s) => ({ x: 0, y: 0, vx: 0, vy: 0, life: R(3, 5), a: R(0, 6.283), w: R(.9, 1.7) * (Math.random() < .5 ? -1 : 1), rad: R(.28, .5), r: R(1.8, 3.8) * s, gold: Math.random() < .45 }),
+        step: (p, dt, W, H) => { p.a += p.w * dt; const rr = p.rad * W * (1 - p.age / p.life * .3); p.x = W / 2 + Math.cos(p.a) * rr; p.y = H / 2 + Math.sin(p.a) * rr * .8; },
+        draw: (c, p, k) => { const col = p.gold ? '255,200,60' : '130,80,255', e = env(k, .2); trail(c, p, col, p.r * 1.8, e * .8); glow(c, p.x, p.y, p.r * 4.5, col, e * .95); },
+        aura: (c, W, H, t) => { for (let i = 0; i < 2; i++) { const a = t * .5 + i * 3.14, x = W / 2 + Math.cos(a) * W * .25, y = H / 2 + Math.sin(a) * H * .22; glow(c, x, y, W * .5, i ? '255,190,60' : '111,53,252', .28); } } },
+  17: { rate: 4, spawn: (W, H, s) => { const side = Math.random() < .5; return { x: side ? -20 : W + 20, y: R(.4 * H, H), vx: (side ? 1 : -1) * R(14, 30), vy: -R(6, 22), life: R(3, 5), r: R(26, 50) * s, sw: R(0, 6) }; }, step: (p, dt) => { p.r += 10 * dt; p.y += Math.sin(p.age * 1.2 + p.sw) * 10 * dt; },
+        draw: (c, p, k) => { glow(c, p.x, p.y, p.r, '36,18,58', env(k, .3) * .5 * (.6 + .4 * p.z)); },
+        aura: (c, W, H, t) => { vign(c, W, H, '20,8,36', .6 + .08 * Math.sin(t * 1.5), .3); } },
+  18: { rate: 7, trail: 6, spawn: (W, H, s) => ({ x: R(0, W), y: R(0, H), vx: R(-8, 8), vy: -R(8, 22), life: R(1.6, 3.4), r: R(4, 11) * s, pink: Math.random() < .6, bokeh: Math.random() < .25 }),
+        draw: (c, p, k) => { const e = env(k, .3) * (.7 + .3 * Math.sin(p.age * 12));
+          if (p.bokeh) { c.globalAlpha = e * .35; c.fillStyle = p.pink ? '#ffb3e0' : '#fff'; c.beginPath(); c.arc(p.x, p.y, p.r * 2.2, 0, 7); c.fill(); c.globalAlpha = 1; return; }
+          trail(c, p, '255,154,213', 2, e * .5); c.globalAlpha = e; c.fillStyle = p.pink ? '#ff9ad5' : '#ffffff'; c.shadowColor = '#ff9ad5'; c.shadowBlur = 10; star4(c, p.x, p.y, p.r); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; },
+        aura: (c, W, H, t) => { vgrad(c, W, H, H, H * .35, '255,170,225', .38 + .06 * Math.sin(t * 2), 0); } }
 };
-const vfx = { b: $('#vfxb'), f: $('#vfxf'), parts: [], types: [], acc: [], raf: 0, last: 0, W: 0, H: 0, dpr: 1, on: ls.get('fx', '1') === '1', sig: '' };
+const vfx = { b: $('#vfxb'), f: $('#vfxf'), parts: [], types: [], acc: [], raf: 0, last: 0, W: 0, H: 0, dpr: 1, t: 0, on: ls.get('fx', '1') === '1', sig: '' };
 function fxSize() {
   const r = stg.getBoundingClientRect(); vfx.W = r.width; vfx.H = r.height; vfx.dpr = Math.min(2, devicePixelRatio || 1);
   for (const cv of [vfx.b, vfx.f]) { cv.width = Math.round(r.width * vfx.dpr); cv.height = Math.round(r.height * vfx.dpr); }
 }
 function fxStop() { cancelAnimationFrame(vfx.raf); vfx.raf = 0; vfx.parts = []; for (const cv of [vfx.b, vfx.f]) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); }
+function fxSpawn(t, over, warm) {
+  const d = FX[t], z = Math.random(), s = .65 + .7 * z, p = Object.assign(d.spawn(vfx.W, vfx.H, s), over || {});
+  p.t = t; p.z = z; p.age = warm ? R(0, (p.life || 2) * .8) : 0; p.front = z > .6; if (d.trail) p.hist = []; if (d.init && !warm) d.init(p); vfx.parts.push(p); return p;
+}
 function fxSet(types, force) {
   const sig = types.join(',');
   if (!force && sig === vfx.sig && vfx.raf) return;
   fxStop(); vfx.sig = sig; vfx.types = types.slice(0, 2); vfx.acc = vfx.types.map(() => 0);
   if (!vfx.on || reduce || !vw.open) return;
-  fxSize(); vfx.last = performance.now(); vfx.raf = requestAnimationFrame(fxLoop);
+  fxSize(); const share = vfx.types.length > 1 ? .62 : 1;
+  vfx.types.forEach(t => { const n = Math.min(40, Math.round(FX[t].rate * share * 1.6)); for (let i = 0; i < n; i++) fxSpawn(t, null, true); });
+  vfx.last = performance.now(); vfx.raf = requestAnimationFrame(fxLoop);
 }
 function fxLoop(ts) {
-  const dt = Math.min(.05, (ts - vfx.last) / 1000); vfx.last = ts; const { W, H } = vfx, share = vfx.types.length > 1 ? .6 : 1;
-  vfx.types.forEach((t, i) => { const d = FX[t]; vfx.acc[i] += dt * d.rate * share; while (vfx.acc[i] >= 1) { vfx.acc[i]--; if (vfx.parts.length < 160) { const p = d.spawn(W, H); p.t = t; p.age = 0; p.front = Math.random() < .35; vfx.parts.push(p); } } });
+  const dt = Math.min(.05, (ts - vfx.last) / 1000); vfx.last = ts; vfx.t += dt; const { W, H } = vfx, share = vfx.types.length > 1 ? .62 : 1;
+  vfx.types.forEach((t, i) => { const d = FX[t]; vfx.acc[i] += dt * d.rate * share; while (vfx.acc[i] >= 1) { vfx.acc[i]--; if (vfx.parts.length < 190) fxSpawn(t); } });
   const cb = vfx.b.getContext('2d'), cf = vfx.f.getContext('2d');
   for (const c of [cb, cf]) { c.setTransform(vfx.dpr, 0, 0, vfx.dpr, 0, 0); c.clearRect(0, 0, W, H); }
+  fxState.shock *= .9;
+  for (const t of vfx.types) { const a = FX[t].aura; if (a) { cb.save(); a(cb, W, H, vfx.t); cb.restore(); } }
+  const spawnFx = (type, o) => { if (vfx.parts.length < 220) { const p = Object.assign({ t: type, z: .5, age: 0, front: false, vx: 0, vy: 0 }, o); vfx.parts.push(p); } };
   vfx.parts = vfx.parts.filter(p => {
-    p.age += dt; if (p.age >= p.life) return false; const d = FX[p.t]; p.x += p.vx * dt; p.y += p.vy * dt; if (d.step) d.step(p, dt, W, H);
-    if (p.x < -140 || p.x > W + 140 || p.y < -140 || p.y > H + 140) return false;
+    const d = FX[p.t]; p.age += dt;
+    if (p.age >= p.life) { if (d.end) d.end(p, W, H, (ty, o) => spawnFx(p.t, o)); return false; }
+    p.x += p.vx * dt; p.y += p.vy * dt; if (d.step) d.step(p, dt, W, H);
+    if (d.trail && p.hist) { p.hist.push([p.x, p.y]); if (p.hist.length > d.trail) p.hist.shift(); }
+    if (p.x < -160 || p.x > W + 160 || p.y < -160 || p.y > H + 160) return false;
     const c = p.front ? cf : cb; c.save(); if (d.add) c.globalCompositeOperation = 'lighter'; d.draw(c, p, p.age / p.life); c.restore(); return true; });
+  // parallaxe : l'arrière-plan bouge à l'opposé de l'inclinaison, l'avant-plan avec elle
+  vfx.b.style.transform = `translate(${-fxState.tx * 14}px,${-fxState.ty * 14}px) scale(1.06)`; vfx.f.style.transform = `translate(${fxState.tx * 20}px,${fxState.ty * 20}px) scale(1.06)`;
   vfx.raf = requestAnimationFrame(fxLoop);
 }
 vw.addEventListener('close', fxStop);
@@ -1012,7 +1009,7 @@ function onOri(e) {
 }
 function gstep() {
   gc.x += (gt.x - gc.x) * .14; gc.y += (gt.y - gc.y) * .14;
-  const st = stg.style;
+  const st = stg.style; fxState.tx = gc.y; fxState.ty = -gc.x;
   st.setProperty('--ry', gc.y * 20 + 'deg'); st.setProperty('--rx', gc.x * 20 + 'deg');
   st.setProperty('--mx', 50 + gc.y * 50 + '%'); st.setProperty('--my', 50 - gc.x * 50 + '%');
   st.setProperty('--tx', gc.y * 10 + 'px'); st.setProperty('--ty', -gc.x * 10 + 'px');
@@ -1030,7 +1027,7 @@ async function setGyro(on) {
 $('#vgyro').onclick = () => { setGyro(!gyroOn); };
 stg.addEventListener('dblclick', () => { g0 = null; });
 vw.addEventListener('close', () => { g0 = null; });
-stg.addEventListener('pointerleave', () => { stg.style.setProperty('--rx', '0deg'); stg.style.setProperty('--ry', '0deg'); });
+stg.addEventListener('pointerleave', () => { stg.style.setProperty('--rx', '0deg'); stg.style.setProperty('--ry', '0deg'); fxState.tx = fxState.ty = 0; });
 
 /* ---------- Démarrage ---------- */
 setMode(mode, false);
