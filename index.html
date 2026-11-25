@@ -63,6 +63,7 @@ h1 small{display:block;font-size:11.5px;font-weight:500;opacity:.8;letter-spacin
 .chip{flex:none;background:var(--glass);color:#fff;padding:4px 11px;border-radius:999px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden}
 .chip em{font-style:normal;opacity:.8;margin-left:5px;font-size:11.5px}
 .chip:hover{background:rgba(255,255,255,.28)}
+.chip[hidden]{display:none}
 .chip.on{background:#fff;color:var(--red2);border-color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.25);transform:translateY(-1px)}
 .chip.full:after{content:"★";margin-left:4px;color:var(--gold2)}
 .btn{padding:8px 14px;border-radius:12px;background:var(--glass);color:#fff;font-weight:500;border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(4px)}
@@ -334,7 +335,8 @@ function paint(id, animate) {
   if (it) { const im = new Image(); im.src = it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; if (animate) im.className = 'stick'; pic.appendChild(im); }
   c.el.classList.toggle('empty', !it); c.el.classList.toggle('done', !!it);
 }
-let shownN = 0;
+let loaded = false;
+function genCounts() { const per = {}; for (const [id, c] of cards) if (store.items.has(id)) per[c.gen] = (per[c.gen] || 0) + 1; return per; }
 function tween(el, to) { // compteur animé
   const from = +el.dataset.v || 0; el.dataset.v = to; if (reduce || from === to) { el.textContent = to; return; }
   const t0 = performance.now(), dur = 600;
@@ -343,20 +345,24 @@ function tween(el, to) { // compteur animé
 let lastCount = -1;
 function refresh(animate) {
   const q = norm($('#q').value.trim()); let shown = 0, i = 0;
-  const per = {};
+  const per = genCounts();
+  if (fGen && !per[fGen]) { fGen = 0; }
   for (const [id, c] of cards) {
-    const have = store.items.has(id); if (have) per[c.gen] = (per[c.gen] || 0) + 1;
-    const ok = (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have);
+    const have = store.items.has(id);
+    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have);
     c.el.hidden = !ok; shown += ok;
     if (ok && animate && i < 48) { c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i); c.el.classList.add('in'); i++; }
   }
-  $('#none').hidden = shown > 0;
+  const any = Object.keys(per).length > 0;
+  $('#none').hidden = shown > 0 || !loaded;
+  $('#none').innerHTML = any ? '<b>🫥</b>Aucun Pokémon ne correspond.' : '<b>🥚</b>Ton Pokédex est vide.<br><small>Ajoute ta première image : sa génération se débloquera.</small>';
   const n = store.items.size;
   tween($('#cn'), n);
   if (lastCount >= 0 && n > lastCount) { $('#counter').classList.remove('bump'); void $('#counter').offsetWidth; $('#counter').classList.add('bump'); }
   lastCount = n;
   $('#bar').style.width = (100 * n / P.length) + '%';
-  document.querySelectorAll('.chip[data-g]').forEach(ch => { const g = +ch.dataset.g; if (!g) return;
+  document.querySelectorAll('.chip[data-g]').forEach(ch => { const g = +ch.dataset.g;
+    ch.hidden = g ? !per[g] : !any; if (!g) return;
     ch.querySelector('em').textContent = `${per[g] || 0}/${genTotal[g]}`; ch.classList.toggle('full', per[g] === genTotal[g]); });
 }
 let qt; $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => refresh(true), 120); });
@@ -381,8 +387,9 @@ function goTo(id) {
   c.el.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
   c.el.classList.remove('flash'); void c.el.offsetWidth; c.el.classList.add('flash');
 }
-function nextMissing(after = 0) {
-  for (let k = 1; k <= P.length; k++) { const id = ((after + k - 1) % P.length) + 1; if (!store.items.has(id)) return id; }
+let unlocked = {};
+function nextMissing(after = 0) { unlocked = genCounts();
+  for (let k = 1; k <= P.length; k++) { const id = ((after + k - 1) % P.length) + 1; if (!store.items.has(id) && unlocked[cards.get(id).gen]) return id; }
   return null;
 }
 $('#nextm').onclick = () => { const id = nextMissing(lastOpened); if (!id) { toast('🎉 Pokédex complet !'); confetti(innerWidth / 2, innerHeight / 3, 200, true); } else goTo(id); };
@@ -574,13 +581,14 @@ async function save(next) {
   const id = curId;
   const blob = await new Promise(r => lastCanvas.toBlob(r, 'image/webp', .92));
   const b = blob && blob.type === 'image/webp' ? blob : await new Promise(r => lastCanvas.toBlob(r, 'image/png'));
-  const before = store.items.size; await put(id, b);
+  const before = store.items.size, newGen = !genCounts()[P[id-1][3]]; await put(id, b);
   closeDlg();
   setTimeout(() => {
-    goTo(id); paint(id, true); refresh(); const r = cards.get(id).el.getBoundingClientRect();
+    paint(id, true); refresh(); goTo(id); const r = cards.get(id).el.getBoundingClientRect();
     setTimeout(() => confetti(r.left + r.width / 2, r.top + r.height / 2, 34), 250);
     const n = store.items.size;
     if (n > before && n % 100 === 0) { toast(`🏆 ${n} Pokémon !`); setTimeout(() => confetti(innerWidth / 2, innerHeight / 3, 160, true), 400); }
+    else if (newGen) { toast(`🔓 Génération ${GEN[P[id-1][3]-1]} débloquée !`); setTimeout(() => confetti(innerWidth / 2, innerHeight / 3, 120, true), 300); }
     else toast(`✨ ${P[id-1][1]} ajouté au Pokédex`);
     if (n === P.length) { toast('🎉 PokéDex COMPLET !'); confetti(innerWidth / 2, innerHeight / 3, 300, true); }
     if (next) { const nx = nextMissing(id); if (nx) setTimeout(() => openDialog(nx), 650); }
@@ -615,7 +623,7 @@ $('#impf').onchange = async e => {
 
 /* ---------- Démarrage ---------- */
 buildGrid(); refresh(true);
-store.load().then(() => { for (const id of store.items.keys()) paint(id); refresh(true); });
+store.load().then(() => { loaded = true; for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
 </body>
 </html>
