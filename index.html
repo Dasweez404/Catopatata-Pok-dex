@@ -177,6 +177,31 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .b.red:disabled{opacity:.4;cursor:not-allowed}
 kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margin-left:5px}
 
+/* ---------- Modes ---------- */
+#view{max-width:min(560px,95vw)}
+.mode{margin-left:6px}
+.mode button{display:flex;gap:6px;align-items:center}
+body[data-mode=explorer] .prof-only{display:none!important}
+body[data-mode=explorer] .slot.empty{cursor:default}
+body[data-mode=explorer] .slot.empty:after{display:none}
+body[data-mode=explorer] .slot.empty:hover .pic:before{transform:none;border-color:var(--mute);opacity:.35}
+body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
+.slot.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.v-stage{position:relative;width:min(calc(100% - 32px),58vh);width:min(calc(100% - 32px),58dvh);aspect-ratio:1;margin:16px auto 8px;border-radius:22px;overflow:hidden;touch-action:pan-y;
+  background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--gold) 38%,var(--card)),var(--bg2));box-shadow:inset 0 0 0 2px var(--line);
+  --rx:0deg;--ry:0deg;--mx:50%;--my:50%}
+.v-stage:after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;transition:opacity .3s;
+  background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 40%),conic-gradient(from 0deg at var(--mx) var(--my),#ff6ad5,#ffd76a,#6affb1,#6ab8ff,#c36aff,#ff6ad5)}
+.v-stage:hover:after{opacity:.28}
+.v-stage img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .2s;
+  filter:drop-shadow(calc(var(--sh)*1.5) calc(var(--sh)*2) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
+.v-stage img.inR{animation:inR .4s var(--ease)}.v-stage img.inL{animation:inL .4s var(--ease)}
+@keyframes inR{from{opacity:0;translate:60px 0;scale:.85}}@keyframes inL{from{opacity:0;translate:-60px 0;scale:.85}}
+.v-info{text-align:center;padding:0 16px 4px}
+.v-info b{font-size:22px;display:block}.v-info span{color:var(--mute);font-size:14px}
+.v-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px 16px}
+.v-nav .b{min-width:56px;font-size:18px}.v-nav em{font-style:normal;color:var(--mute);font-variant-numeric:tabular-nums}
 /* ---------- Toasts / confettis ---------- */
 #toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .toast{pointer-events:auto;display:flex;gap:14px;align-items:center;background:#1b1d25;color:#fff;padding:11px 18px;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.4);animation:tIn .4s var(--ease)}
@@ -198,19 +223,20 @@ kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margi
 <header>
   <div class="bar">
     <div class="brand"><div class="lens"></div><h1>Mon Pokédex<small>Collection stickers</small></h1></div>
+    <div class="seg mode" id="mode"><button data-m="prof" title="Éditer : ajouter et modifier les stickers">🎓 Professeur</button><button data-m="explorer" title="Observer ta collection">🔭 Explorateur</button></div>
     <div class="counter" id="counter"><b id="cn">0</b><span>/ 1025</span></div>
     <div class="prog"><i id="bar"></i></div>
     <div class="controls">
       <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
       <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
-      <button class="btn" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
+      <button class="btn prof-only" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
       <span class="sp"></span>
       <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
       <button class="btn icon" id="theme" title="Thème clair / sombre">🌓</button>
-      <button class="btn icon" id="exp" title="Sauvegarder ma collection (fichier)">⬇</button>
-      <button class="btn icon" id="imp" title="Restaurer une sauvegarde">⬆</button>
+      <button class="btn icon prof-only" id="exp" title="Sauvegarder ma collection (fichier)">⬇</button>
+      <button class="btn icon prof-only" id="imp" title="Restaurer une sauvegarde">⬆</button>
       <input type="file" id="impf" accept=".json" hidden>
-      <button class="btn gold" id="add">＋ Ajouter une image</button>
+      <button class="btn gold prof-only" id="add">＋ Ajouter une image</button>
     </div>
     <div class="chips" id="chips"></div>
   </div>
@@ -223,6 +249,13 @@ kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margi
 <div class="dragveil" id="veil">📥 Lâche l'image pour l'ajouter</div>
 <div id="toasts"></div>
 <canvas id="fx"></canvas>
+
+<dialog id="view">
+  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vx">✕</button></div>
+  <div class="v-stage" id="vstage"><img id="vimg" alt=""></div>
+  <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
+  <div class="v-nav"><button class="b" id="vprev">←</button><em id="vcount"></em><button class="b" id="vnext">→</button></div>
+</dialog>
 
 <dialog id="dlg">
   <div class="dh"><h2 id="dtitle">Ajouter un Pokémon</h2><button class="x" id="x">✕</button></div>
@@ -320,7 +353,7 @@ const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const cards = new Map();
 const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
 const genTotal = {}; P.forEach(p => genTotal[p[3]] = (genTotal[p[3]] || 0) + 1);
-let fGen = 0, fSt = 'all';
+let fGen = 0, fSt = 'all', mode = ls.get('mode', 'prof') === 'explorer' ? 'explorer' : 'prof';
 
 function buildGrid() {
   const frag = document.createDocumentFragment();
@@ -329,7 +362,7 @@ function buildGrid() {
     el.className = 'slot empty'; el.dataset.id = id;
     el.innerHTML = `<div class="num">#${pad(id)}</div><div class="pic"></div><div class="name">${fr}</div>`;
     el.title = fr === en ? fr : `${fr} (${en})`;
-    el.onclick = () => openDialog(id);
+    el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
     cards.set(id, { el, key: norm(fr + ' ' + en + ' ' + id + ' ' + pad(id)), gen });
     frag.appendChild(el);
   }
@@ -541,7 +574,8 @@ function sticker(co, border, shape = 'round', k = .5) {
 /* ---------- Boîte de dialogue ---------- */
 const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null, lastOpened = 0, listIds = [], shape = 'round';
 const setShape = v => { shape = v === 'cut' ? 'cut' : 'round'; document.querySelectorAll('#shapes button').forEach(b => b.classList.toggle('on', b.dataset.s === shape)); };
-const closeDlg = () => { if (!dlg.open) return; dlg.classList.add('closing'); setTimeout(() => { dlg.close(); dlg.classList.remove('closing'); }, 180); };
+const closeD = d => { if (!d.open) return; d.classList.add('closing'); setTimeout(() => { d.close(); d.classList.remove('closing'); }, 180); };
+const closeDlg = () => closeD(dlg);
 dlg.addEventListener('cancel', e => { e.preventDefault(); closeDlg(); });
 dlg.addEventListener('click', e => { if (e.target === dlg) closeDlg(); });
 $('#x').onclick = closeDlg;
@@ -599,7 +633,7 @@ async function showExisting() { // affiche le sticker déjà enregistré pour le
   p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop'); upd();
 }
 async function setFile(f) {
-  if (!f || !f.type.startsWith('image/')) return;
+  if (mode !== 'prof' || !f || !f.type.startsWith('image/')) return;
   if (!dlg.open) openDialog(null);
   const url = URL.createObjectURL(f);
   try { curImg = await loadImage(url); } finally { URL.revokeObjectURL(url); }
@@ -623,7 +657,7 @@ $('#drop').addEventListener('dragleave', () => $('#drop').classList.remove('over
 $('#drop').addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); $('#drop').classList.remove('over'); $('#veil').classList.remove('on'); setFile(e.dataTransfer.files[0]); });
 // glisser une image n'importe où dans la page
 let dc = 0;
-addEventListener('dragenter', e => { if ([...e.dataTransfer.types].includes('Files')) { dc++; if (!dlg.open) $('#veil').classList.add('on'); } });
+addEventListener('dragenter', e => { if (mode === 'prof' && [...e.dataTransfer.types].includes('Files')) { dc++; if (!dlg.open) $('#veil').classList.add('on'); } });
 addEventListener('dragleave', () => { if (--dc <= 0) { dc = 0; $('#veil').classList.remove('on'); } });
 addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', e => { e.preventDefault(); dc = 0; $('#veil').classList.remove('on'); const f = e.dataTransfer.files[0]; if (f) setFile(f); });
@@ -681,7 +715,46 @@ const setSh = v => { document.documentElement.style.setProperty('--sh', v + 'px'
 $('#sh').value = ls.get('sh', 3); setSh($('#sh').value);
 $('#sh').oninput = e => { setSh(e.target.value); ls.set('sh', e.target.value); };
 
+/* ---------- Modes Professeur / Explorateur ---------- */
+function setMode(m, notify) {
+  mode = m; ls.set('mode', m); document.body.dataset.mode = m;
+  document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  if (dlg.open) closeDlg();
+  if (notify) { toast(m === 'prof' ? '🎓 Mode Professeur : ajoute et modifie tes stickers' : '🔭 Mode Explorateur : observe ta collection'); refresh(true); }
+}
+$('#mode').onclick = e => { const b = e.target.closest('button'); if (b && b.dataset.m !== mode) setMode(b.dataset.m, true); };
+
+/* ---------- Visionneuse (mode Explorateur) ---------- */
+const vw = $('#view'); let vIds = [], vi = 0;
+vw.addEventListener('cancel', e => { e.preventDefault(); closeD(vw); });
+vw.addEventListener('click', e => { if (e.target === vw) closeD(vw); });
+$('#vx').onclick = () => closeD(vw);
+function openViewer(id) {
+  if (!store.items.has(id)) { const el = cards.get(id).el; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); return; }
+  vIds = [...cards].filter(([i, c]) => !c.el.hidden && store.items.has(i)).map(x => x[0]);
+  vi = vIds.indexOf(id); if (vi < 0) { vIds = [id]; vi = 0; }
+  showV(0); if (!vw.open) vw.showModal();
+}
+function showV(dir) {
+  const id = vIds[vi], [, fr, en, g] = P[id - 1], im = $('#vimg');
+  im.src = store.items.get(id).url; im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
+  $('#vtitle').innerHTML = `<span>#${pad(id)}</span>${fr}`; $('#vname').textContent = fr;
+  $('#vsub').textContent = (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
+  $('#vcount').textContent = `${vi + 1} / ${vIds.length}`;
+  $('#vprev').disabled = $('#vnext').disabled = vIds.length < 2;
+}
+const vgo = d => { vi = (vi + d + vIds.length) % vIds.length; showV(d); };
+$('#vprev').onclick = () => vgo(-1); $('#vnext').onclick = () => vgo(1);
+vw.addEventListener('keydown', e => { if (e.key === 'ArrowRight') vgo(1); if (e.key === 'ArrowLeft') vgo(-1); });
+let tx0 = null; const stg = $('#vstage');
+stg.addEventListener('touchstart', e => tx0 = e.touches[0].clientX, { passive: true });
+stg.addEventListener('touchend', e => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0; tx0 = null; if (Math.abs(dx) > 50) vgo(dx < 0 ? 1 : -1); });
+stg.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || reduce) return; const r = stg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  stg.style.setProperty('--ry', ((x - .5) * 16) + 'deg'); stg.style.setProperty('--rx', ((.5 - y) * 16) + 'deg'); stg.style.setProperty('--mx', x * 100 + '%'); stg.style.setProperty('--my', y * 100 + '%'); });
+stg.addEventListener('pointerleave', () => { stg.style.setProperty('--rx', '0deg'); stg.style.setProperty('--ry', '0deg'); });
+
 /* ---------- Démarrage ---------- */
+setMode(mode, false);
 buildGrid(); refresh(true);
 store.load().then(() => { loaded = true; for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
