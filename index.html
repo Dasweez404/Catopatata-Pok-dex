@@ -4,111 +4,242 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mon Pokédex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="pokemon-data.js"></script>
 <style>
 :root{
-  --red:#d32f3f; --red-d:#9e1a2a; --bg:#f3efe6; --card:#fff; --ink:#22252e; --mute:#8a8f9c;
-  --line:#e2ddd0; --ok:#2e9e5b; --shadow:0 2px 6px rgba(30,20,10,.12);
+  --red:#e0323f; --red2:#a91d31; --gold:#ffd84d; --gold2:#ffb703;
+  --bg:#f5f0e6; --bg2:#ece5d6; --card:#ffffff; --ink:#23262f; --mute:#8b8f9c; --line:#e5dfd0; --ok:#25a55f;
+  --glass:rgba(255,255,255,.14); --shadow:0 2px 0 rgba(0,0,0,.04),0 6px 16px rgba(60,40,10,.12);
+  --font:"Fredoka",ui-rounded,"SF Pro Rounded",system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1.2,.36,1); --cs:132px;
 }
-@media (prefers-color-scheme:dark){
-  :root{--bg:#1c1e25;--card:#272a33;--ink:#eceef3;--mute:#8d93a3;--line:#383c48;--shadow:0 2px 8px rgba(0,0,0,.4)}
+:root[data-theme=dark]{
+  --bg:#13151c; --bg2:#191c25; --card:#232733; --ink:#eef0f6; --mute:#8d94a6; --line:#323747;
+  --shadow:0 2px 0 rgba(0,0,0,.25),0 8px 20px rgba(0,0,0,.4);
 }
-*{box-sizing:border-box}
-body{margin:0;font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
-header{position:sticky;top:0;z-index:20;background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;max-width:1400px;margin:0 auto}
-h1{font-size:20px;margin:0;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
-.ball{width:22px;height:22px;border-radius:50%;background:linear-gradient(#fff 0 0) center/100% 3px no-repeat,linear-gradient(#e33 50%,#fff 50%);border:2px solid #222;position:relative;flex:none}
-.ball:after{content:"";position:absolute;inset:50% auto auto 50%;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:#fff;border:2px solid #222}
-.count{font-weight:600;margin-left:auto}
-.prog{flex-basis:100%;height:6px;background:rgba(0,0,0,.25);border-radius:3px;overflow:hidden}
-.prog i{display:block;height:100%;width:0;background:#ffd84d;transition:width .3s}
-.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1 1 400px}
-input[type=search],select,.tools input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
-button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px}
-button:hover{filter:brightness(.96)}
-button.primary{background:#ffd84d;color:#3a2c00;border-color:#d9b52a;font-weight:600}
-button.danger{color:#c0283a}
-header button{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff}
-header button.primary{background:#ffd84d;color:#3a2c00}
-main{max-width:1400px;margin:0 auto;padding:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
-.slot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 8px 10px;text-align:center;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s;position:relative;content-visibility:auto;contain-intrinsic-size:170px 160px}
-.slot:hover{transform:translateY(-3px)}
-.slot .num{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;text-align:left}
-.slot .pic{height:104px;display:grid;place-items:center}
-.slot img{max-width:100%;max-height:104px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
-.slot .name{font-weight:600;font-size:13.5px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.slot.empty .pic{opacity:.28}
-.slot.empty .name{color:var(--mute);font-weight:500}
-.slot.empty .pic:before{content:"";width:58px;height:58px;border-radius:50%;border:3px dashed var(--mute);display:block}
-.slot.empty:hover .pic{opacity:.6}
-.slot.done:after{content:"✓";position:absolute;top:6px;right:8px;color:var(--ok);font-weight:700;font-size:14px}
-.empty-msg{padding:60px;text-align:center;color:var(--mute)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.4 var(--font);background:var(--bg);color:var(--ink);transition:background .4s,color .4s;
+  background-image:radial-gradient(var(--line) 1.2px,transparent 1.4px);background-size:22px 22px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;transition:transform .15s var(--ease),filter .15s,background .2s,box-shadow .2s}
+button:active{transform:scale(.94)}
 
-dialog{border:none;border-radius:18px;padding:0;max-width:min(900px,95vw);width:100%;background:var(--card);color:var(--ink);box-shadow:0 10px 50px rgba(0,0,0,.5)}
-dialog::backdrop{background:rgba(10,10,20,.6)}
-.m{display:grid;grid-template-columns:1fr 1fr;gap:0}
-@media(max-width:700px){.m{grid-template-columns:1fr}}
-.m .left{padding:18px;background:var(--bg)}
-.m .right{padding:18px;display:flex;flex-direction:column;gap:12px}
-.drop{border:2px dashed var(--mute);border-radius:14px;min-height:300px;display:grid;place-items:center;text-align:center;color:var(--mute);padding:10px;position:relative;
-  background:repeating-conic-gradient(#0000000d 0 25%,#0000 0 50%) 0 0/20px 20px}
-.drop.over{border-color:var(--red);color:var(--red)}
-.drop canvas{max-width:100%;max-height:340px;display:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4))}
+/* ---------- En-tête ---------- */
+header{position:sticky;top:0;z-index:30;color:#fff;
+  background:linear-gradient(180deg,var(--red) 0,var(--red2) 100%);box-shadow:0 4px 18px rgba(120,10,30,.4);
+  border-bottom:4px solid #1b1d25}
+header:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% -40%,rgba(255,255,255,.35),transparent 55%);pointer-events:none}
+.bar{position:relative;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 18px;max-width:1500px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px}
+.lens{width:42px;height:42px;border-radius:50%;flex:none;border:3px solid #fff;
+  background:radial-gradient(circle at 32% 30%,#fff 0 9%,transparent 11%),radial-gradient(circle,#59d4ff,#1578d6 70%);
+  box-shadow:0 0 0 3px #1b1d25,0 0 18px #59d4ff99;animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 3px #1b1d25,0 0 30px #59d4ffee}}
+h1{margin:0;font-size:25px;font-weight:700;letter-spacing:.5px;text-shadow:0 2px 0 rgba(0,0,0,.25);line-height:1}
+h1 small{display:block;font-size:11.5px;font-weight:500;opacity:.8;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.counter{margin-left:auto;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.28);padding:6px 14px;border-radius:999px;box-shadow:inset 0 2px 4px rgba(0,0,0,.3)}
+.counter b{font-size:22px;font-variant-numeric:tabular-nums;color:var(--gold)}
+.counter span{opacity:.8}
+.counter.bump{animation:bump .5s var(--ease)}
+@keyframes bump{40%{transform:scale(1.18) rotate(-2deg)}}
+.prog{flex-basis:100%;height:9px;background:rgba(0,0,0,.3);border-radius:6px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.prog i{display:block;height:100%;width:0;border-radius:6px;transition:width .8s var(--ease);
+  background:linear-gradient(90deg,var(--gold2),var(--gold),#fff6c2,var(--gold),var(--gold2));background-size:200% 100%;animation:shimmer 2.5s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.controls{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{position:relative;flex:1 1 220px;max-width:340px}
+.search input{width:100%;padding:9px 12px 9px 36px;border-radius:12px;border:2px solid transparent;background:rgba(255,255,255,.95);color:#23262f;outline:none;transition:border .2s,box-shadow .2s}
+.search input:focus{border-color:var(--gold);box-shadow:0 0 0 4px #ffd84d55}
+.search:before{content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font:12px var(--font);background:#0001;border-radius:5px;padding:1px 7px;color:#666}
+.seg{display:flex;background:rgba(0,0,0,.28);border-radius:12px;padding:3px;position:relative}
+.seg button{background:none;color:#fff;padding:5px 12px;border-radius:9px;font-weight:500;position:relative;z-index:1;opacity:.8}
+.seg button.on{background:#fff;color:var(--red2);opacity:1;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 100%;order:5;padding:2px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:var(--glass);color:#fff;padding:4px 11px;border-radius:999px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden}
+.chip em{font-style:normal;opacity:.8;margin-left:5px;font-size:11.5px}
+.chip:hover{background:rgba(255,255,255,.28)}
+.chip.on{background:#fff;color:var(--red2);border-color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.25);transform:translateY(-1px)}
+.chip.full:after{content:"★";margin-left:4px;color:var(--gold2)}
+.btn{padding:8px 14px;border-radius:12px;background:var(--glass);color:#fff;font-weight:500;border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(4px)}
+.btn:hover{background:rgba(255,255,255,.28)}
+.btn.gold,.gold{background:linear-gradient(180deg,#ffe27a,var(--gold2));color:#4a3300;border:0;font-weight:600;box-shadow:0 3px 0 #b87d00,0 6px 14px rgba(0,0,0,.25)}
+.btn.gold:hover,.gold:hover{filter:brightness(1.06);transform:translateY(-2px)}
+.btn.gold:active,.gold:active{transform:translateY(2px);box-shadow:0 1px 0 #b87d00}
+.icon{width:38px;height:38px;padding:0;display:grid;place-items:center;border-radius:12px;font-size:17px}
+.sp{flex:1}
+.range{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.9}
+.range input{width:80px;accent-color:var(--gold)}
+
+/* ---------- Grille ---------- */
+main{max-width:1500px;margin:0 auto;padding:22px 18px 90px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--cs),1fr));gap:14px}
+.slot{--rx:0deg;--ry:0deg;--mx:50%;--my:50%;
+  position:relative;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:8px 8px 10px;text-align:center;cursor:pointer;
+  box-shadow:var(--shadow);content-visibility:auto;contain-intrinsic-size:auto 180px;
+  transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition:transform .25s var(--ease),border-color .25s,box-shadow .25s,background .3s;overflow:hidden}
+.slot[hidden]{display:none}
+.slot.in{animation:cardIn .5s var(--ease) backwards;animation-delay:calc(var(--i,0)*14ms)}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.9)}}
+.slot:hover{transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-5px) scale(1.03);border-color:var(--gold2);box-shadow:0 14px 28px rgba(60,40,10,.25)}
+.slot .num{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;text-align:left;font-weight:500}
+.slot .pic{height:calc(var(--cs)*.8);display:grid;place-items:center;position:relative}
+.slot .pic img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));transition:transform .35s var(--ease);position:relative}
+.slot:hover .pic img{transform:scale(1.1) rotate(-3deg)}
+.slot .name{font-weight:600;font-size:14px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative}
+.slot.empty{background:color-mix(in srgb,var(--card) 70%,transparent);border-style:dashed}
+.slot.empty .pic:before{content:"";width:46%;aspect-ratio:1;border-radius:50%;opacity:.35;transition:all .3s var(--ease);
+  background:linear-gradient(var(--mute) 0 0) center/100% 3px no-repeat,radial-gradient(circle,var(--card) 0 22%,var(--mute) 24% 32%,transparent 34%);border:3px solid var(--mute)}
+.slot.empty:hover .pic:before{opacity:.9;transform:rotate(180deg) scale(1.15);border-color:var(--red)}
+.slot.empty:after{content:"＋";position:absolute;right:8px;top:6px;color:var(--mute);opacity:0;transform:scale(.4);transition:all .25s var(--ease);font-weight:700}
+.slot.empty:hover:after{opacity:1;transform:scale(1);color:var(--red)}
+.slot.empty .name{color:var(--mute);font-weight:500}
+.slot.done .num:after{content:"✓";float:right;color:#fff;background:var(--ok);border-radius:50%;width:17px;height:17px;display:grid;place-items:center;font-size:11px;font-weight:700}
+.slot.done:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .3s;mix-blend-mode:color-dodge;
+  background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 45%),
+   conic-gradient(from 0deg at var(--mx) var(--my),#ff6ad5,#ffd76a,#6affb1,#6ab8ff,#c36aff,#ff6ad5);filter:saturate(.8)}
+.slot.done:hover:before{opacity:.35}
+.slot.done{background:linear-gradient(160deg,var(--card),color-mix(in srgb,var(--card) 80%,var(--gold)))}
+.slot.flash{animation:flash 1.4s ease 2}
+@keyframes flash{50%{box-shadow:0 0 0 5px var(--gold),0 0 30px var(--gold);transform:scale(1.07)}}
+.slot img.stick{animation:stick .7s var(--ease)}
+@keyframes stick{0%{transform:scale(1.35) rotate(-14deg);opacity:0;filter:drop-shadow(0 22px 14px rgba(0,0,0,.4))}60%{opacity:1}100%{transform:none}}
+.empty-msg{padding:80px 20px;text-align:center;color:var(--mute);font-size:18px}
+.empty-msg b{display:block;font-size:48px;animation:float 2s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+
+/* ---------- Dialogue ---------- */
+dialog{border:none;border-radius:24px;padding:0;max-width:min(940px,95vw);width:100%;background:var(--card);color:var(--ink);overflow:hidden;
+  box-shadow:0 20px 70px rgba(0,0,0,.55);font-family:var(--font)}
+dialog[open]{animation:dIn .35s var(--ease)}
+dialog.closing{animation:dOut .18s ease forwards}
+dialog::backdrop{background:rgba(8,8,18,.6);backdrop-filter:blur(6px);animation:bIn .3s}
+dialog.closing::backdrop{animation:bOut .18s forwards}
+@keyframes dIn{from{opacity:0;transform:translateY(30px) scale(.92)}}
+@keyframes dOut{to{opacity:0;transform:translateY(16px) scale(.96)}}
+@keyframes bIn{from{opacity:0}}@keyframes bOut{to{opacity:0}}
+.dh{display:flex;align-items:center;gap:12px;padding:14px 20px;background:linear-gradient(180deg,var(--red),var(--red2));color:#fff;border-bottom:3px solid #1b1d25}
+.dh h2{margin:0;font-size:21px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh h2 span{opacity:.75;font-weight:500;margin-right:6px}
+.dh .x{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:16px}
+.dh .x:hover{background:rgba(0,0,0,.45);transform:rotate(90deg)}
+.m{display:grid;grid-template-columns:1.05fr 1fr}
+@media(max-width:720px){.m{grid-template-columns:1fr}}
+.left{padding:18px;background:var(--bg2)}
+.right{padding:18px;display:flex;flex-direction:column;gap:12px}
+.drop{position:relative;border:3px dashed var(--mute);border-radius:18px;min-height:320px;display:grid;place-items:center;text-align:center;color:var(--mute);padding:12px;cursor:pointer;
+  background:repeating-conic-gradient(#8881 0 25%,#0000 0 50%) 0 0/22px 22px,var(--card);transition:border-color .2s,background-color .2s,transform .3s var(--ease)}
+.drop:hover{border-color:var(--red);transform:scale(1.01)}
+.drop.over{border-color:var(--red);transform:scale(1.03);background-color:#e0323f14;animation:pulse .8s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 10px #e0323f22}}
+.drop canvas{max-width:100%;max-height:340px;display:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}
 .drop.has canvas{display:block}.drop.has .hint{display:none}
-.drop .hint b{display:block;font-size:17px;color:var(--ink);margin-bottom:6px}
-label.row{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mute)}
+.drop canvas.pop{animation:pop .5s var(--ease)}
+@keyframes pop{from{transform:scale(.7) rotate(-6deg);opacity:.2}}
+.drop .hint{pointer-events:none}
+.drop .hint i{display:block;font-style:normal;font-size:54px;animation:float 2.2s ease-in-out infinite}
+.drop .hint b{display:block;font-size:19px;color:var(--ink);margin:4px 0}
+.drop.busy:after{content:"";position:absolute;width:34px;height:34px;border-radius:50%;border:4px solid #0002;border-top-color:var(--red);animation:spin .6s linear infinite;right:12px;top:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cur-tag{position:absolute;left:10px;bottom:8px;font-size:12px;background:var(--ink);color:var(--bg);padding:2px 9px;border-radius:99px;opacity:.85;display:none}
+.drop.existing .cur-tag{display:block}
+.search2 input{width:100%;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);outline:none;transition:border .2s,box-shadow .2s}
+.search2 input:focus{border-color:var(--red);box-shadow:0 0 0 4px #e0323f22}
+.list{position:relative;margin-top:6px;height:178px;overflow:auto;border:2px solid var(--line);border-radius:12px;background:var(--bg);scroll-behavior:auto}
+.list div{padding:6px 12px;display:flex;gap:8px;cursor:pointer;transition:background .12s,padding .15s}
+.list div i{font-style:normal;color:var(--mute);min-width:42px;font-variant-numeric:tabular-nums;font-size:13px}
+.list div u{margin-left:auto;text-decoration:none;color:var(--ok);font-weight:700}
+.list div:hover{background:color-mix(in srgb,var(--gold) 25%,transparent);padding-left:16px}
+.list div.sel{background:var(--red);color:#fff;font-weight:600}.list div.sel i,.list div.sel u{color:#fff}
+.warn{font-size:13px;color:#c47a00;background:#ffb70322;padding:6px 10px;border-radius:10px;margin-top:6px;animation:dIn .3s}
+label.row{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mute)}
 label.row span b{color:var(--ink);float:right}
 input[type=range]{width:100%;accent-color:var(--red)}
-select[size]{height:190px;padding:4px}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:auto;flex-wrap:wrap}
 .note{font-size:12.5px;color:var(--mute)}
-.warn{color:#c47a00}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:auto;flex-wrap:wrap;align-items:center}
+.b{padding:10px 16px;border-radius:12px;background:var(--bg2);font-weight:500}
+.b:hover{filter:brightness(.95)}
+.b.danger{color:#d0283a;margin-right:auto}
+.b.gold:disabled{filter:grayscale(1) opacity(.45);box-shadow:none;transform:none;cursor:not-allowed}
+.b.red{background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red2)}
+.b.red:disabled{opacity:.4;cursor:not-allowed}
+kbd{font:11px var(--font);background:#0002;border-radius:4px;padding:0 5px;margin-left:5px}
+
+/* ---------- Toasts / confettis ---------- */
+#toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{pointer-events:auto;display:flex;gap:14px;align-items:center;background:#1b1d25;color:#fff;padding:11px 18px;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.4);animation:tIn .4s var(--ease)}
+.toast.out{animation:tOut .3s forwards}
+.toast button{background:none;color:var(--gold);font-weight:600;padding:0}
+@keyframes tIn{from{opacity:0;transform:translateY(30px) scale(.9)}}
+@keyframes tOut{to{opacity:0;transform:translateY(20px)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:200}
+.fab{position:fixed;right:18px;bottom:18px;z-index:25;width:52px;height:52px;border-radius:50%;font-size:22px;opacity:0;transform:scale(.5);pointer-events:none}
+.fab.show{opacity:1;transform:none;pointer-events:auto}
+.dragveil{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(224,50,63,.85);color:#fff;font-size:32px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
+.dragveil.on{opacity:1}
+@media(max-width:600px){h1{font-size:20px}.range{display:none}.counter{padding:4px 10px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
-    <h1><span class="ball"></span> Mon Pokédex</h1>
-    <div class="tools">
-      <input type="search" id="q" placeholder="Rechercher nom ou numéro…">
-      <select id="gen"><option value="0">Toutes générations</option></select>
-      <select id="st"><option value="all">Tous</option><option value="have">Obtenus</option><option value="miss">Manquants</option></select>
-      <button class="primary" id="add">＋ Ajouter une image</button>
-      <button id="exp" title="Sauvegarder ta collection dans un fichier">⬇ Sauvegarde</button>
-      <button id="imp" title="Restaurer une sauvegarde">⬆ Restaurer</button>
-      <input type="file" id="impf" accept=".json" hidden>
-    </div>
-    <div class="count" id="count"></div>
+    <div class="brand"><div class="lens"></div><h1>Mon Pokédex<small>Collection stickers</small></h1></div>
+    <div class="counter" id="counter"><b id="cn">0</b><span>/ 1025</span></div>
     <div class="prog"><i id="bar"></i></div>
+    <div class="controls">
+      <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
+      <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
+      <button class="btn" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
+      <span class="sp"></span>
+      <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
+      <button class="btn icon" id="theme" title="Thème clair / sombre">🌓</button>
+      <button class="btn icon" id="exp" title="Sauvegarder ma collection (fichier)">⬇</button>
+      <button class="btn icon" id="imp" title="Restaurer une sauvegarde">⬆</button>
+      <input type="file" id="impf" accept=".json" hidden>
+      <button class="btn gold" id="add">＋ Ajouter une image</button>
+    </div>
+    <div class="chips" id="chips"></div>
   </div>
 </header>
-<main><div class="grid" id="grid"></div><div class="empty-msg" id="none" hidden>Aucun Pokémon ne correspond.</div></main>
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="empty-msg" id="none" hidden><b>🫥</b>Aucun Pokémon ne correspond.</div>
+</main>
+<button class="btn gold fab" id="top" title="Remonter">↑</button>
+<div class="dragveil" id="veil">📥 Lâche l'image pour l'ajouter</div>
+<div id="toasts"></div>
+<canvas id="fx"></canvas>
 
 <dialog id="dlg">
+  <div class="dh"><h2 id="dtitle">Ajouter un Pokémon</h2><button class="x" id="x">✕</button></div>
   <div class="m">
     <div class="left">
       <div class="drop" id="drop">
-        <div class="hint"><b>Dépose ton image ici</b>ou clique pour parcourir · ou colle avec Ctrl+V<br><small>(Pokémon sur fond blanc/papier)</small></div>
-        <canvas id="prev"></canvas>
+        <div class="hint"><i>📥</i><b>Dépose ton image ici</b>clique pour parcourir · ou Ctrl+V pour coller<br><small>Pokémon sur fond blanc / papier</small></div>
+        <canvas id="prev"></canvas><span class="cur-tag">Image actuelle</span>
       </div>
       <input type="file" id="file" accept="image/*" hidden>
     </div>
     <div class="right">
-      <div>
-        <input type="search" id="pq" placeholder="Chercher le Pokémon…" style="width:100%;margin-bottom:6px">
-        <select id="psel" size="6" style="width:100%"></select>
-        <div class="note warn" id="over" hidden>Ce slot contient déjà une image : elle sera remplacée.</div>
+      <div class="search2">
+        <input type="search" id="pq" placeholder="Choisir le Pokémon (nom ou n°)…" autocomplete="off">
+        <div class="list" id="plist"></div>
+        <div class="warn" id="over" hidden>⚠ Ce slot a déjà une image : elle sera remplacée.</div>
       </div>
       <label class="row"><span>Tolérance du fond <b id="vtol"></b></span><input type="range" id="tol" min="5" max="120" value="38"></label>
-      <label class="row"><span>Contour sticker <b id="vbor"></b></span><input type="range" id="bor" min="0" max="40" value="14"></label>
+      <label class="row"><span>Épaisseur du contour <b id="vbor"></b></span><input type="range" id="bor" min="0" max="40" value="14"></label>
       <label class="row"><span>Affiner les bords <b id="vero"></b></span><input type="range" id="ero" min="0" max="5" value="1"></label>
-      <div class="note">Si le fond n'est pas entièrement retiré, augmente la tolérance ; si le Pokémon est mangé, diminue-la.</div>
+      <div class="note">Du fond reste ? Augmente la tolérance. Le Pokémon est grignoté ? Diminue-la.</div>
       <div class="actions">
-        <button class="danger" id="del" hidden>Supprimer</button>
-        <button id="cancel">Annuler</button>
-        <button class="primary" id="save" disabled>Enregistrer</button>
+        <button class="b danger" id="del" hidden>🗑 Supprimer</button>
+        <button class="b red" id="savenext" disabled title="Ctrl+Maj+Entrée">Enregistrer &amp; suivant →</button>
+        <button class="b gold" id="save" disabled title="Ctrl+Entrée">Enregistrer<kbd>⌘↵</kbd></button>
       </div>
     </div>
   </div>
@@ -118,6 +249,13 @@ select[size]{height:190px;padding:4px}
 const P = window.POKEMON; // [id, nomFR, nomEN, gen]
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(4, '0');
+const ls = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- Thème ---------- */
+const applyTheme = t => document.documentElement.dataset.theme = t;
+applyTheme(ls.get('theme', matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'));
+$('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(t); ls.set('theme', t); };
 
 /* ---------- Stockage (IndexedDB) ---------- */
 const db = new Promise((res, rej) => {
@@ -128,24 +266,50 @@ const db = new Promise((res, rej) => {
 const tx = async (mode, fn) => { const d = await db; return new Promise((res, rej) => {
   const t = d.transaction('stickers', mode), s = t.objectStore('stickers'); const out = fn(s);
   t.oncomplete = () => res(out.result); t.onerror = () => rej(t.error); }); };
-const store = { // id -> {blob,url}
+const store = {
   items: new Map(),
   async load() {
     const d = await db;
     await new Promise(res => { const c = d.transaction('stickers').objectStore('stickers').openCursor();
-      c.onsuccess = () => { const cur = c.result; if (!cur) return res(); this.set(+cur.key, cur.value, false); cur.continue(); }; });
+      c.onsuccess = () => { const cur = c.result; if (!cur) return res(); this.set(+cur.key, cur.value); cur.continue(); }; });
   },
-  set(id, blob) { this.drop(id, false); this.items.set(id, { blob, url: URL.createObjectURL(blob) }); },
+  set(id, blob) { this.drop(id); this.items.set(id, { blob, url: URL.createObjectURL(blob) }); },
   drop(id) { const o = this.items.get(id); if (o) URL.revokeObjectURL(o.url); this.items.delete(id); }
 };
 const put = (id, blob) => tx('readwrite', s => s.put(blob, id)).then(() => store.set(id, blob));
 const remove = id => tx('readwrite', s => s.delete(id)).then(() => store.drop(id));
 
+/* ---------- Toasts & confettis ---------- */
+function toast(msg, action, fn, ms = 4500) {
+  const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `<span>${msg}</span>`;
+  const kill = () => { t.classList.add('out'); setTimeout(() => t.remove(), 300); };
+  if (action) { const b = document.createElement('button'); b.textContent = action; b.onclick = () => { fn(); kill(); }; t.appendChild(b); }
+  $('#toasts').appendChild(t); setTimeout(kill, ms);
+}
+const fx = $('#fx'), fc = fx.getContext('2d'); let parts = [], raf = 0;
+function confetti(x, y, n = 36, big = false) {
+  if (reduce) return;
+  const cols = ['#ffd84d', '#e0323f', '#59d4ff', '#6affb1', '#c36aff', '#fff'];
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = (big ? 9 : 5) + Math.random() * (big ? 12 : 7);
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4, r: 3 + Math.random() * 4, c: cols[i % cols.length], rot: Math.random() * 6, vr: (Math.random() - .5) * .4, life: 1 }); }
+  if (!raf) loop();
+}
+function loop() {
+  fx.width = innerWidth; fx.height = innerHeight; fc.clearRect(0, 0, fx.width, fx.height);
+  parts = parts.filter(p => p.life > 0);
+  for (const p of parts) { p.vy += .35; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life -= .012;
+    fc.save(); fc.globalAlpha = Math.max(0, p.life); fc.translate(p.x, p.y); fc.rotate(p.rot); fc.fillStyle = p.c; fc.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); fc.restore(); }
+  raf = parts.length ? requestAnimationFrame(loop) : 0;
+  if (!raf) fc.clearRect(0, 0, fx.width, fx.height);
+}
+
 /* ---------- Grille ---------- */
-const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
-GEN.forEach((g, i) => $('#gen').insertAdjacentHTML('beforeend', `<option value="${i+1}">Génération ${g}</option>`));
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const cards = new Map();
+const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
+const genTotal = {}; P.forEach(p => genTotal[p[3]] = (genTotal[p[3]] || 0) + 1);
+let fGen = 0, fSt = 'all';
+
 function buildGrid() {
   const frag = document.createDocumentFragment();
   for (const [id, fr, en, gen] of P) {
@@ -158,26 +322,73 @@ function buildGrid() {
     frag.appendChild(el);
   }
   $('#grid').appendChild(frag);
+  // chips de génération
+  const ch = $('#chips');
+  ch.innerHTML = `<button class="chip on" data-g="0">Toutes</button>` + GEN.map((g, i) => `<button class="chip" data-g="${i+1}">Gén. ${g}<em></em></button>`).join('');
+  ch.onclick = e => { const b = e.target.closest('.chip'); if (!b) return; fGen = +b.dataset.g;
+    ch.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); refresh(true); };
 }
-function paint(id) {
+function paint(id, animate) {
   const c = cards.get(id), it = store.items.get(id), pic = c.el.querySelector('.pic');
   pic.innerHTML = '';
-  if (it) { const im = new Image(); im.src = it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; pic.appendChild(im); }
+  if (it) { const im = new Image(); im.src = it.url; im.loading = 'lazy'; im.decoding = 'async'; im.alt = ''; if (animate) im.className = 'stick'; pic.appendChild(im); }
   c.el.classList.toggle('empty', !it); c.el.classList.toggle('done', !!it);
 }
-function refresh() {
-  const q = norm($('#q').value.trim()), g = +$('#gen').value, st = $('#st').value; let shown = 0;
+let shownN = 0;
+function tween(el, to) { // compteur animé
+  const from = +el.dataset.v || 0; el.dataset.v = to; if (reduce || from === to) { el.textContent = to; return; }
+  const t0 = performance.now(), dur = 600;
+  (function f(t) { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); })(t0);
+}
+let lastCount = -1;
+function refresh(animate) {
+  const q = norm($('#q').value.trim()); let shown = 0, i = 0;
+  const per = {};
   for (const [id, c] of cards) {
-    const have = store.items.has(id);
-    const ok = (!q || c.key.includes(q)) && (!g || c.gen === g) && (st === 'all' || (st === 'have') === have);
+    const have = store.items.has(id); if (have) per[c.gen] = (per[c.gen] || 0) + 1;
+    const ok = (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have);
     c.el.hidden = !ok; shown += ok;
+    if (ok && animate && i < 48) { c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i); c.el.classList.add('in'); i++; }
   }
   $('#none').hidden = shown > 0;
   const n = store.items.size;
-  $('#count').textContent = `${n} / ${P.length}`;
+  tween($('#cn'), n);
+  if (lastCount >= 0 && n > lastCount) { $('#counter').classList.remove('bump'); void $('#counter').offsetWidth; $('#counter').classList.add('bump'); }
+  lastCount = n;
   $('#bar').style.width = (100 * n / P.length) + '%';
+  document.querySelectorAll('.chip[data-g]').forEach(ch => { const g = +ch.dataset.g; if (!g) return;
+    ch.querySelector('em').textContent = `${per[g] || 0}/${genTotal[g]}`; ch.classList.toggle('full', per[g] === genTotal[g]); });
 }
-['q','gen','st'].forEach(i => $('#'+i).addEventListener('input', refresh));
+let qt; $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => refresh(true), 120); });
+$('#seg').onclick = e => { const b = e.target.closest('button'); if (!b) return; fSt = b.dataset.v;
+  $('#seg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); refresh(true); };
+$('#cs').value = ls.get('cs', 132); document.documentElement.style.setProperty('--cs', $('#cs').value + 'px');
+$('#cs').oninput = e => { document.documentElement.style.setProperty('--cs', e.target.value + 'px'); ls.set('cs', e.target.value); };
+
+// effet 3D + reflet holographique
+$('#grid').addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch' || reduce) return;
+  const el = e.target.closest('.slot'); if (!el) return; const r = el.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  el.style.setProperty('--ry', ((x - .5) * 14) + 'deg'); el.style.setProperty('--rx', ((.5 - y) * 14) + 'deg');
+  el.style.setProperty('--mx', x * 100 + '%'); el.style.setProperty('--my', y * 100 + '%');
+});
+$('#grid').addEventListener('pointerout', e => { const el = e.target.closest('.slot'); if (el && !el.contains(e.relatedTarget)) { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); } });
+
+function goTo(id) {
+  const c = cards.get(id); if (!c) return;
+  if (c.el.hidden) { fGen = 0; fSt = 'all'; $('#q').value = ''; $('#chips .chip').click(); $('#seg button').click(); }
+  c.el.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+  c.el.classList.remove('flash'); void c.el.offsetWidth; c.el.classList.add('flash');
+}
+function nextMissing(after = 0) {
+  for (let k = 1; k <= P.length; k++) { const id = ((after + k - 1) % P.length) + 1; if (!store.items.has(id)) return id; }
+  return null;
+}
+$('#nextm').onclick = () => { const id = nextMissing(lastOpened); if (!id) { toast('🎉 Pokédex complet !'); confetti(innerWidth / 2, innerHeight / 3, 200, true); } else goTo(id); };
+const topb = $('#top'); addEventListener('scroll', () => topb.classList.toggle('show', scrollY > 600), { passive: true });
+topb.onclick = () => scrollTo({ top: 0 });
+addEventListener('keydown', e => { if (e.key === '/' && !dlg.open && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); $('#q').focus(); } });
 
 /* ---------- Détourage + effet sticker ---------- */
 const MAXW = 640;
@@ -265,72 +476,123 @@ function sticker(co, border) {
   return out;
 }
 
+
+
 /* ---------- Boîte de dialogue ---------- */
-const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null;
+const dlg = $('#dlg'); let curImg = null, curId = null, timer = 0, lastCanvas = null, lastOpened = 0, listIds = [];
+const closeDlg = () => { if (!dlg.open) return; dlg.classList.add('closing'); setTimeout(() => { dlg.close(); dlg.classList.remove('closing'); }, 180); };
+dlg.addEventListener('cancel', e => { e.preventDefault(); closeDlg(); });
+dlg.addEventListener('click', e => { if (e.target === dlg) closeDlg(); });
+$('#x').onclick = closeDlg;
+
 function fillList() {
-  const q = norm($('#pq').value.trim()); const sel = $('#psel'); const keep = curId;
-  sel.innerHTML = '';
-  for (const [id, fr, en] of P) {
-    if (q && !cards.get(id).key.includes(q)) continue;
-    const o = new Option(`#${pad(id)}  ${fr}${store.items.has(id) ? '  ✓' : ''}`, id);
-    sel.add(o);
-  }
-  if (keep && sel.querySelector(`option[value="${keep}"]`)) sel.value = keep;
-  else if (q && sel.options.length) { sel.selectedIndex = 0; curId = +sel.value; }
+  const q = norm($('#pq').value.trim()); const box = $('#plist');
+  listIds = P.filter(p => !q || cards.get(p[0]).key.includes(q)).map(p => p[0]);
+  box.innerHTML = listIds.map(id => `<div data-id="${id}"><i>#${pad(id)}</i>${P[id-1][1]}${store.items.has(id) ? '<u>✓</u>' : ''}</div>`).join('') || '<div style="cursor:default">Aucun résultat</div>';
+  if (q && !listIds.includes(curId)) curId = listIds[0] || null;
+  markSel(true);
+}
+function markSel(scroll) {
+  const box = $('#plist'); box.querySelectorAll('.sel').forEach(n => n.classList.remove('sel'));
+  const n = curId && box.querySelector(`[data-id="${curId}"]`);
+  if (n) { n.classList.add('sel'); if (scroll) box.scrollTop = n.offsetTop - box.clientHeight / 2 + 16; }
   upd();
 }
 function upd() {
-  curId = $('#psel').value ? +$('#psel').value : curId;
   const has = curId && store.items.has(curId);
-  $('#over').hidden = !has; $('#del').hidden = !has;
-  $('#save').disabled = !(lastCanvas && curId);
+  $('#over').hidden = !(has && lastCanvas); $('#del').hidden = !has;
+  $('#save').disabled = $('#savenext').disabled = !(lastCanvas && curId);
+  $('#dtitle').innerHTML = curId ? `<span>#${pad(curId)}</span>${P[curId-1][1]}` : 'Ajouter un Pokémon';
 }
+$('#plist').onclick = e => { const n = e.target.closest('[data-id]'); if (!n) return; curId = +n.dataset.id; markSel(false); showExisting(); };
+$('#pq').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const k = listIds.indexOf(curId) + (e.key === 'ArrowDown' ? 1 : -1);
+    if (listIds[k]) { curId = listIds[k]; markSel(false); $('#plist').querySelector('.sel')?.scrollIntoView({ block: 'nearest' }); showExisting(); } }
+});
+$('#pq').oninput = () => { fillList(); showExisting(); };
+
+const setBusy = b => $('#drop').classList.toggle('busy', b);
 function renderPreview() {
   $('#vtol').textContent = $('#tol').value; $('#vbor').textContent = $('#bor').value + ' px'; $('#vero').textContent = $('#ero').value;
+  ls.set('opt', JSON.stringify([$('#tol').value, $('#bor').value, $('#ero').value]));
   if (!curImg) return;
-  clearTimeout(timer);
+  clearTimeout(timer); setBusy(true);
   timer = setTimeout(() => {
     const co = cutout(curImg, +$('#tol').value, +$('#ero').value);
-    if (!co) { lastCanvas = null; upd(); return; }
+    setBusy(false);
+    if (!co) { lastCanvas = null; upd(); toast('😕 Rien détecté : augmente la tolérance ?'); return; }
     lastCanvas = sticker(co, +$('#bor').value);
     const p = $('#prev'); p.width = lastCanvas.width; p.height = lastCanvas.height;
     p.getContext('2d').drawImage(lastCanvas, 0, 0);
-    $('#drop').classList.add('has'); upd();
+    $('#drop').classList.add('has'); $('#drop').classList.remove('existing');
+    if (!reduce && !renderPreview.quiet) { p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop'); }
+    renderPreview.quiet = false; upd();
   }, 40);
+}
+async function showExisting() { // affiche le sticker déjà enregistré pour le Pokémon sélectionné
+  if (curImg) return upd();
+  const d = $('#drop'), it = curId && store.items.get(curId);
+  if (!it) { d.classList.remove('has', 'existing'); return upd(); }
+  const im = await loadImage(it.url), p = $('#prev'); p.width = im.naturalWidth; p.height = im.naturalHeight;
+  p.getContext('2d').drawImage(im, 0, 0); d.classList.add('has', 'existing');
+  p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop'); upd();
 }
 async function setFile(f) {
   if (!f || !f.type.startsWith('image/')) return;
+  if (!dlg.open) openDialog(null);
   const url = URL.createObjectURL(f);
   try { curImg = await loadImage(url); } finally { URL.revokeObjectURL(url); }
   renderPreview();
 }
 function openDialog(id) {
+  if (id) lastOpened = id;
   curId = id || null; curImg = null; lastCanvas = null;
-  $('#drop').classList.remove('has'); $('#pq').value = ''; $('#file').value = '';
-  fillList(); renderPreview(); dlg.showModal();
+  const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; }
+  $('#drop').classList.remove('has', 'existing'); $('#pq').value = ''; $('#file').value = '';
+  fillList(); renderPreview(); showExisting();
+  if (!dlg.open) dlg.showModal();
+  if (!id) $('#pq').focus();
 }
 $('#add').onclick = () => openDialog(null);
-$('#cancel').onclick = () => dlg.close();
 $('#drop').onclick = () => $('#file').click();
 $('#file').onchange = e => setFile(e.target.files[0]);
 $('#drop').addEventListener('dragover', e => { e.preventDefault(); $('#drop').classList.add('over'); });
 $('#drop').addEventListener('dragleave', () => $('#drop').classList.remove('over'));
-$('#drop').addEventListener('drop', e => { e.preventDefault(); $('#drop').classList.remove('over'); setFile(e.dataTransfer.files[0]); });
-document.addEventListener('paste', e => { if (dlg.open) { const f = [...e.clipboardData.files].find(f => f.type.startsWith('image/')); if (f) setFile(f); } });
-$('#pq').oninput = () => { curId = null; fillList(); };
-$('#psel').onchange = () => { curId = +$('#psel').value; upd(); };
-['tol','bor','ero'].forEach(i => $('#'+i).addEventListener('input', renderPreview));
-$('#save').onclick = async () => {
+$('#drop').addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); $('#drop').classList.remove('over'); $('#veil').classList.remove('on'); setFile(e.dataTransfer.files[0]); });
+// glisser une image n'importe où dans la page
+let dc = 0;
+addEventListener('dragenter', e => { if ([...e.dataTransfer.types].includes('Files')) { dc++; if (!dlg.open) $('#veil').classList.add('on'); } });
+addEventListener('dragleave', () => { if (--dc <= 0) { dc = 0; $('#veil').classList.remove('on'); } });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); dc = 0; $('#veil').classList.remove('on'); const f = e.dataTransfer.files[0]; if (f) setFile(f); });
+addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/')); if (f) setFile(f); });
+['tol','bor','ero'].forEach(i => $('#'+i).addEventListener('input', () => { renderPreview.quiet = true; renderPreview(); }));
+
+async function save(next) {
   if (!lastCanvas || !curId) return;
+  const id = curId;
   const blob = await new Promise(r => lastCanvas.toBlob(r, 'image/webp', .92));
   const b = blob && blob.type === 'image/webp' ? blob : await new Promise(r => lastCanvas.toBlob(r, 'image/png'));
-  await put(curId, b); paint(curId); refresh(); dlg.close();
-  const el = cards.get(curId).el; el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-};
+  const before = store.items.size; await put(id, b);
+  closeDlg();
+  setTimeout(() => {
+    goTo(id); paint(id, true); refresh(); const r = cards.get(id).el.getBoundingClientRect();
+    setTimeout(() => confetti(r.left + r.width / 2, r.top + r.height / 2, 34), 250);
+    const n = store.items.size;
+    if (n > before && n % 100 === 0) { toast(`🏆 ${n} Pokémon !`); setTimeout(() => confetti(innerWidth / 2, innerHeight / 3, 160, true), 400); }
+    else toast(`✨ ${P[id-1][1]} ajouté au Pokédex`);
+    if (n === P.length) { toast('🎉 PokéDex COMPLET !'); confetti(innerWidth / 2, innerHeight / 3, 300, true); }
+    if (next) { const nx = nextMissing(id); if (nx) setTimeout(() => openDialog(nx), 650); }
+  }, 200);
+}
+$('#save').onclick = () => save(false);
+$('#savenext').onclick = () => save(true);
 $('#del').onclick = async () => {
-  if (!curId || !confirm('Supprimer cette image ?')) return;
-  await remove(curId); paint(curId); refresh(); dlg.close();
+  const id = curId, it = store.items.get(id); if (!it) return;
+  const blob = it.blob; await remove(id); paint(id); refresh(); closeDlg();
+  toast(`${P[id-1][1]} supprimé`, 'Annuler', async () => { await put(id, blob); paint(id, true); refresh(); });
 };
+dlg.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(e.shiftKey); } });
 
 /* ---------- Sauvegarde / restauration ---------- */
 const b2d = b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); });
@@ -338,22 +600,21 @@ $('#exp').onclick = async () => {
   const o = {}; for (const [id, it] of store.items) o[id] = await b2d(it.blob);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify({ v: 1, stickers: o })], { type: 'application/json' }));
-  a.download = 'pokedex-sauvegarde.json'; a.click();
+  a.download = 'pokedex-sauvegarde.json'; a.click(); toast('💾 Sauvegarde téléchargée');
 };
 $('#imp').onclick = () => $('#impf').click();
 $('#impf').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   try { const j = JSON.parse(await f.text()); let n = 0;
-    for (const [id, url] of Object.entries(j.stickers || {})) { await put(+id, await (await fetch(url)).blob()); paint(+id); n++; }
-    refresh(); alert(n + ' image(s) restaurée(s).');
-  } catch (err) { alert('Fichier invalide.'); }
+    for (const [id, url] of Object.entries(j.stickers || {})) { await put(+id, await (await fetch(url)).blob()); paint(+id, true); n++; }
+    refresh(); toast(`✅ ${n} image(s) restaurée(s)`);
+  } catch (err) { toast('❌ Fichier invalide'); }
   e.target.value = '';
 };
 
 /* ---------- Démarrage ---------- */
-buildGrid();
-store.load().then(() => { for (const id of store.items.keys()) paint(id); refresh(); });
-refresh();
+buildGrid(); refresh(true);
+store.load().then(() => { for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
 </body>
 </html>
