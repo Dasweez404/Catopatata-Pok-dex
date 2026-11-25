@@ -192,6 +192,8 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
 .mode{margin-left:6px}
 .mode button{display:flex;gap:6px;align-items:center}
 body[data-mode=explorer] .prof-only{display:none!important}
+body[data-mode=prof] .explorer-only{display:none!important}
+.btn.on{background:#fff;color:var(--red2);border-color:#fff;font-weight:600}
 body[data-mode=explorer] .slot.empty{cursor:default}
 body[data-mode=explorer] .slot.empty:after{display:none}
 body[data-mode=explorer] .slot.empty:hover .pic:before{transform:none;border-color:var(--mute);opacity:.35}
@@ -241,6 +243,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
       <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
       <div class="seg" id="sort" title="Ordre d'affichage"><button data-v="num" class="on">N°</button><button data-v="fam">👪 Familles</button></div>
+      <button class="btn explorer-only" id="onlyhave" title="Ne montrer que les Pokémon débloqués">👁 Débloqués seulement</button>
       <button class="btn prof-only" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
       <span class="sp"></span>
       <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
@@ -417,7 +420,7 @@ function paint(id, animate) {
     const nv = store.vers.get(id).length; if (nv > 1) { const bd = document.createElement('span'); bd.className = 'vbadge'; bd.textContent = '✦ ' + nv; bd.title = nv + ' versions'; pic.appendChild(bd); } }
   c.el.classList.toggle('empty', !it); c.el.classList.toggle('done', !!it);
 }
-let loaded = false;
+let loaded = false, onlyHave = ls.get('onlyhave', '0') === '1';
 let sortMode = ls.get('sort', 'num') === 'fam' ? 'fam' : 'num', ordIdx = {};
 function applySort() {
   const famMin = {}; for (const p of P) famMin[p[4]] = Math.min(famMin[p[4]] ?? 1e9, p[0]);
@@ -426,6 +429,8 @@ function applySort() {
   document.body.classList.toggle('fam', sortMode === 'fam');
   document.querySelectorAll('#sort button').forEach(b => b.classList.toggle('on', b.dataset.v === sortMode));
 }
+$('#onlyhave').classList.toggle('on', onlyHave);
+$('#onlyhave').onclick = () => { onlyHave = !onlyHave; ls.set('onlyhave', onlyHave ? '1' : '0'); $('#onlyhave').classList.toggle('on', onlyHave); refresh(true); toast(onlyHave ? '👁 Seuls les Pokémon débloqués sont affichés' : '👁 Tous les slots sont affichés'); };
 $('#sort').onclick = e => { const b = e.target.closest('button'); if (!b || b.dataset.v === sortMode) return; sortMode = b.dataset.v; ls.set('sort', sortMode); applySort(); refresh(true);
   toast(sortMode === 'fam' ? '👪 Regroupés par famille d\'évolution' : '🔢 Triés par numéro'); };
 function genCounts() { const per = {}; for (const [id, c] of cards) if (store.items.has(id)) per[c.gen] = (per[c.gen] || 0) + 1; return per; }
@@ -441,7 +446,7 @@ function refresh(animate) {
   if (fGen && !per[fGen]) { fGen = 0; }
   for (const [id, c] of cards) {
     const have = store.items.has(id);
-    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have);
+    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have) && !(mode === 'explorer' && onlyHave && !have);
     c.el.hidden = !ok; shown += ok;
     if (ok && animate && i < 48) { c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i); c.el.classList.add('in'); i++; }
   }
