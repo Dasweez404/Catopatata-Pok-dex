@@ -205,6 +205,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   --rx:0deg;--ry:0deg;--mx:50%;--my:50%}
 .v-stage:after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;transition:opacity .3s;
   background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 40%),conic-gradient(from 0deg at var(--mx) var(--my),var(--h1),var(--h2),#ffffffcc,var(--h1),var(--h2),var(--h1))}
+.vfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#vfxbtn.on{background:var(--gold);color:#4a3300}
 .v-stage:hover:after,.v-stage.gyro:after{opacity:.45}
 .v-info .tchip{display:inline-block;color:#fff;font-size:12px;font-weight:600;font-size:12px;padding:1px 10px;border-radius:99px;margin:0 3px;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 #vgyro{width:auto;padding:0 11px;font-size:13px}#vgyro.on{background:var(--gold);color:#4a3300}
@@ -267,8 +269,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <canvas id="fx"></canvas>
 
 <dialog id="view">
-  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
-  <div class="v-stage" id="vstage"><img id="vimg" alt=""></div>
+  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨ FX</button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
+  <div class="v-stage" id="vstage"><canvas id="vfxb" class="vfx"></canvas><img id="vimg" alt=""><canvas id="vfxf" class="vfx" style="z-index:1"></canvas></div>
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
   <div class="vers" id="vvers" style="justify-content:center;padding:0 16px"></div>
   <div class="v-nav"><button class="b" id="vprev">←</button><em id="vcount"></em><button class="b" id="vnext">→</button></div>
@@ -812,7 +814,7 @@ function openViewer(id) {
   vIds = [...cards].filter(([i, c]) => !c.el.hidden && store.items.has(i)).map(x => x[0]).sort((a, b) => ordIdx[a] - ordIdx[b]);
   vi = vIds.indexOf(id); vv = 0; if (vi < 0) { vIds = [id]; vi = 0; }
   showV(0); if (!vw.open) vw.showModal();
-  $('#vgyro').hidden = !hasOri; g0 = null;
+  $('#vgyro').hidden = !hasOri; g0 = null; fxSet(P[id - 1][6], true);
   if (hasOri && ls.get('gyro', '1') === '1' && typeof DeviceOrientationEvent.requestPermission !== 'function') setGyro(true);
 }
 function showV(dir) {
@@ -821,7 +823,7 @@ function showV(dir) {
   im.src = cur.url; im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
   $('#vtitle').innerHTML = `<span>#${pad(id)}</span>${fr}`; $('#vname').textContent = fr;
   $('#vsub').innerHTML = P[id - 1][6].map(t => `<span class="tchip" style="background:${TYPES[t][1]}">${TYPES[t][0]}</span>`).join('') + '<br>' + (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
-  holoVars(stg, P[id - 1][6]);
+  holoVars(stg, P[id - 1][6]); if (vw.open) fxSet(P[id - 1][6]);
   $('#vcount').textContent = `${vi + 1} / ${vIds.length}`;
   $('#vprev').disabled = $('#vnext').disabled = vIds.length < 2;
 }
@@ -834,6 +836,84 @@ stg.addEventListener('touchstart', e => tx0 = e.touches[0].clientX, { passive: t
 stg.addEventListener('touchend', e => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0; tx0 = null; if (Math.abs(dx) > 50) vgo(dx < 0 ? 1 : -1); });
 stg.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || reduce) return; const r = stg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   stg.style.setProperty('--ry', ((x - .5) * 16) + 'deg'); stg.style.setProperty('--rx', ((.5 - y) * 16) + 'deg'); stg.style.setProperty('--mx', x * 100 + '%'); stg.style.setProperty('--my', y * 100 + '%'); });
+/* ---------- Ambiance par type (mode Explorateur) ---------- */
+const R = (a, b) => a + Math.random() * (b - a);
+const glow = (c, x, y, r, rgb, a) => { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); };
+const star4 = (c, x, y, r) => { c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = i % 2 ? r * .28 : r; c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } c.closePath(); };
+const env = k => Math.sin(Math.PI * Math.min(1, Math.max(0, k)));
+const bubble = (c, p, k, fill, stroke) => { const a = k > .88 ? (1 - k) / .12 : Math.min(1, k * 6); c.globalAlpha = a; c.beginPath(); c.arc(p.x, p.y, p.r * (k > .92 ? 1.25 : 1), 0, 7); c.fillStyle = fill; c.fill(); c.lineWidth = 1.4; c.strokeStyle = stroke; c.stroke();
+  c.beginPath(); c.arc(p.x - p.r * .3, p.y - p.r * .3, p.r * .25, 0, 7); c.fillStyle = 'rgba(255,255,255,.85)'; c.fill(); c.globalAlpha = 1; };
+const FX = {
+  1: { rate: 5, spawn: (W, H) => ({ x: R(0, W), y: R(0, H), vx: R(-8, 8), vy: R(-14, -4), life: R(3, 6), r: R(1.5, 3.5) }),
+       draw: (c, p, k) => { c.globalAlpha = env(k) * .6; c.fillStyle = '#fff'; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); c.globalAlpha = 1; } },
+  2: { rate: 2.2, spawn: (W, H) => ({ x: R(.12 * W, .88 * W), y: R(.12 * H, .88 * H), vx: 0, vy: 0, life: .4, r: R(22, 44), rot: R(0, 6) }),
+       draw: (c, p, k) => { c.save(); c.translate(p.x, p.y); c.rotate(p.rot); c.strokeStyle = '#ff5a3c'; c.lineCap = 'round'; c.lineWidth = 3 * (1 - k) + 1; c.globalAlpha = 1 - k;
+         for (let i = 0; i < 7; i++) { const a = i / 7 * 6.283; c.beginPath(); c.moveTo(Math.cos(a) * p.r * (.3 + k * .5), Math.sin(a) * p.r * (.3 + k * .5)); c.lineTo(Math.cos(a) * p.r * (.6 + k * .7), Math.sin(a) * p.r * (.6 + k * .7)); c.stroke(); } c.restore(); } },
+  3: { rate: 5, spawn: (W, H) => ({ x: -60, y: R(0, H), vx: R(260, 420), vy: R(-14, 14), life: 1.4, len: R(50, 110) }),
+       draw: (c, p, k) => { c.globalAlpha = env(k) * .55; c.strokeStyle = '#fff'; c.lineWidth = 1.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x - p.len, p.y); c.quadraticCurveTo(p.x - p.len / 2, p.y - 4, p.x, p.y); c.stroke(); c.globalAlpha = 1; } },
+  4: { rate: 6, spawn: (W, H) => ({ x: R(0, W), y: H + 10, vx: 0, vy: -R(18, 38), life: R(3, 5), r: R(3, 10), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 2 + p.sw) * 14 * dt; },
+       draw: (c, p, k) => bubble(c, p, k, 'rgba(163,62,161,.32)', 'rgba(220,130,220,.85)') },
+  5: { rate: 14, spawn: (W, H) => ({ x: R(-20, W), y: R(0, H), vx: R(30, 70), vy: R(-8, 8), life: R(2.5, 4.5), r: R(1, 2.6) }),
+       draw: (c, p, k) => { c.globalAlpha = env(k) * .7; c.fillStyle = '#d9b45a'; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); c.globalAlpha = 1; } },
+  6: { rate: 6, spawn: (W, H) => { const vy = R(50, 100); return { x: R(0, W), y: -10, vx: R(-10, 10), vy, life: (H + 20) / vy, r: R(2.5, 6), rot: R(0, 6), vr: R(-3, 3), s: R(0, 1) }; },
+       draw: (c, p) => { c.save(); c.translate(p.x, p.y); c.rotate(p.rot + p.age * p.vr); c.fillStyle = p.s > .5 ? '#a89a6b' : '#7e7452'; c.beginPath(); for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283, rr = p.r * (.7 + ((i * 37 + p.s * 100) % 10) / 20); c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.fill(); c.restore(); } },
+  7: { rate: 5, spawn: (W, H) => ({ x: R(0, W), y: R(0, H), vx: R(-15, 15), vy: R(-15, 15), life: R(3, 6), r: R(2.5, 4.5) }),
+       step: (p, dt) => { p.vx += R(-60, 60) * dt; p.vy += R(-60, 60) * dt; p.vx = Math.max(-30, Math.min(30, p.vx)); p.vy = Math.max(-30, Math.min(30, p.vy)); },
+       draw: (c, p, k) => { const a = env(k) * (.6 + .4 * Math.sin(p.age * 8)); glow(c, p.x, p.y, p.r * 4, '200,255,60', a * .6); c.globalAlpha = a; c.fillStyle = '#f4ffb0'; c.beginPath(); c.arc(p.x, p.y, p.r * .6, 0, 7); c.fill(); c.globalAlpha = 1; } },
+  8: { rate: 4, spawn: (W, H) => ({ x: R(0, W), y: H + 20, vx: 0, vy: -R(16, 34), life: R(3, 5), r: R(12, 26), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 1.5 + p.sw) * 18 * dt; },
+       draw: (c, p, k) => glow(c, p.x, p.y, p.r, '150,120,220', env(k) * (.3 + .15 * Math.sin(p.age * 9))) },
+  9: { rate: 3, spawn: (W, H) => ({ x: R(.05 * W, .95 * W), y: R(.05 * H, .95 * H), vx: 0, vy: 0, life: .9, r: R(7, 16) }),
+       draw: (c, p, k) => { c.globalAlpha = env(k); c.fillStyle = '#f2f6ff'; c.shadowColor = '#b7c4f0'; c.shadowBlur = 8; star4(c, p.x, p.y, p.r * (.5 + env(k) * .5)); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; } },
+  10: { rate: 22, spawn: (W, H) => ({ x: R(.08 * W, .92 * W), y: H + 8, vx: R(-12, 12), vy: -R(55, 115), life: R(1.2, 2.4), r: R(6, 13), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 6 + p.sw) * 22 * dt; },
+       draw: (c, p, k) => { const s = 1 - k * .6, a = Math.min(1, k * 8) * (1 - k); c.save(); c.translate(p.x, p.y); c.scale(.8, 1.5); glow(c, 0, 0, p.r * s * 1.1, '255,70,10', a * .9); glow(c, 0, 0, p.r * s * .55, '255,200,50', a); c.restore(); } },
+  11: { rate: 8, spawn: (W, H) => ({ x: R(0, W), y: H + 12, vx: 0, vy: -R(25, 55), life: R(3, 5.5), r: R(3, 11), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age * 2.2 + p.sw) * 12 * dt; },
+       draw: (c, p, k) => bubble(c, p, k, 'rgba(99,144,240,.22)', 'rgba(200,225,255,.9)') },
+  12: { rate: 5, spawn: (W, H) => { const vy = R(30, 60); return { x: R(0, W), y: -12, vx: R(-14, 14), vy, life: (H + 24) / vy, r: R(5, 9), sw: R(0, 6), s: Math.random() }; }, step: (p, dt) => { p.x += Math.sin(p.age * 2 + p.sw) * 26 * dt; },
+       draw: (c, p) => { c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.age * 2 + p.sw) + p.sw); c.fillStyle = p.s > .5 ? '#7ac74c' : '#4ea63a'; c.beginPath(); c.ellipse(0, 0, p.r, p.r * .45, 0, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 1; c.beginPath(); c.moveTo(-p.r, 0); c.lineTo(p.r, 0); c.stroke(); c.restore(); } },
+  13: { rate: 2.6, spawn: (W, H) => { let x = R(.05 * W, .95 * W), y = R(.05 * H, .95 * H), a = R(0, 6.283); const pts = [[x, y]]; for (let i = 0; i < R(3, 6); i++) { a += R(-1.2, 1.2); const l = R(12, 28); x += Math.cos(a) * l; y += Math.sin(a) * l; pts.push([x, y]); } return { x: 0, y: 0, vx: 0, vy: 0, life: R(.14, .3), pts }; },
+       draw: (c, p, k) => { c.globalAlpha = (1 - k) * (.6 + .4 * Math.random()); c.strokeStyle = '#ffc400'; c.lineWidth = 2.6; c.lineJoin = 'round'; c.shadowColor = '#fff27a'; c.shadowBlur = 12; c.beginPath(); p.pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1; } },
+  14: { rate: 1.3, spawn: (W, H) => ({ x: R(.2 * W, .8 * W), y: R(.2 * H, .8 * H), vx: 0, vy: 0, life: 1.7, r: R(45, 95) }),
+       draw: (c, p, k) => { c.globalAlpha = (1 - k) * .65; c.strokeStyle = '#f95587'; c.lineWidth = 2.2; c.beginPath(); c.arc(p.x, p.y, p.r * k, 0, 7); c.stroke(); c.globalAlpha = (1 - k) * .35; c.strokeStyle = '#ffb3cc'; c.beginPath(); c.arc(p.x, p.y, p.r * k * .65, 0, 7); c.stroke(); c.globalAlpha = 1; } },
+  15: { rate: 12, spawn: (W, H) => { const vy = R(22, 48); return { x: R(0, W), y: -8, vx: R(-6, 6), vy, life: (H + 16) / vy, r: R(1.5, 5), sw: R(0, 6) }; }, step: (p, dt) => { p.x += Math.sin(p.age * 1.6 + p.sw) * 14 * dt; },
+       draw: (c, p) => { c.fillStyle = c.strokeStyle = '#eafcff'; c.globalAlpha = .9; if (p.r < 3) { c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); } else { c.lineWidth = 1.2; c.save(); c.translate(p.x, p.y); c.rotate(p.age); for (let i = 0; i < 3; i++) { c.rotate(Math.PI / 3); c.beginPath(); c.moveTo(-p.r * 1.3, 0); c.lineTo(p.r * 1.3, 0); c.stroke(); } c.restore(); } c.globalAlpha = 1; } },
+  16: { rate: 10, spawn: (W, H) => ({ x: 0, y: 0, vx: 0, vy: 0, life: R(2.5, 4.5), a: R(0, 6.283), w: R(.8, 1.6) * (Math.random() < .5 ? -1 : 1), rad: R(.3, .55), r: R(1.5, 3.5), gold: Math.random() < .4 }),
+       step: (p, dt, W, H) => { p.a += p.w * dt; const rr = p.rad * W * (1 - p.age / p.life * .25); p.x = W / 2 + Math.cos(p.a) * rr; p.y = H / 2 + Math.sin(p.a) * rr * .8; },
+       draw: (c, p, k) => glow(c, p.x, p.y, p.r * 4, p.gold ? '255,190,40' : '120,70,255', env(k) * .9) },
+  17: { rate: 4, spawn: (W, H) => ({ x: R(0, W), y: H + 20, vx: 0, vy: -R(14, 30), life: R(2.8, 4.5), r: R(14, 28), sw: R(0, 6) }), step: (p, dt) => { p.x += Math.sin(p.age + p.sw) * 16 * dt; p.r += 6 * dt; },
+       draw: (c, p, k) => glow(c, p.x, p.y, p.r, '50,28,72', env(k) * .38) },
+  18: { rate: 8, spawn: (W, H) => ({ x: R(0, W), y: R(0, H), vx: R(-6, 6), vy: -R(6, 18), life: R(1.4, 3), r: R(3.5, 8), pink: Math.random() < .6 }),
+       draw: (c, p, k) => { c.globalAlpha = env(k) * (.65 + .35 * Math.sin(p.age * 12)); c.fillStyle = p.pink ? '#ff9ad5' : '#ffffff'; c.shadowColor = '#ff9ad5'; c.shadowBlur = 8; star4(c, p.x, p.y, p.r); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; } }
+};
+const vfx = { b: $('#vfxb'), f: $('#vfxf'), parts: [], types: [], acc: [], raf: 0, last: 0, W: 0, H: 0, dpr: 1, on: ls.get('fx', '1') === '1', sig: '' };
+function fxSize() {
+  const r = stg.getBoundingClientRect(); vfx.W = r.width; vfx.H = r.height; vfx.dpr = Math.min(2, devicePixelRatio || 1);
+  for (const cv of [vfx.b, vfx.f]) { cv.width = Math.round(r.width * vfx.dpr); cv.height = Math.round(r.height * vfx.dpr); }
+}
+function fxStop() { cancelAnimationFrame(vfx.raf); vfx.raf = 0; vfx.parts = []; for (const cv of [vfx.b, vfx.f]) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); }
+function fxSet(types, force) {
+  const sig = types.join(',');
+  if (!force && sig === vfx.sig && vfx.raf) return;
+  fxStop(); vfx.sig = sig; vfx.types = types.slice(0, 2); vfx.acc = vfx.types.map(() => 0);
+  if (!vfx.on || reduce || !vw.open) return;
+  fxSize(); vfx.last = performance.now(); vfx.raf = requestAnimationFrame(fxLoop);
+}
+function fxLoop(ts) {
+  const dt = Math.min(.05, (ts - vfx.last) / 1000); vfx.last = ts; const { W, H } = vfx, share = vfx.types.length > 1 ? .6 : 1;
+  vfx.types.forEach((t, i) => { const d = FX[t]; vfx.acc[i] += dt * d.rate * share; while (vfx.acc[i] >= 1) { vfx.acc[i]--; if (vfx.parts.length < 160) { const p = d.spawn(W, H); p.t = t; p.age = 0; p.front = Math.random() < .35; vfx.parts.push(p); } } });
+  const cb = vfx.b.getContext('2d'), cf = vfx.f.getContext('2d');
+  for (const c of [cb, cf]) { c.setTransform(vfx.dpr, 0, 0, vfx.dpr, 0, 0); c.clearRect(0, 0, W, H); }
+  vfx.parts = vfx.parts.filter(p => {
+    p.age += dt; if (p.age >= p.life) return false; const d = FX[p.t]; p.x += p.vx * dt; p.y += p.vy * dt; if (d.step) d.step(p, dt, W, H);
+    if (p.x < -140 || p.x > W + 140 || p.y < -140 || p.y > H + 140) return false;
+    const c = p.front ? cf : cb; c.save(); if (d.add) c.globalCompositeOperation = 'lighter'; d.draw(c, p, p.age / p.life); c.restore(); return true; });
+  vfx.raf = requestAnimationFrame(fxLoop);
+}
+vw.addEventListener('close', fxStop);
+addEventListener('resize', () => { if (vw.open && vfx.raf) fxSize(); });
+function setFx(on) { vfx.on = on; ls.set('fx', on ? '1' : '0'); $('#vfxbtn').classList.toggle('on', on); if (vw.open) { if (on) fxSet(vfx.types.length ? vfx.types : P[vIds[vi] - 1][6], true); else fxStop(); } }
+$('#vfxbtn').onclick = () => setFx(!vfx.on);
+$('#vfxbtn').classList.toggle('on', vfx.on);
+
 /* gyroscope : le sticker s'incline avec le téléphone */
 const hasOri = 'DeviceOrientationEvent' in window && matchMedia('(pointer:coarse)').matches;
 let gyroOn = false, g0 = null, gt = { x: 0, y: 0 }, gc = { x: 0, y: 0 }, graf = 0;
