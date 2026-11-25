@@ -104,8 +104,8 @@ main{max-width:1500px;margin:0 auto;padding:22px 18px 90px}
 .slot.done .num:after{content:"✓";float:right;color:#fff;background:var(--ok);border-radius:50%;width:17px;height:17px;display:grid;place-items:center;font-size:11px;font-weight:700}
 .slot.done:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .3s;mix-blend-mode:color-dodge;
   background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 45%),
-   conic-gradient(from 0deg at var(--mx) var(--my),#ff6ad5,#ffd76a,#6affb1,#6ab8ff,#c36aff,#ff6ad5);filter:saturate(.8)}
-.slot.done:hover:before{opacity:.35}
+   conic-gradient(from 0deg at var(--mx) var(--my),var(--h1),var(--h2),#ffffffcc,var(--h1),var(--h2),var(--h1));filter:saturate(1.1)}
+.slot.done:hover:before{opacity:.5}
 .slot.done{background:linear-gradient(160deg,var(--card),color-mix(in srgb,var(--card) 80%,var(--gold)))}
 .slot.flash{animation:flash 1.4s ease 2}
 @keyframes flash{50%{box-shadow:0 0 0 5px var(--gold),0 0 30px var(--gold);transform:scale(1.07)}}
@@ -201,11 +201,12 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 .slot.shake{animation:shake .45s}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 .v-stage{position:relative;width:min(calc(100% - 32px),58vh);width:min(calc(100% - 32px),58dvh);aspect-ratio:1;margin:16px auto 8px;border-radius:22px;overflow:hidden;touch-action:pan-y;
-  background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--gold) 38%,var(--card)),var(--bg2));box-shadow:inset 0 0 0 2px var(--line);
+  background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--h1,var(--gold)) 38%,var(--card)),var(--bg2));box-shadow:inset 0 0 0 2px var(--line);
   --rx:0deg;--ry:0deg;--mx:50%;--my:50%}
 .v-stage:after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;transition:opacity .3s;
-  background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 40%),conic-gradient(from 0deg at var(--mx) var(--my),#ff6ad5,#ffd76a,#6affb1,#6ab8ff,#c36aff,#ff6ad5)}
-.v-stage:hover:after,.v-stage.gyro:after{opacity:.3}
+  background:radial-gradient(circle at var(--mx) var(--my),#fff9 0,transparent 40%),conic-gradient(from 0deg at var(--mx) var(--my),var(--h1),var(--h2),#ffffffcc,var(--h1),var(--h2),var(--h1))}
+.v-stage:hover:after,.v-stage.gyro:after{opacity:.45}
+.v-info .tchip{display:inline-block;color:#fff;font-size:12px;font-weight:600;font-size:12px;padding:1px 10px;border-radius:99px;margin:0 3px;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 #vgyro{width:auto;padding:0 11px;font-size:13px}#vgyro.on{background:var(--gold);color:#4a3300}
 .v-stage img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .2s;
   translate:var(--tx,0px) var(--ty,0px);filter:drop-shadow(calc(var(--sh)*1.5 + var(--sx,0px)) calc(var(--sh)*2 + var(--sy,0px)) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
@@ -390,19 +391,22 @@ function loop() {
 /* ---------- Grille ---------- */
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const cards = new Map();
+const TYPES = { 1:['Normal','#a8a77a'], 2:['Combat','#c22e28'], 3:['Vol','#a98ff3'], 4:['Poison','#a33ea1'], 5:['Sol','#e2bf65'], 6:['Roche','#b6a136'], 7:['Insecte','#a6b91a'], 8:['Spectre','#735797'], 9:['Acier','#b7b7ce'], 10:['Feu','#ee8130'], 11:['Eau','#6390f0'], 12:['Plante','#7ac74c'], 13:['Électrik','#f7d02c'], 14:['Psy','#f95587'], 15:['Glace','#96d9d6'], 16:['Dragon','#6f35fc'], 17:['Ténèbres','#705746'], 18:['Fée','#d685ad'] };
+const holoVars = (el, types) => { const c1 = TYPES[types[0]][1], c2 = TYPES[types[1] || types[0]][1]; el.style.setProperty('--h1', c1); el.style.setProperty('--h2', c2); };
 const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
 const genTotal = {}; P.forEach(p => genTotal[p[3]] = (genTotal[p[3]] || 0) + 1);
 let fGen = 0, fSt = 'all', mode = ls.get('mode', 'prof') === 'explorer' ? 'explorer' : 'prof';
 
 function buildGrid() {
   const frag = document.createDocumentFragment();
-  for (const [id, fr, en, gen, chain] of P) {
+  for (const [id, fr, en, gen, chain, , types] of P) {
     const el = document.createElement('div');
     el.className = 'slot empty'; el.dataset.id = id;
     el.innerHTML = `<div class="num">#${pad(id)}</div><div class="pic"></div><div class="name">${fr}</div>`;
     el.title = fr === en ? fr : `${fr} (${en})`;
     el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
     el.style.setProperty('--fc', `hsl(${(chain * 137) % 360} 70% 55%)`);
+    holoVars(el, types);
     cards.set(id, { el, key: norm(fr + ' ' + en + ' ' + id + ' ' + pad(id)), gen });
     frag.appendChild(el);
   }
@@ -816,7 +820,8 @@ function showV(dir) {
   $('#vvers').innerHTML = vs.length > 1 ? vs.map((v, i) => `<button data-i="${i}" class="${v === cur ? 'on' : ''}">${v.alt ? (v.label || 'Alt. ' + i).replace(/</g, '&lt;') : 'Principale'}</button>`).join('') : '';
   im.src = cur.url; im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
   $('#vtitle').innerHTML = `<span>#${pad(id)}</span>${fr}`; $('#vname').textContent = fr;
-  $('#vsub').textContent = (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
+  $('#vsub').innerHTML = P[id - 1][6].map(t => `<span class="tchip" style="background:${TYPES[t][1]}">${TYPES[t][0]}</span>`).join('') + '<br>' + (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
+  holoVars(stg, P[id - 1][6]);
   $('#vcount').textContent = `${vi + 1} / ${vIds.length}`;
   $('#vprev').disabled = $('#vnext').disabled = vIds.length < 2;
 }
