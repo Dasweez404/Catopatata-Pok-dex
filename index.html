@@ -321,7 +321,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
     <div class="seg mode" id="mode"><button data-m="prof" title="Éditer : ajouter et modifier les stickers">🎓<span class="lbl"> Professeur</span></button><button data-m="explorer" title="Observer ta collection">🔭<span class="lbl"> Explorateur</span></button></div>
       <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
       <button class="btn icon" id="moretoggle" title="Filtres et options" aria-expanded="false">⚙</button>
-      <button class="btn gold prof-only" id="add"><span class="plus">＋</span><span class="lbl"> Ajouter une image</span></button>
+      <button class="btn gold prof-only" id="add"><span class="plus">＋</span><span class="lbl"> Ajouter des images</span></button>
       <div class="more" id="more">
       <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
       <div class="seg" id="sort" title="Ordre d'affichage"><button data-v="num" class="on">N°</button><button data-v="fam">👪 Familles</button></div>
@@ -366,7 +366,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
         <div class="hint"><i>📥</i><b>Dépose ton image ici</b>clique pour parcourir · ou Ctrl+V pour coller<br><small>Pokémon sur fond blanc / papier</small></div>
         <canvas id="prev"></canvas><span class="cur-tag">Image actuelle</span>
       </div>
-      <input type="file" id="file" accept="image/*" hidden>
+      <input type="file" id="file" accept="image/*" multiple hidden>
     </div>
     <div class="right">
       <div class="search2">
@@ -385,6 +385,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <label class="row"><span>Affiner les bords <b id="vero"></b></span><input type="range" id="ero" min="0" max="5" value="1"></label>
       <div class="note">Du fond reste ? Augmente la tolérance. Le Pokémon est grignoté ? Diminue-la.</div>
       <div class="actions">
+        <button class="b" id="skip" hidden title="Ignorer cette image et passer à la suivante">Passer →</button>
         <button class="b danger" id="del" hidden>🗑 Supprimer</button>
         <button class="b red" id="savenext" disabled title="Ctrl+Maj+Entrée">Enregistrer &amp; suivant →</button>
         <button class="b gold" id="save" disabled title="Ctrl+Entrée">Enregistrer<kbd>⌘↵</kbd></button>
@@ -755,7 +756,8 @@ function upd() {
   const has = !!(curId && verEntry());
   $('#over').hidden = !(has && lastCanvas); $('#del').hidden = !has; renderVers();
   $('#save').disabled = $('#savenext').disabled = !(lastCanvas && curId);
-  $('#dtitle').innerHTML = curId ? `<span>#${pad(curId)}</span>${P[curId-1][1]}` : 'Ajouter un Pokémon';
+  $('#skip').hidden = !queue; $('#savenext').hidden = !!queue; $('#save').firstChild.textContent = queue ? (queue.i + 1 < queue.files.length ? 'Enregistrer & suivante →' : 'Enregistrer & terminer') : 'Enregistrer';
+  $('#dtitle').innerHTML = (queue ? `<span>📚 ${queue.i + 1}/${queue.files.length}</span>` : '') + (curId ? `<span>#${pad(curId)}</span>${P[curId-1][1]}` : 'Ajouter un Pokémon');
 }
 $('#plist').onclick = e => { const n = e.target.closest('[data-id]'); if (!n) return; curId = +n.dataset.id; curVer = 'main'; $('#vlabel').value = ''; markSel(false); showExisting(); };
 $('#pq').addEventListener('keydown', e => {
@@ -795,8 +797,42 @@ async function showExisting() { // affiche le sticker déjà enregistré pour le
   p.getContext('2d').drawImage(im, 0, 0); d.classList.add('has', 'existing');
   p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop'); upd();
 }
-async function setFile(f) {
+/* ----- Ajout par lot : plusieurs images à la suite ----- */
+let queue = null;
+const flat = t => norm(t).replace(/[^a-z0-9]/g, '');
+const NAMEKEYS = P.map(p => [p[0], flat(p[1]), flat(p[2])]);
+function guessPokemon(fn) { // devine le Pokémon d'après le nom du fichier ("025.png", "pikachu_v2.jpg"…)
+  const base = flat(fn.replace(/\.[a-z0-9]+$/i, '')), num = fn.replace(/\.[a-z0-9]+$/i, '').match(/^[#n°]?0*(\d{1,4})(?:[-_ ].*)?$/i);
+  if (num && +num[1] >= 1 && +num[1] <= P.length) return +num[1];
+  let best = 0, bl = 0;
+  for (const [id, a, b] of NAMEKEYS) for (const k of [a, b]) if (k && (k === base || (k.length >= 4 && base.includes(k))) && k.length > bl) { best = id; bl = k.length; }
+  return best || null;
+}
+function setFiles(list) {
+  if (mode !== 'prof') return;
+  const arr = [...list].filter(f => f.type.startsWith('image/')); if (!arr.length) return;
+  if (arr.length === 1) { queue = null; return setFile(arr[0]); }
+  arr.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  queue = { files: arr, i: 0, saved: 0 }; if (!dlg.open) openDialog(null); loadQueued();
+  toast(`📚 Lot de ${arr.length} images : choisis le Pokémon puis « Enregistrer »`);
+}
+async function loadQueued() {
+  const f = queue.files[queue.i]; curImg = null; lastCanvas = null; typeof resetEdits === 'function' && resetEdits();
+  const g = guessPokemon(f.name); curId = g || nextMissing(lastOpened || 0) || null; curVer = 'main'; $('#vlabel').value = ''; $('#pq').value = '';
+  fillList(); markSel(true); $('#drop').classList.remove('has', 'existing'); upd();
+  await setFile(f, true);
+}
+function advanceQueue() {
+  queue.i++;
+  if (queue.i < queue.files.length) return loadQueued();
+  const n = queue.saved; queue = null; closeDlg(); toast(`🎉 Lot terminé : ${n} image${n > 1 ? 's' : ''} ajoutée${n > 1 ? 's' : ''}`); confetti(innerWidth / 2, innerHeight / 3, 140, true);
+}
+dlg.addEventListener('close', () => { if (queue) { toast(`Lot interrompu : ${queue.saved} image(s) ajoutée(s)`); queue = null; } });
+$('#skip').onclick = () => { if (queue) advanceQueue(); };
+
+async function setFile(f, fromQueue) {
   if (mode !== 'prof' || !f || !f.type.startsWith('image/')) return;
+  if (!fromQueue) queue = queue && queue.files.includes(f) ? queue : null;
   if (!dlg.open) openDialog(null);
   const url = URL.createObjectURL(f);
   try { curImg = await loadImage(url); } finally { URL.revokeObjectURL(url); }
@@ -814,17 +850,17 @@ function openDialog(id) {
 }
 $('#add').onclick = () => openDialog(null);
 $('#drop').onclick = () => $('#file').click();
-$('#file').onchange = e => setFile(e.target.files[0]);
+$('#file').onchange = e => { setFiles(e.target.files); e.target.value = ''; };
 $('#drop').addEventListener('dragover', e => { e.preventDefault(); $('#drop').classList.add('over'); });
 $('#drop').addEventListener('dragleave', () => $('#drop').classList.remove('over'));
-$('#drop').addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); $('#drop').classList.remove('over'); $('#veil').classList.remove('on'); setFile(e.dataTransfer.files[0]); });
+$('#drop').addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); $('#drop').classList.remove('over'); $('#veil').classList.remove('on'); setFiles(e.dataTransfer.files); });
 // glisser une image n'importe où dans la page
 let dc = 0;
 addEventListener('dragenter', e => { if (mode === 'prof' && [...e.dataTransfer.types].includes('Files')) { dc++; if (!dlg.open) $('#veil').classList.add('on'); } });
 addEventListener('dragleave', () => { if (--dc <= 0) { dc = 0; $('#veil').classList.remove('on'); } });
 addEventListener('dragover', e => e.preventDefault());
-addEventListener('drop', e => { e.preventDefault(); dc = 0; $('#veil').classList.remove('on'); const f = e.dataTransfer.files[0]; if (f) setFile(f); });
-addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/')); if (f) setFile(f); });
+addEventListener('drop', e => { e.preventDefault(); dc = 0; $('#veil').classList.remove('on'); setFiles(e.dataTransfer.files); });
+addEventListener('paste', e => { setFiles(e.clipboardData?.files || []); });
 $('#shapes').onclick = e => { const b = e.target.closest('button'); if (!b) return; setShape(b.dataset.s); renderPreview(); };
 ['tol','bor','ero','cutk'].forEach(i => $('#'+i).addEventListener('input', () => { renderPreview.quiet = true; renderPreview(); }));
 
@@ -833,6 +869,11 @@ async function save(next) {
   const id = curId;
   const b = await new Promise(r => lastCanvas.toBlob(r, 'image/png')); // PNG = sans aucune perte
   const before = store.items.size, newGen = !genCounts()[P[id-1][3]]; const isAlt = curVer !== 'main'; await putV(verKey(), b, isAlt ? $('#vlabel').value.trim() : '');
+  if (queue) { // lot : on enchaîne sans fermer la fenêtre
+    paint(id, true); refresh(); queue.saved++; lastOpened = id;
+    if (newGen) { toast(`🔓 Génération ${GEN[P[id-1][3]-1]} débloquée !`); confetti(innerWidth / 2, innerHeight / 3, 120, true); }
+    return advanceQueue();
+  }
   closeDlg();
   setTimeout(() => {
     paint(id, true); refresh(); goTo(id); const r = cards.get(id).el.getBoundingClientRect();
