@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mon Pokédex</title>
-<meta name="build" content="2026-11-26.1">
+<meta name="build" content="2026-11-26.2">
 <meta name="theme-color" content="#e0323f">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pokédex"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -246,6 +246,15 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
 .evo em{font-style:normal;color:var(--mute)}
 .dexn{display:flex;flex-wrap:wrap;gap:6px}.dexn span{background:var(--bg2);border-radius:99px;padding:3px 11px;font-size:13px}
 .sh-load{padding:30px;text-align:center;color:var(--mute)}
+/* ---------- Retouche ---------- */
+.retouch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.seg2{display:flex;background:var(--card);border-radius:11px;padding:3px}
+.seg2 button{background:none;padding:5px 10px;border-radius:8px;font-weight:500;color:var(--ink)}
+.seg2 button.on{background:var(--red);color:#fff}
+.retouch input[type=range]{flex:1;min-width:70px;width:auto}
+.retouch>button{background:var(--card);border-radius:9px;padding:5px 10px}
+.drop.painting,.drop.painting canvas{cursor:none;touch-action:none}
+#brushcur{position:fixed;display:none;border:2px solid #ff4d4d;border-radius:50%;pointer-events:none;z-index:1000;box-shadow:0 0 0 1px rgba(255,255,255,.6)}
 /* ---------- Modes ---------- */
 #view{max-width:min(560px,95vw)}
 .mode{margin-left:6px}
@@ -365,6 +374,11 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <div class="drop" id="drop">
         <div class="hint"><i>📥</i><b>Dépose ton image ici</b>clique pour parcourir · ou Ctrl+V pour coller<br><small>Pokémon sur fond blanc / papier</small></div>
         <canvas id="prev"></canvas><span class="cur-tag">Image actuelle</span>
+      </div>
+      <div class="retouch" id="rt" hidden>
+        <div class="seg2" id="rtools"><button data-t="none" class="on" title="Aucune retouche">👆</button><button data-t="erase" title="Gomme : efface une zone du Pokémon">🧽 Gommer</button><button data-t="keep" title="Pinceau : récupère une zone effacée par erreur">🖌 Restaurer</button></div>
+        <input type="range" id="brush" min="6" max="70" value="24" title="Taille du pinceau">
+        <button id="rtundo" title="Annuler le dernier trait">↶</button><button id="rtreset" title="Tout réinitialiser">⟲</button>
       </div>
       <input type="file" id="file" accept="image/*" multiple hidden>
     </div>
@@ -652,7 +666,7 @@ function cutout(img, tol, erodeN, region, maxW = MAXW) {
     if (a[p] > 0.5) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
   if (x1 < 0) return null;
   cx.putImageData(id, 0, 0);
-  return { cv, sc, box: [x0, y0, x1 - x0 + 1, y1 - y0 + 1] };
+  return { cv, sc, R, box: [x0, y0, x1 - x0 + 1, y1 - y0 + 1] };
 }
 
 /* contour d'un masque binaire (Moore) + simplification Douglas-Peucker -> coupe « aux ciseaux » */
@@ -717,7 +731,7 @@ function sticker(co, border, shape = 'round', k = .5) {
     for (const pl of polys) { o.beginPath(); pl.forEach(([x, y], i) => i ? o.lineTo(x + .5, y + .5) : o.moveTo(x + .5, y + .5)); o.closePath(); o.stroke(); o.fill(); }
   } else if (border > 0) { stamp(tint('#c9ced8'), border + 1.8); stamp(tint('#ffffff'), border); }
   o.drawImage(co.cv, bx, by, bw, bh, pd, pd, bw, bh);
-  return out;
+  out._pd = pd; return out;
 }
 
 /* ---------- Boîte de dialogue ---------- */
@@ -756,7 +770,7 @@ function upd() {
   const has = !!(curId && verEntry());
   $('#over').hidden = !(has && lastCanvas); $('#del').hidden = !has; renderVers();
   $('#save').disabled = $('#savenext').disabled = !(lastCanvas && curId);
-  $('#skip').hidden = !queue; $('#savenext').hidden = !!queue; $('#save').firstChild.textContent = queue ? (queue.i + 1 < queue.files.length ? 'Enregistrer & suivante →' : 'Enregistrer & terminer') : 'Enregistrer';
+  $('#rt').hidden = !(curImg && lastCanvas); $('#skip').hidden = !queue; $('#savenext').hidden = !!queue; $('#save').firstChild.textContent = queue ? (queue.i + 1 < queue.files.length ? 'Enregistrer & suivante →' : 'Enregistrer & terminer') : 'Enregistrer';
   $('#dtitle').innerHTML = (queue ? `<span>📚 ${queue.i + 1}/${queue.files.length}</span>` : '') + (curId ? `<span>#${pad(curId)}</span>${P[curId-1][1]}` : 'Ajouter un Pokémon');
 }
 $('#plist').onclick = e => { const n = e.target.closest('[data-id]'); if (!n) return; curId = +n.dataset.id; curVer = 'main'; $('#vlabel').value = ''; markSel(false); showExisting(); };
@@ -767,21 +781,68 @@ $('#pq').addEventListener('keydown', e => {
 $('#pq').oninput = () => { fillList(); showExisting(); };
 
 const setBusy = b => $('#drop').classList.toggle('busy', b);
+/* ----- Retouche manuelle du détourage (gomme / pinceau) ----- */
+let edits = [], tool = 'none', baseCache = {}, imgKey = 0, lastGeo = null, painting = null;
+function setTool(t) { tool = t; document.querySelectorAll('#rtools button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); $('#drop').classList.toggle('painting', t !== 'none'); $('#brushcur').style.display = 'none'; }
+function resetEdits() { edits = []; baseCache = {}; setTool('none'); }
+function applyEdits(base) {
+  const cv = document.createElement('canvas'); cv.width = base.cv.width; cv.height = base.cv.height;
+  const c = cv.getContext('2d', { willReadFrequently: true }); c.drawImage(base.cv, 0, 0);
+  const { R, sc } = base, T = ([x, y]) => [(x - R.x) * sc, (y - R.y) * sc];
+  for (const g of edits) {
+    const r = g.r * sc, pts = g.pts.map(T);
+    if (g.m === 'erase') { c.save(); c.globalCompositeOperation = 'destination-out'; c.lineCap = c.lineJoin = 'round'; c.lineWidth = r * 2; c.strokeStyle = '#000'; c.beginPath();
+      pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); if (pts.length === 1) c.lineTo(pts[0][0] + .01, pts[0][1]); c.stroke(); c.restore(); }
+    else { const path = new Path2D();
+      pts.forEach(([x, y], i) => { path.moveTo(x + r, y); path.arc(x, y, r, 0, 7);
+        if (i) { const [px, py] = pts[i - 1], n = Math.ceil(Math.hypot(x - px, y - py) / (r / 2)); for (let k = 1; k < n; k++) { const t = k / n, xx = px + (x - px) * t, yy = py + (y - py) * t; path.moveTo(xx + r, yy); path.arc(xx, yy, r, 0, 7); } } });
+      c.save(); c.clip(path); c.drawImage(curImg, R.x, R.y, R.w, R.h, 0, 0, cv.width, cv.height); c.restore(); }
+  }
+  const d = c.getImageData(0, 0, cv.width, cv.height).data, w = cv.width; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  for (let i = 3, p = 0; i < d.length; i += 4, p++) if (d[i] > 127) { const x = p % w, y = (p / w) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  return { cv, sc, R, box: x1 < 0 ? base.box : [x0, y0, x1 - x0 + 1, y1 - y0 + 1] };
+}
+function toSrc(e) { // position du doigt/souris sur l'aperçu -> coordonnées dans l'image d'origine
+  const p = $('#prev'), r = p.getBoundingClientRect(), k = p.width / r.width, g = lastGeo;
+  const cx = (e.clientX - r.left) * k, cy = (e.clientY - r.top) * k, rc = +$('#brush').value * k;
+  return { x: g.R.x + (cx - g.pd + g.box[0]) / g.sc, y: g.R.y + (cy - g.pd + g.box[1]) / g.sc, r: rc / g.sc, cx, cy, rc };
+}
+const brushCur = document.createElement('div'); brushCur.id = 'brushcur'; document.body.appendChild(brushCur);
+const prevEl = $('#prev');
+prevEl.addEventListener('pointerdown', e => {
+  if (tool === 'none' || !lastGeo) return; e.preventDefault(); e.stopPropagation(); prevEl.setPointerCapture(e.pointerId);
+  const s = toSrc(e); painting = { m: tool, r: s.r, pts: [[s.x, s.y]] }; dot(s);
+});
+prevEl.addEventListener('pointermove', e => {
+  if (tool === 'none' || !lastGeo) return; const rect = prevEl.getBoundingClientRect(), sz = +$('#brush').value * 2;
+  brushCur.style.cssText = `display:block;width:${sz}px;height:${sz}px;left:${e.clientX - sz / 2}px;top:${e.clientY - sz / 2}px;border-color:${tool === 'erase' ? '#ff4d4d' : '#33c46b'}`;
+  if (!painting) return; const s = toSrc(e), l = painting.pts[painting.pts.length - 1];
+  if (Math.hypot(s.x - l[0], s.y - l[1]) > painting.r / 3) { painting.pts.push([s.x, s.y]); dot(s); }
+});
+prevEl.addEventListener('pointerleave', () => { brushCur.style.display = 'none'; });
+const endPaint = () => { if (!painting) return; edits.push(painting); painting = null; renderPreview.quiet = true; renderPreview(); };
+prevEl.addEventListener('pointerup', endPaint); prevEl.addEventListener('pointercancel', endPaint);
+function dot(s) { const c = prevEl.getContext('2d'); c.save(); c.fillStyle = painting.m === 'erase' ? 'rgba(255,60,60,.45)' : 'rgba(50,200,100,.45)'; c.beginPath(); c.arc(s.cx, s.cy, s.rc, 0, 7); c.fill(); c.restore(); }
+$('#rtools').onclick = e => { const b = e.target.closest('button'); if (b) setTool(b.dataset.t); };
+$('#rtundo').onclick = () => { if (edits.pop()) { renderPreview.quiet = true; renderPreview(); } };
+$('#rtreset').onclick = () => { if (edits.length) { edits = []; renderPreview.quiet = true; renderPreview(); } };
+
 function renderPreview() {
   $('#vtol').textContent = $('#tol').value; $('#vcutk').textContent = $('#cutk').value; $('#cutrow').hidden = shape !== 'cut'; $('#vbor').textContent = $('#bor').value + ' px'; $('#vero').textContent = $('#ero').value;
   ls.set('opt', JSON.stringify([$('#tol').value, $('#bor').value, $('#ero').value, shape, $('#cutk').value]));
   if (!curImg) return;
   clearTimeout(timer); setBusy(true);
   timer = setTimeout(() => {
-    const tol = +$('#tol').value, ero = +$('#ero').value;
-    let co = cutout(curImg, tol, ero, null, 480);   // passe rapide : repère le Pokémon
-    if (co) { const [bx, by, bw, bh] = co.box, m = Math.max(24, .1 * Math.max(bw, bh)), W = curImg.naturalWidth, H = curImg.naturalHeight;
+    const tol = +$('#tol').value, ero = +$('#ero').value, ck = `${imgKey}|${tol}|${ero}`;
+    let co = baseCache.key === ck ? baseCache.co : cutout(curImg, tol, ero, null, 480);   // passe rapide : repère le Pokémon
+    if (co && baseCache.key !== ck) { const [bx, by, bw, bh] = co.box, m = Math.max(24, .1 * Math.max(bw, bh)), W = curImg.naturalWidth, H = curImg.naturalHeight;
       const x = Math.max(0, Math.floor((bx - m) / co.sc)), y = Math.max(0, Math.floor((by - m) / co.sc));
       const region = { x, y, w: Math.min(W - x, Math.ceil((bw + 2 * m) / co.sc)), h: Math.min(H - y, Math.ceil((bh + 2 * m) / co.sc)) };
-      co = cutout(curImg, tol, ero, region, 1600) || co; }   // passe fine : résolution native du Pokémon (jusqu'à 1600 px, jamais agrandi)
+      co = cutout(curImg, tol, ero, region, 1600) || co; baseCache = { key: ck, co }; }   // passe fine : résolution native du Pokémon (jusqu'à 1600 px, jamais agrandi)
     setBusy(false);
     if (!co) { lastCanvas = null; upd(); toast('😕 Rien détecté : augmente la tolérance ?'); return; }
-    lastCanvas = sticker(co, +$('#bor').value, shape, +$('#cutk').value / 10);
+    const base = co; if (edits.length) co = applyEdits(base);
+    lastCanvas = sticker(co, +$('#bor').value, shape, +$('#cutk').value / 10); lastGeo = { R: base.R, sc: base.sc, box: co.box, pd: lastCanvas._pd };
     const p = $('#prev'); p.width = lastCanvas.width; p.height = lastCanvas.height;
     p.getContext('2d').drawImage(lastCanvas, 0, 0);
     $('#drop').classList.add('has'); $('#drop').classList.remove('existing');
@@ -817,7 +878,7 @@ function setFiles(list) {
   toast(`📚 Lot de ${arr.length} images : choisis le Pokémon puis « Enregistrer »`);
 }
 async function loadQueued() {
-  const f = queue.files[queue.i]; curImg = null; lastCanvas = null; typeof resetEdits === 'function' && resetEdits();
+  const f = queue.files[queue.i]; curImg = null; lastCanvas = null; resetEdits();
   const g = guessPokemon(f.name); curId = g || nextMissing(lastOpened || 0) || null; curVer = 'main'; $('#vlabel').value = ''; $('#pq').value = '';
   fillList(); markSel(true); $('#drop').classList.remove('has', 'existing'); upd();
   await setFile(f, true);
@@ -836,11 +897,12 @@ async function setFile(f, fromQueue) {
   if (!dlg.open) openDialog(null);
   const url = URL.createObjectURL(f);
   try { curImg = await loadImage(url); } finally { URL.revokeObjectURL(url); }
+  imgKey++; resetEdits();
   renderPreview();
 }
 function openDialog(id) {
   if (id) lastOpened = id;
-  curId = id || null; curImg = null; lastCanvas = null; curVer = 'main'; $('#vlabel').value = '';
+  curId = id || null; curImg = null; lastCanvas = null; curVer = 'main'; $('#vlabel').value = ''; resetEdits();
   const o = JSON.parse(ls.get('opt', 'null') || 'null'); if (o) { $('#tol').value = o[0]; $('#bor').value = o[1]; $('#ero').value = o[2]; setShape(o[3] || 'round'); if (o[4]) $('#cutk').value = o[4]; }
   $('#drop').classList.remove('has', 'existing'); $('#pq').value = ''; $('#file').value = '';
   fillList(); renderPreview(); showExisting();
@@ -849,7 +911,7 @@ function openDialog(id) {
   if (!id) $('#pq').focus();
 }
 $('#add').onclick = () => openDialog(null);
-$('#drop').onclick = () => $('#file').click();
+$('#drop').onclick = () => { if (tool === 'none') $('#file').click(); };
 $('#file').onchange = e => { setFiles(e.target.files); e.target.value = ''; };
 $('#drop').addEventListener('dragover', e => { e.preventDefault(); $('#drop').classList.add('over'); });
 $('#drop').addEventListener('dragleave', () => $('#drop').classList.remove('over'));
