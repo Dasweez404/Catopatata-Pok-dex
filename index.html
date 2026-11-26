@@ -322,9 +322,9 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <span class="sp"></span>
       <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
       <button class="btn icon" id="theme" title="Thème clair / sombre">🌓</button>
-      <button class="btn icon prof-only" id="exp" title="Sauvegarder ma collection (fichier)">⬇</button>
-      <button class="btn icon prof-only" id="imp" title="Restaurer une sauvegarde">⬆</button>
-      <input type="file" id="impf" accept=".json" hidden>
+      <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇</button>
+      <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆</button>
+      <input type="file" id="impf" accept=".pkdx,.json,application/json,application/octet-stream" hidden>
       </div>
     </div>
     <div class="chips" id="chips"></div>
@@ -846,22 +846,36 @@ $('#del').onclick = async () => {
 dlg.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(e.shiftKey); } });
 
 /* ---------- Sauvegarde / restauration ---------- */
-const b2d = b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); });
+// Format .pkdx : "PKDX3\n" + longueur de l'en-tête (4 octets) + en-tête JSON + images PNG brutes (léger en mémoire, sans base64)
+const MAGIC = 'PKDX3\n';
 $('#exp').onclick = async () => {
-  const o = {}, al = {}; for (const vs of store.vers.values()) for (const v of vs) { if (v.alt) al[v.key] = { img: await b2d(v.blob), label: v.label }; else o[v.key] = await b2d(v.blob); }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify({ v: 2, stickers: o, alts: al })], { type: 'application/json' }));
-  a.download = 'pokedex-sauvegarde.json'; a.click(); toast('💾 Sauvegarde téléchargée');
+  if (!store.vers.size) { toast('Rien à sauvegarder pour le moment'); return; }
+  const entries = [], parts = [];
+  for (const vs of store.vers.values()) for (const v of vs) { entries.push({ key: v.key, label: v.label || '', size: v.blob.size, type: v.blob.type || 'image/png' }); parts.push(v.blob); }
+  const head = new TextEncoder().encode(JSON.stringify({ v: 3, date: new Date().toISOString(), entries })), len = new Uint8Array(4); new DataView(len.buffer).setUint32(0, head.length, true);
+  const blob = new Blob([MAGIC, len, head, ...parts], { type: 'application/octet-stream' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `pokedex-sauvegarde-${new Date().toISOString().slice(0, 10)}.pkdx`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  toast(`💾 Sauvegarde de ${entries.length} image(s) téléchargée (${(blob.size / 1048576).toFixed(1)} Mo)`);
 };
 $('#imp').onclick = () => $('#impf').click();
 $('#impf').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  try { const j = JSON.parse(await f.text()); let n = 0;
-    for (const [id, url] of Object.entries(j.stickers || {})) { await putV(+id, await (await fetch(url)).blob()); paint(+id, true); n++; }
-    for (const [key, a] of Object.entries(j.alts || {})) { await putV(key, await (await fetch(a.img)).blob(), a.label || ''); paint(+key.split(':')[0], true); n++; }
-    refresh(); toast(`✅ ${n} image(s) restaurée(s)`);
-  } catch (err) { toast('❌ Fichier invalide'); }
-  e.target.value = '';
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    let n = 0; const touched = new Set(); toast('⏳ Restauration en cours…', null, null, 2500);
+    const first = new TextDecoder().decode(new Uint8Array(await f.slice(0, MAGIC.length).arrayBuffer()));
+    if (first === MAGIC) {
+      const hl = new DataView(await f.slice(MAGIC.length, MAGIC.length + 4).arrayBuffer()).getUint32(0, true), off0 = MAGIC.length + 4;
+      const head = JSON.parse(new TextDecoder().decode(new Uint8Array(await f.slice(off0, off0 + hl).arrayBuffer()))); let off = off0 + hl;
+      for (const en of head.entries) { const blob = f.slice(off, off + en.size, en.type); off += en.size; const key = /^\d+$/.test(String(en.key)) ? +en.key : String(en.key);
+        await putV(key, blob, en.label || ''); touched.add(+String(key).split(':')[0]); n++; }
+    } else { // anciennes sauvegardes .json
+      const j = JSON.parse(await f.text());
+      for (const [id, url] of Object.entries(j.stickers || {})) { await putV(+id, await (await fetch(url)).blob()); touched.add(+id); n++; }
+      for (const [key, a] of Object.entries(j.alts || {})) { await putV(key, await (await fetch(a.img)).blob(), a.label || ''); touched.add(+key.split(':')[0]); n++; }
+    }
+    touched.forEach(id => paint(+id, true)); refresh(); toast(`✅ ${n} image(s) restaurée(s)`);
+  } catch (err) { console.error(err); toast('❌ Fichier de sauvegarde invalide'); }
 };
 
 /* ---------- Ombre portée (réglage global) ---------- */
