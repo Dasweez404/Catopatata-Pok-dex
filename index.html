@@ -288,6 +288,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 .dragveil{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(224,50,63,.85);color:#fff;font-size:32px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
 .dragveil.on{opacity:1}
 @media(max-width:700px){header{position:relative}}
+.bkinfo{display:none;flex-basis:100%;font-size:12px;opacity:.85;color:#fff}
+#exp{position:relative}#exp.dirty:after{content:"";position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--red2)}
 .more{display:contents}#moretoggle{display:none}
 @media(max-width:700px){
   .bar{padding:8px 12px;gap:6px 8px}
@@ -302,6 +304,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   #moretoggle{display:grid}#moretoggle.on{background:#fff;color:var(--red2)}
   .more{display:none;flex-basis:100%;flex-wrap:wrap;gap:6px;padding:8px;background:rgba(0,0,0,.2);border-radius:14px;animation:dIn .25s var(--ease)}
   .more.open{display:flex}
+  .more .bkinfo{display:block}
   .more .range{display:flex}.more .sp{display:none}
   .chips{order:5;padding:0}
 }
@@ -331,6 +334,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇</button>
       <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆</button>
       <input type="file" id="impf" accept=".pkdx,.json,application/json,application/octet-stream" hidden>
+      <div class="bkinfo prof-only" id="bkinfo"></div>
       </div>
     </div>
     <div class="chips" id="chips"></div>
@@ -440,8 +444,8 @@ async function makeThumb(blob) {
   return await new Promise(r => c.toBlob(b => r(b || blob), 'image/png'));
 }
 const putV = async (key, blob, label = '') => { const val = { blob, label, thumb: await makeThumb(blob) };
-  await tx('readwrite', s => s.put(val, key)); store.add(key, val); };
-const removeV = key => tx('readwrite', s => s.delete(key)).then(() => store.del(key));
+  await tx('readwrite', s => s.put(val, key)); store.add(key, val); bk.touch(); };
+const removeV = key => tx('readwrite', s => s.delete(key)).then(() => { store.del(key); bk.touch(); });
 const nextAltKey = id => { let n = 0; for (const v of store.vers.get(id) || []) if (v.alt) n = Math.max(n, +v.key.split(':')[1]); return `${id}:${n + 1}`; };
 
 /* ---------- Toasts & confettis ---------- */
@@ -851,10 +855,20 @@ $('#del').onclick = async () => {
 };
 dlg.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(e.shiftKey); } });
 
+/* ---------- Rappels de sauvegarde ---------- */
+const bk = {
+  get dirty() { return +ls.get('dirty', 0); }, get last() { return +ls.get('lastbackup', 0); },
+  touch() { ls.set('dirty', this.dirty + 1); this.ui(); if (this.dirty % 10 === 0) this.remind(); },
+  done() { ls.set('dirty', 0); ls.set('lastbackup', Date.now()); this.ui(); },
+  ago() { if (!this.last) return 'jamais'; const d = (Date.now() - this.last) / 864e5; return d < 1 ? 'aujourd’hui' : d < 2 ? 'hier' : `il y a ${Math.floor(d)} j`; },
+  ui() { const el = $('#bkinfo'); if (!el) return; el.textContent = `💾 Dernière sauvegarde : ${this.ago()}${this.dirty ? ` · ${this.dirty} modification${this.dirty > 1 ? 's' : ''} non sauvegardée${this.dirty > 1 ? 's' : ''}` : ''}`; $('#exp').classList.toggle('dirty', this.dirty > 0); $('#exp').title = el.textContent + ' — cliquer pour sauvegarder'; },
+  remind() { if (mode === 'prof') toast(`💾 ${this.dirty} modifications non sauvegardées`, 'Sauvegarder', () => doExport(), 12000); },
+  startup() { this.ui(); const stale = !this.last || Date.now() - this.last > 7 * 864e5; if (this.dirty > 0 && stale && store.items.size >= 3 && mode === 'prof') setTimeout(() => this.remind(), 2500); }
+};
 /* ---------- Sauvegarde / restauration ---------- */
 // Format .pkdx : "PKDX3\n" + longueur de l'en-tête (4 octets) + en-tête JSON + images PNG brutes (léger en mémoire, sans base64)
 const MAGIC = 'PKDX3\n';
-$('#exp').onclick = async () => {
+async function doExport() {
   if (!store.vers.size) { toast('Rien à sauvegarder pour le moment'); return; }
   const entries = [], parts = [];
   for (const vs of store.vers.values()) for (const v of vs) { entries.push({ key: v.key, label: v.label || '', size: v.blob.size, type: v.blob.type || 'image/png' }); parts.push(v.blob); }
@@ -862,8 +876,9 @@ $('#exp').onclick = async () => {
   const blob = new Blob([MAGIC, len, head, ...parts], { type: 'application/octet-stream' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `pokedex-sauvegarde-${new Date().toISOString().slice(0, 10)}.pkdx`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-  toast(`💾 Sauvegarde de ${entries.length} image(s) téléchargée (${(blob.size / 1048576).toFixed(1)} Mo)`);
-};
+  bk.done(); toast(`💾 Sauvegarde de ${entries.length} image(s) téléchargée (${(blob.size / 1048576).toFixed(1)} Mo)`);
+}
+$('#exp').onclick = doExport;
 $('#imp').onclick = () => $('#impf').click();
 $('#impf').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -880,7 +895,7 @@ $('#impf').onchange = async e => {
       for (const [id, url] of Object.entries(j.stickers || {})) { await putV(+id, await (await fetch(url)).blob()); touched.add(+id); n++; }
       for (const [key, a] of Object.entries(j.alts || {})) { await putV(key, await (await fetch(a.img)).blob(), a.label || ''); touched.add(+key.split(':')[0]); n++; }
     }
-    touched.forEach(id => paint(+id, true)); refresh(); toast(`✅ ${n} image(s) restaurée(s)`);
+    touched.forEach(id => paint(+id, true)); refresh(); bk.done(); toast(`✅ ${n} image(s) restaurée(s)`);
   } catch (err) { console.error(err); toast('❌ Fichier de sauvegarde invalide'); }
 };
 
@@ -1151,7 +1166,7 @@ addEventListener('appinstalled', () => { $('#install').hidden = true; toast('�
 try { navigator.storage?.persist?.(); } catch {} // demande au navigateur de ne pas effacer les stickers automatiquement
 setMode(mode, false);
 buildGrid(); applySort(); refresh(true);
-store.load().then(() => { loaded = true; for (const id of store.items.keys()) paint(id); refresh(true); });
+store.load().then(() => { loaded = true; bk.startup(); for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
 </body>
 </html>
