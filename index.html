@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mon Pokédex</title>
+<meta name="build" content="2026-11-26.1">
+<meta name="theme-color" content="#e0323f">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pokédex"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="pokemon-data.js"></script>
@@ -321,6 +326,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <button class="btn prof-only" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
       <span class="sp"></span>
       <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
+      <button class="btn" id="install" hidden title="Installer comme une appli">📲 Installer</button>
       <button class="btn icon" id="theme" title="Thème clair / sombre">🌓</button>
       <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇</button>
       <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆</button>
@@ -1125,6 +1131,22 @@ async function renderSheet(id) {
   $('#shback').onclick = () => setSheet(false);
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = () => { const g = +a.dataset.go; if (g === id) return; if (store.items.has(g) && !cards.get(g).el.hidden) { vi = vIds.indexOf(g); if (vi < 0) { vIds.push(g); vi = vIds.length - 1; } vv = 0; showV(1); } else toast(store.items.has(g) ? 'Ce Pokémon est masqué par les filtres' : `${P[g - 1][1]} n’est pas encore dans ta collection`); });
 }
+/* ---------- Appli installable, hors ligne, mises à jour ---------- */
+const BUILD = document.querySelector('meta[name=build]')?.content;
+async function checkUpdate() {
+  try { const t = await (await fetch('index.html', { cache: 'no-cache' })).text(), m = t.match(/<meta name="build" content="([^"]+)"/);
+    if (m && BUILD && m[1] !== BUILD && !checkUpdate.shown) { checkUpdate.shown = true; toast('🆕 Une nouvelle version est disponible', 'Recharger', () => location.reload(), 60000); } } catch {}
+}
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdate(); });
+  setTimeout(checkUpdate, 4000);
+}
+let deferredInstall = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; $('#install').hidden = false; });
+$('#install').onclick = async () => { if (!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; $('#install').hidden = true; };
+addEventListener('appinstalled', () => { $('#install').hidden = true; toast('📲 Pokédex installé'); });
+
 /* ---------- Démarrage ---------- */
 try { navigator.storage?.persist?.(); } catch {} // demande au navigateur de ne pas effacer les stickers automatiquement
 setMode(mode, false);
