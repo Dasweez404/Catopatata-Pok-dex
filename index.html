@@ -1035,6 +1035,7 @@ vw.addEventListener('close', () => { g0 = null; });
 stg.addEventListener('pointerleave', () => { stg.style.setProperty('--rx', '0deg'); stg.style.setProperty('--ry', '0deg'); fxState.tx = fxState.ty = 0; });
 
 /* ---------- Démarrage ---------- */
+try { navigator.storage?.persist?.(); } catch {} // demande au navigateur de ne pas effacer les stickers automatiquement
 setMode(mode, false);
 buildGrid(); applySort(); refresh(true);
 store.load().then(() => { loaded = true; for (const id of store.items.keys()) paint(id); refresh(true); });
