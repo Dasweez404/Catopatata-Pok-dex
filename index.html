@@ -1096,8 +1096,8 @@ async function renderSheet(id) {
   box.innerHTML = `
     <div class="sh-top">${it ? `<img src="${it.turl || it.url}" alt="">` : ''}<div><h3>#${pad(id)} ${esc(fr)}</h3><small>${esc(d.g)}${fr !== en ? ' · ' + esc(en) : ''}</small><div>${tch}</div></div><button class="b" id="shback">← Sticker</button></div>
     <section class="sh-desc"><h4>📖 Description du Pokédex</h4>
-      <p>${d.m.map(esc).join(' ')}</p>
-      <small>Fusion de ${d.d.length} entrée${d.d.length > 1 ? 's' : ''} différente${d.d.length > 1 ? 's' : ''} issues de ${nGames} jeu${nGames > 1 ? 'x' : ''} — ${d.m.length} phrases uniques, sans doublon.</small>
+      <p>${d.r ? esc(d.r) : d.m.map(esc).join(' ')}</p>
+      <small>Fusion de ${d.d.length} entrée${d.d.length > 1 ? 's' : ''} différente${d.d.length > 1 ? 's' : ''} issues de ${nGames} jeu${nGames > 1 ? 'x' : ''} — fusionnées en un seul texte, sans répétition.</small>
       <details><summary>Voir le détail jeu par jeu</summary>${d.d.map(([vs, t]) => `<div class="gt">${vs.map(v => `<span class="gchip">${esc(gname(v))}</span>`).join('')}<p>${esc(t)}</p></div>`).join('')}</details></section>
     <section><h4>Informations</h4><div class="facts">
       ${F('Catégorie', esc(d.g))}${F('Génération', GEN[gen - 1])}${F('Taille', pct(d.h / 10) + ' m')}${F('Poids', pct(d.w / 10) + ' kg')}
