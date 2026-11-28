@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mon Pokédex</title>
-<meta name="build" content="2026-11-28.2">
+<meta name="build" content="2026-11-28.3">
 <meta name="theme-color" content="#e0323f">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pokédex"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -283,6 +283,30 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
   .actions{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   .v-nav{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 }
+/* ---------- Stats, comparaison ---------- */
+#sdlg,#cdlg{max-width:min(560px,95vw)}
+.st-top{display:flex;align-items:center;gap:18px;margin-bottom:14px}
+.st-facts{display:grid;gap:4px;font-size:14px}.st-facts b{font-size:17px}
+#sbody h4,.cm-note{color:var(--mute)}#sbody h4{margin:16px 0 8px;font-size:12.5px;text-transform:uppercase;letter-spacing:.5px}
+.st-row{display:grid;grid-template-columns:110px 1fr 64px;gap:10px;align-items:center;padding:4px 0;cursor:pointer;font-size:14px}
+.st-row:hover span{color:var(--red)}
+.st-row i{display:block;height:10px;border-radius:5px;background:var(--bg2);overflow:hidden}.st-row u{display:block;height:100%;background:var(--red);border-radius:5px;text-decoration:none;transition:width .8s var(--ease)}
+.st-row em{font-style:normal;color:var(--mute);text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+.cm-top{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px}
+.cm-vs{font-weight:800;color:var(--mute)}
+.cm-side{background:linear-gradient(160deg,var(--bg2),color-mix(in srgb,var(--bg2) 70%,var(--tc,var(--mute))));border-radius:18px;padding:10px;display:grid;justify-items:center;gap:2px;color:var(--ink)}
+.cm-side img{width:90px;height:90px;object-fit:contain;filter:drop-shadow(2px 3px 2px rgba(0,0,0,.35))}
+.cm-side small{color:var(--mute)}.cm-ph{width:90px;height:90px;display:grid;place-items:center;font-size:38px;color:var(--mute)}
+.cm-pick input{width:100%;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);outline:none;margin-bottom:6px}
+.cm-res{max-height:42vh;overflow:auto;border-radius:12px;background:var(--bg)}
+.cm-res div{padding:8px 12px;display:flex;gap:8px;cursor:pointer}.cm-res div:hover{background:color-mix(in srgb,var(--gold) 25%,transparent)}
+.cm-res i{font-style:normal;color:var(--mute);min-width:44px}.cm-res u{margin-left:auto;text-decoration:none;color:var(--ok);font-weight:700}
+.cr{display:grid;grid-template-columns:62px 1fr 62px;gap:8px;align-items:center;margin:7px 0}
+.cr>b{text-align:center;font-weight:500;font-variant-numeric:tabular-nums}.cr>b.win{font-weight:800;color:var(--red)}.cr>b.win:before{content:"▲ ";font-size:9px}
+.cmid{display:grid;gap:3px;text-align:center;font-size:12px;color:var(--mute)}
+.cbars{display:grid;grid-template-columns:1fr 1fr;gap:3px}.cbars i{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;display:flex}
+.cbars i.l{justify-content:flex-end}.cbars u{display:block;height:100%;border-radius:4px}
+.cm-note{display:block;text-align:center;margin:8px 0 12px}
 /* ---------- Favoris ---------- */
 .slot>.fav{position:absolute;top:4px;right:5px;z-index:4;width:30px;height:30px;padding:0;border-radius:50%;background:none;color:var(--mute);font-size:19px;line-height:1;opacity:.55;display:grid;place-items:center;overflow:visible}
 .slot.isfav>.fav{color:var(--gold2);opacity:1;text-shadow:0 1px 4px rgba(0,0,0,.35)}
@@ -404,6 +428,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <button class="btn icon" id="moretoggle" title="Filtres et options" aria-expanded="false">⚙</button>
       <button class="btn gold prof-only" id="add"><span class="plus">＋</span><span class="lbl"> Ajouter des images</span></button>
       <div class="more" id="more">
+      <button class="btn" id="statbtn" title="Statistiques de ma collection">📊<span class="olbl"> Statistiques</span><span class="lbl2"></span></button>
       <button class="btn prof-only" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
       <span class="sp"></span>
       <label class="range" title="Taille des cartes"><span class="olbl">Taille des cartes&nbsp;</span>▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
@@ -412,6 +437,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇<span class="olbl"> Sauvegarder</span></button>
       <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆<span class="olbl"> Restaurer</span></button>
       <input type="file" id="impf" accept=".pkdx,.json,application/json,application/octet-stream" hidden>
+      <button class="btn" id="cloudbtn" hidden title="Envoyer une sauvegarde vers Drive, mail…">☁️<span class="olbl"> Envoyer ma sauvegarde</span></button>
+      <button class="btn prof-only" id="autobtn" title="Le fichier choisi est mis à jour automatiquement">📁 Auto-sauvegarde dans un fichier</button>
       <button class="btn tg" id="tghap" title="Vibrations">📳 Vibrations</button><button class="btn tg" id="tgsfx" title="Sons">🔊 Sons</button>
       <div class="bkinfo prof-only" id="bkinfo"></div>
       </div>
@@ -436,12 +463,23 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <canvas id="fx"></canvas>
 
 <dialog id="view">
-  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vfav" title="Favori" style="width:34px;font-size:18px">☆</button><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨ FX</button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
+  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vshare" title="Partager une carte" style="width:34px;font-size:16px">📤</button><button class="x" id="vfav" title="Favori" style="width:34px;font-size:18px">☆</button><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨ FX</button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
   <div class="v-stage" id="vstage"><div class="v-holo"></div><canvas id="vfxb" class="vfx"></canvas><div class="v-card"><img id="vimg" alt=""><div class="v-glare"></div></div><canvas id="vfxf" class="vfx" style="z-index:1"></canvas><button class="v-logo" id="vlogo" title="Fiche Pokédex" aria-label="Fiche Pokédex"><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="2.5" width="18" height="19" rx="3.5" fill="#e0323f" stroke="#1b1d25" stroke-width="1.6"/><circle cx="8.2" cy="7.4" r="2.1" fill="#59d4ff" stroke="#1b1d25" stroke-width="1.2"/><rect x="6" y="12" width="12" height="2" rx="1" fill="#fff"/><rect x="6" y="16" width="8" height="2" rx="1" fill="#fff"/></svg></button></div>
   <div class="v-sheet" id="vsheet"></div>
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
   <div class="vers" id="vvers" style="justify-content:center;padding:0 16px"></div>
   <div class="v-nav"><button class="b" id="vprev">←</button><em id="vcount"></em><button class="b" id="vnext">→</button></div>
+</dialog>
+
+<dialog id="sdlg">
+  <div class="dh"><h2>📊 Ma collection</h2><button class="x" id="sclose">✕</button></div>
+  <div class="fbody" id="sbody"></div>
+  <div class="ffoot"><button class="b gold" id="swall" style="flex:1">📤 Partager le mur de ma collection</button></div>
+</dialog>
+
+<dialog id="cdlg">
+  <div class="dh"><h2>⚖️ Comparer</h2><button class="x" id="cclose">✕</button></div>
+  <div class="fbody" id="cbody"></div>
 </dialog>
 
 <dialog id="fdlg">
@@ -1078,7 +1116,7 @@ dlg.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key ===
 /* ---------- Rappels de sauvegarde ---------- */
 const bk = {
   get dirty() { return +ls.get('dirty', 0); }, get last() { return +ls.get('lastbackup', 0); },
-  touch() { ls.set('dirty', this.dirty + 1); this.ui(); if (this.dirty % 10 === 0) this.remind(); },
+  touch() { ls.set('dirty', this.dirty + 1); this.ui(); if (typeof autoSoon === 'function') autoSoon(); if (this.dirty % 10 === 0 && !(typeof autoHandle !== 'undefined' && autoHandle)) this.remind(); },
   done() { ls.set('dirty', 0); ls.set('lastbackup', Date.now()); this.ui(); },
   ago() { if (!this.last) return 'jamais'; const d = (Date.now() - this.last) / 864e5; return d < 1 ? 'aujourd’hui' : d < 2 ? 'hier' : `il y a ${Math.floor(d)} j`; },
   ui() { const el = $('#bkinfo'); if (!el) return; el.textContent = `💾 Dernière sauvegarde : ${this.ago()}${this.dirty ? ` · ${this.dirty} modification${this.dirty > 1 ? 's' : ''} non sauvegardée${this.dirty > 1 ? 's' : ''}` : ''}`; $('#exp').classList.toggle('dirty', this.dirty > 0); $('#exp').title = el.textContent + ' — cliquer pour sauvegarder'; },
@@ -1088,12 +1126,15 @@ const bk = {
 /* ---------- Sauvegarde / restauration ---------- */
 // Format .pkdx : "PKDX3\n" + longueur de l'en-tête (4 octets) + en-tête JSON + images PNG brutes (léger en mémoire, sans base64)
 const MAGIC = 'PKDX3\n';
-async function doExport() {
-  if (!store.vers.size) { toast('Rien à sauvegarder pour le moment'); return; }
+function buildPkdx() {
   const entries = [], parts = [];
   for (const vs of store.vers.values()) for (const v of vs) { entries.push({ key: v.key, label: v.label || '', size: v.blob.size, type: v.blob.type || 'image/png' }); parts.push(v.blob); }
   const head = new TextEncoder().encode(JSON.stringify({ v: 3, date: new Date().toISOString(), entries, favs: [...favs] })), len = new Uint8Array(4); new DataView(len.buffer).setUint32(0, head.length, true);
-  const blob = new Blob([MAGIC, len, head, ...parts], { type: 'application/octet-stream' });
+  return { blob: new Blob([MAGIC, len, head, ...parts], { type: 'application/octet-stream' }), entries };
+}
+async function doExport() {
+  if (!store.vers.size) { toast('Rien à sauvegarder pour le moment'); return; }
+  const { blob, entries } = buildPkdx();
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `pokedex-sauvegarde-${new Date().toISOString().slice(0, 10)}.pkdx`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
   bk.done(); toast(`💾 Sauvegarde de ${entries.length} image(s) téléchargée (${(blob.size / 1048576).toFixed(1)} Mo)`);
@@ -1360,7 +1401,7 @@ async function renderSheet(id) {
   const edges = INFO.chains[d.ch] || [], nm = i => `<a data-go="${i}" class="${i === id ? 'cur' : ''}">${esc(P[i - 1][1])}</a>`;
   const evo = edges.length ? edges.map(([a, b, c]) => `<div>${nm(a)} → ${nm(b)} <em>(${esc(c)})</em></div>`).join('') : '<div><em>Ne possède aucune évolution ni pré-évolution.</em></div>';
   box.innerHTML = `
-    <div class="sh-top">${it ? `<img src="${it.turl || it.url}" alt="">` : ''}<div><h3>#${pad(id)} ${esc(fr)}</h3><small>${esc(d.g)}${fr !== en ? ' · ' + esc(en) : ''}</small><div>${tch}</div></div><button class="b" id="shback">← Sticker</button></div>
+    <div class="sh-top">${it ? `<img src="${it.turl || it.url}" alt="">` : ''}<div><h3>#${pad(id)} ${esc(fr)}</h3><small>${esc(d.g)}${fr !== en ? ' · ' + esc(en) : ''}</small><div>${tch}</div></div><div style="margin-left:auto;display:grid;gap:6px"><button class="b" id="shback">← Sticker</button><button class="b" id="shcmp">⚖️ Comparer</button></div></div>
     <section class="sh-desc"><h4>📖 Description du Pokédex</h4>
       <p>${d.r ? esc(d.r) : d.m.map(esc).join(' ')}</p>
       <small>Fusion de ${d.d.length} entrée${d.d.length > 1 ? 's' : ''} différente${d.d.length > 1 ? 's' : ''} issues de ${nGames} jeu${nGames > 1 ? 'x' : ''} — fusionnées en un seul texte, sans répétition.</small>
@@ -1374,7 +1415,7 @@ async function renderSheet(id) {
     <section><h4>Statistiques de base</h4><div class="bars">${bars}</div></section>
     <section><h4>Évolutions</h4><div class="evo">${evo}</div></section>
     ${d.dx.length ? `<section><h4>Numéros dans les Pokédex régionaux</h4><div class="dexn">${d.dx.map(([n, k]) => `<span>${esc(n)} <b>#${String(k).padStart(3, '0')}</b></span>`).join('')}</div></section>` : ''}`;
-  $('#shback').onclick = () => setSheet(false);
+  $('#shback').onclick = () => setSheet(false); $('#shcmp').onclick = () => openCompare(id);
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = () => { const g = +a.dataset.go; if (g === id) return; if (store.items.has(g) && !cards.get(g).el.hidden) { vi = vIds.indexOf(g); if (vi < 0) { vIds.push(g); vi = vIds.length - 1; } vv = 0; showV(1); } else toast(store.items.has(g) ? 'Ce Pokémon est masqué par les filtres' : `${P[g - 1][1]} n’est pas encore dans ta collection`); });
 }
 /* ---------- Ressenti : vibrations, sons, ondulations, dock ---------- */
@@ -1417,6 +1458,119 @@ function sheetDrag(d) {
 sheetDrag($('#dlg')); sheetDrag($('#view')); sheetDrag(fdlg);
 fdlg.addEventListener('cancel', e => { e.preventDefault(); closeD(fdlg); }); fdlg.addEventListener('click', e => { if (e.target === fdlg) closeD(fdlg); });
 
+/* ---------- Statistiques, partage, comparaison, sauvegarde cloud ---------- */
+for (const d of [$('#sdlg'), $('#cdlg')]) { sheetDrag(d); d.addEventListener('cancel', e => { e.preventDefault(); closeD(d); }); d.addEventListener('click', e => { if (e.target === d) closeD(d); }); }
+$('#sclose').onclick = () => closeD($('#sdlg')); $('#cclose').onclick = () => closeD($('#cdlg'));
+
+/* --- Statistiques --- */
+function renderStats() {
+  const per = genCounts(), gens = Object.keys(per).map(Number).sort((a, b) => a - b), total = gens.reduce((a, g) => a + genTotal[g], 0), n = store.items.size, pct = total ? n / total * 100 : 0;
+  const tc = {}; for (const [id, c] of cards) if (per[c.gen]) for (const t of c.types) { (tc[t] ||= [0, 0])[1]++; if (store.items.has(id)) tc[t][0]++; }
+  const extra = [...store.vers.values()].reduce((a, v) => a + v.length - 1, 0), C = 2 * Math.PI * 54;
+  const best = Object.entries(tc).filter(([, v]) => v[1] >= 3).sort((a, b) => b[1][0] / b[1][1] - a[1][0] / a[1][1])[0];
+  const full = gens.filter(g => per[g] === genTotal[g]).length;
+  $('#sbody').innerHTML = `
+    <div class="st-top"><svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="60" r="54" fill="none" stroke="var(--bg2)" stroke-width="12"/>
+      <circle cx="60" cy="60" r="54" fill="none" stroke="var(--red)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct / 100)}" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s var(--ease)"/>
+      <text x="60" y="58" text-anchor="middle" font-size="26" font-weight="800" fill="currentColor">${Math.round(pct)}%</text><text x="60" y="76" text-anchor="middle" font-size="11" fill="var(--mute)">${n} / ${total || 0}</text></svg>
+      <div class="st-facts"><div><b>${favs.size}</b> ⭐ favori${favs.size > 1 ? 's' : ''}</div><div><b>${extra}</b> version${extra > 1 ? 's' : ''} alternative${extra > 1 ? 's' : ''}</div><div><b>${full}</b> génération${full > 1 ? 's' : ''} complète${full > 1 ? 's' : ''}</div>${best ? `<div>Type le plus complet : <b>${TEMOJI[best[0]]} ${TYPES[best[0]][0]}</b> (${Math.round(best[1][0] / best[1][1] * 100)} %)</div>` : ''}</div></div>
+    <h4>Par génération</h4>${gens.map(g => `<div class="st-row" data-g="${g}"><span>Gén. ${GEN[g - 1]}</span><i><u style="width:${per[g] / genTotal[g] * 100}%"></u></i><em>${per[g]}/${genTotal[g]}</em></div>`).join('') || '<small>Rien pour le moment</small>'}
+    <h4>Par type</h4>${Object.keys(TYPES).filter(t => tc[t]).map(t => `<div class="st-row" data-t="${t}"><span>${TEMOJI[t]} ${TYPES[t][0]}</span><i><u style="width:${tc[t][0] / tc[t][1] * 100}%;background:${TYPES[t][1]}"></u></i><em>${tc[t][0]}/${tc[t][1]}</em></div>`).join('')}`;
+}
+$('#sbody').onclick = e => { const r = e.target.closest('.st-row'); if (!r) return; hap(8); if (r.dataset.g) { fGen = +r.dataset.g; } else { fTypes = new Set([+r.dataset.t]); } closeD($('#sdlg')); refresh(true); scrollTo({ top: 0, behavior: 'smooth' }); };
+$('#statbtn').onclick = () => { renderStats(); $('#sdlg').showModal(); toggleOptions(false); };
+
+/* --- Partage (carte d'un Pokémon, mur de la collection) --- */
+async function shareBlob(blob, name, text) {
+  const f = new File([blob], name, { type: blob.type });
+  try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: 'Mon Pokédex', text }); return; } } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 30000); toast('🖼 Image téléchargée');
+}
+const imgFrom = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+const rrect = (c, x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+async function renderCard(id) {
+  const [, fr, , , , , types] = P[id - 1], it = store.items.get(id); if (!it) return null;
+  try { await document.fonts.load('800 90px "Bricolage Grotesque"'); } catch {}
+  let genus = ''; try { await loadInfo(); genus = INFO.s[id].g; } catch {}
+  const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d'), c1 = TYPES[types[0]][1], c2 = TYPES[types[1] || types[0]][1];
+  let g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#171923'); g.addColorStop(1, '#0d0f16'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  for (const [col, x, y, r] of [[c1, 300, 420, 760], [c2, 820, 900, 620]]) { const rg = c.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, col + 'aa'); rg.addColorStop(1, col + '00'); c.fillStyle = rg; c.fillRect(0, 0, W, H); }
+  c.globalAlpha = .1; c.font = '420px sans-serif'; c.textAlign = 'center'; c.fillText(TEMOJI[types[0]], 200, 360); c.fillText(TEMOJI[types[1] || types[0]], 900, 1120); c.globalAlpha = 1;
+  rrect(c, 40, 40, W - 80, H - 80, 56); c.strokeStyle = 'rgba(255,255,255,.18)'; c.lineWidth = 4; c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.7)'; c.font = '600 44px "Bricolage Grotesque", sans-serif'; c.textAlign = 'left'; c.fillText('#' + pad(id), 90, 128); c.textAlign = 'right'; c.fillText(TEMOJI[types[0]] + (types[1] ? TEMOJI[types[1]] : ''), W - 90, 128);
+  const im = await imgFrom(it.url), k = Math.min(860 / im.naturalWidth, 800 / im.naturalHeight), w = im.naturalWidth * k, h = im.naturalHeight * k;
+  c.save(); c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 50; c.shadowOffsetY = 26; c.drawImage(im, (W - w) / 2, 170 + (800 - h) / 2, w, h); c.restore();
+  c.textAlign = 'center'; c.fillStyle = '#fff'; c.font = '800 104px "Bricolage Grotesque", sans-serif'; c.fillText(fr, W / 2, 1090);
+  if (genus) { c.fillStyle = 'rgba(255,255,255,.65)'; c.font = '500 40px "Bricolage Grotesque", sans-serif'; c.fillText(genus, W / 2, 1150); }
+  c.font = '700 38px "Bricolage Grotesque", sans-serif'; const ws = types.map(t => c.measureText(TYPES[t][0]).width + 64), tot = ws.reduce((a, b) => a + b, 0) + 20 * (types.length - 1); let x = (W - tot) / 2;
+  types.forEach((t, i) => { rrect(c, x, 1180, ws[i], 64, 32); c.fillStyle = TYPES[t][1]; c.fill(); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(TYPES[t][0], x + ws[i] / 2, 1224); x += ws[i] + 20; });
+  c.fillStyle = 'rgba(255,255,255,.45)'; c.font = '500 32px "Bricolage Grotesque", sans-serif'; c.fillText(`Mon Pokédex · ${store.items.size} Pokémon`, W / 2, 1296);
+  return await new Promise(r => cv.toBlob(r, 'image/png'));
+}
+$('#vshare').onclick = async () => { const id = vIds[vi]; toast('🖼 Création de la carte…', null, null, 1500); const b = await renderCard(id); if (b) shareBlob(b, `pokedex-${pad(id)}-${P[id-1][2].toLowerCase()}.png`, `${P[id-1][1]} dans mon Pokédex !`); };
+async function renderWall() {
+  const ids = [...store.items.keys()].sort((a, b) => ordIdx[a] - ordIdx[b]), N = ids.length; if (!N) return null;
+  try { await document.fonts.load('800 90px "Bricolage Grotesque"'); } catch {}
+  const W = 1800, M = 60, cols = Math.max(4, Math.ceil(Math.sqrt(N * 1.15))), cell = Math.floor((W - 2 * M) / cols), rows = Math.ceil(N / cols), HEAD = 260, H = HEAD + rows * cell + 140;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d'), g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#171923'); g.addColorStop(1, '#0d0f16'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#fff'; c.font = '800 96px "Bricolage Grotesque", sans-serif'; c.textAlign = 'left'; c.fillText('Mon Pokédex', M, 130);
+  const per = genCounts(), total = Object.keys(per).reduce((a, k) => a + genTotal[k], 0); c.fillStyle = '#ffd84d'; c.font = '700 60px "Bricolage Grotesque", sans-serif'; c.textAlign = 'right'; c.fillText(`${N} / ${total}`, W - M, 130);
+  c.fillStyle = 'rgba(255,255,255,.14)'; rrect(c, M, 170, W - 2 * M, 22, 11); c.fill(); c.fillStyle = '#ffd84d'; rrect(c, M, 170, Math.max(22, (W - 2 * M) * N / total), 22, 11); c.fill();
+  for (let i = 0; i < N; i++) { const it = store.items.get(ids[i]); try { const im = await imgFrom(it.turl || it.url), x = M + (i % cols) * cell, y = HEAD + Math.floor(i / cols) * cell, p = cell * .06, k = Math.min((cell - 2 * p) / im.naturalWidth, (cell - 2 * p) / im.naturalHeight);
+    c.drawImage(im, x + (cell - im.naturalWidth * k) / 2, y + (cell - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k); } catch {} }
+  c.fillStyle = 'rgba(255,255,255,.45)'; c.font = '500 36px "Bricolage Grotesque", sans-serif'; c.textAlign = 'center'; c.fillText(new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, H - 60);
+  return await new Promise(r => cv.toBlob(r, 'image/png'));
+}
+$('#swall').onclick = async () => { toast('🖼 Création du mur…', null, null, 2500); const b = await renderWall(); if (b) shareBlob(b, 'ma-collection-pokedex.png', `Ma collection : ${store.items.size} Pokémon !`); };
+
+/* --- Comparaison de deux Pokémon --- */
+let cmp = { a: 0, b: 0, pick: null };
+async function openCompare(a) { cmp = { a, b: 0, pick: 'b' }; $('#cdlg').showModal(); renderCompare(); }
+async function renderCompare() {
+  const box = $('#cbody'); if (!INFO) { box.innerHTML = '<div class="sh-load">Chargement…</div>'; try { await loadInfo(); } catch { box.innerHTML = '<div class="sh-load">Données indisponibles.</div>'; return; } }
+  const side = (id, key) => { if (!id) return `<button class="cm-side empty" data-pick="${key}"><div class="cm-ph">＋</div><b>Choisir</b></button>`; const it = store.items.get(id), t = P[id - 1][6];
+    return `<button class="cm-side" data-pick="${key}" style="--tc:${TYPES[t[0]][1]}">${it ? `<img src="${it.turl || it.url}" alt="">` : '<div class="cm-ph">?</div>'}<b>${esc(P[id - 1][1])}</b><small>#${pad(id)} ${t.map(x => TEMOJI[x]).join('')}</small></button>`; };
+  let html = `<div class="cm-top">${side(cmp.a, 'a')}<span class="cm-vs">VS</span>${side(cmp.b, 'b')}</div>`;
+  if (cmp.pick) { html += `<div class="cm-pick"><input id="cq" type="search" placeholder="Chercher le ${cmp.pick === 'a' ? 'premier' : 'second'} Pokémon…" autocomplete="off"><div id="cres" class="cm-res"></div></div>`; box.innerHTML = html; const q = $('#cq'); const draw = () => { const k = norm(q.value.trim()); const arr = P.filter(p => !k || cards.get(p[0]).key.includes(k)).slice(0, 40);
+      $('#cres').innerHTML = arr.map(p => `<div data-id="${p[0]}"><i>#${pad(p[0])}</i>${esc(p[1])}${store.items.has(p[0]) ? '<u>✓</u>' : ''}</div>`).join(''); }; q.oninput = draw; draw(); q.focus();
+    $('#cres').onclick = e => { const r = e.target.closest('[data-id]'); if (!r) return; cmp[cmp.pick] = +r.dataset.id; cmp.pick = !cmp.b ? 'b' : (!cmp.a ? 'a' : null); hap(8); renderCompare(); }; }
+  else if (cmp.a && cmp.b) {
+    const A = INFO.s[cmp.a], B = INFO.s[cmp.b], names = ['PV', 'Attaque', 'Défense', 'Att. Spé.', 'Déf. Spé.', 'Vitesse'], ca = TYPES[P[cmp.a - 1][6][0]][1], cb = TYPES[P[cmp.b - 1][6][0]][1];
+    const row = (label, x, y, max, fmt = v => v, hi = true) => { const wa = hi ? x > y : x < y, wb = hi ? y > x : y < x; return `<div class="cr"><b class="${wa ? 'win' : ''}">${fmt(x)}</b><div class="cmid"><span>${label}</span><div class="cbars"><i class="l"><u style="width:${Math.min(100, x / max * 100)}%;background:${ca}"></u></i><i class="r"><u style="width:${Math.min(100, y / max * 100)}%;background:${cb}"></u></i></div></div><b class="${wb ? 'win' : ''}">${fmt(y)}</b></div>`; };
+    html += `<div class="cm-rows">${row('Taille', A.h, B.h, Math.max(A.h, B.h, 1), v => (v / 10) + ' m', true)}${row('Poids', A.w, B.w, Math.max(A.w, B.w, 1), v => (v / 10) + ' kg', true)}
+      ${A.st.map((v, i) => row(names[i], v, B.st[i], 200)).join('')}${row('Total', A.st.reduce((p, q) => p + q, 0), B.st.reduce((p, q) => p + q, 0), 720)}</div><small class="cm-note">▲ en gras = la plus haute valeur</small>`;
+    box.innerHTML = html;
+  } else box.innerHTML = html;
+  box.querySelectorAll('.cm-side').forEach(b => b.onclick = () => { cmp.pick = b.dataset.pick; renderCompare(); });
+}
+
+/* --- Sauvegarde cloud : partage (Drive, mail…) et auto-sauvegarde dans un fichier --- */
+const metaDB = new Promise((res, rej) => { const r = indexedDB.open('pokedex-meta', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const kvGet = async k => { const d = await metaDB; return new Promise(r => { const q = d.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => r(q.result); q.onerror = () => r(null); }); };
+const kvSet = async (k, v) => { const d = await metaDB; return new Promise(r => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = r; t.onerror = r; }); };
+let autoHandle = null, autoTimer = 0;
+function updAuto() { const b = $('#autobtn'); if (!b) return; b.classList.toggle('on', !!autoHandle); b.textContent = autoHandle ? `📁 Auto-sauvegarde : ${autoHandle.name}` : '📁 Auto-sauvegarde dans un fichier'; }
+async function autoWrite(manual) {
+  if (!autoHandle || !store.vers.size) return;
+  try { if ((await autoHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') { if (manual && (await autoHandle.requestPermission({ mode: 'readwrite' })) !== 'granted') return; else if (!manual) return; }
+    const { blob } = buildPkdx(), w = await autoHandle.createWritable(); await w.write(blob); await w.close(); bk.done(true); if (manual) toast('☁️ Sauvegarde automatique à jour'); } catch (e) { console.warn(e); }
+}
+function autoSoon() { if (!autoHandle) return; clearTimeout(autoTimer); autoTimer = setTimeout(() => autoWrite(false), 15000); }
+async function autoInit() {
+  if (!window.showSaveFilePicker) { $('#autobtn').hidden = true; return; }
+  try { autoHandle = await kvGet('handle'); } catch {} updAuto();
+  if (autoHandle && (await autoHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') toast('📁 Auto-sauvegarde en pause', 'Réactiver', () => autoWrite(true), 15000);
+}
+$('#autobtn').onclick = async () => {
+  if (autoHandle) { if (confirm('Désactiver l’auto-sauvegarde dans ce fichier ?')) { autoHandle = null; await kvSet('handle', null); updAuto(); } return; }
+  try { autoHandle = await showSaveFilePicker({ suggestedName: 'pokedex-auto.pkdx', types: [{ description: 'Sauvegarde Pokédex', accept: { 'application/octet-stream': ['.pkdx'] } }] });
+    await kvSet('handle', autoHandle); updAuto(); await autoWrite(true); toast('📁 Auto-sauvegarde activée : le fichier se met à jour tout seul (dossier Drive/Dropbox synchronisé = cloud)', null, null, 7000); } catch {}
+};
+$('#cloudbtn').hidden = !navigator.share;
+$('#cloudbtn').onclick = async () => { if (!store.vers.size) return toast('Rien à envoyer pour le moment'); const { blob } = buildPkdx(); const f = new File([blob], `pokedex-${new Date().toISOString().slice(0, 10)}.pkdx`, { type: 'application/octet-stream' });
+  try { await navigator.share({ files: [f], title: 'Sauvegarde Pokédex' }); bk.done(); toast('☁️ Envoyée'); } catch (e) { if (e.name !== 'AbortError') { toast('Partage impossible ici : téléchargement du fichier…'); doExport(); } } };
+$('#cloudbtn').onclick; // (reste masqué si le partage de fichiers n'est pas disponible)
+
 /* ---------- Appli installable, hors ligne, mises à jour ---------- */
 const BUILD = document.querySelector('meta[name=build]')?.content;
 async function checkUpdate() {
@@ -1437,7 +1591,7 @@ addEventListener('appinstalled', () => { $('#install').hidden = true; toast('�
 try { navigator.storage?.persist?.(); } catch {} // demande au navigateur de ne pas effacer les stickers automatiquement
 setMode(mode, false);
 buildGrid(); applySort(); initReveal(); refresh(true);
-store.load().then(() => { loaded = true; bk.startup(); for (const id of store.items.keys()) paint(id); refresh(true); });
+store.load().then(() => { loaded = true; bk.startup(); autoInit(); for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
 </body>
 </html>
