@@ -2,9 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mon Pokédex</title>
-<meta name="build" content="2026-11-26.2">
+<meta name="build" content="2026-11-28.1">
 <meta name="theme-color" content="#e0323f">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pokédex"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -246,7 +246,45 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
 .evo em{font-style:normal;color:var(--mute)}
 .dexn{display:flex;flex-wrap:wrap;gap:6px}.dexn span{background:var(--bg2);border-radius:99px;padding:3px 11px;font-size:13px}
 .sh-load{padding:30px;text-align:center;color:var(--mute)}
+/* ---------- Ressenti « en main » ---------- */
+.bar{padding-top:calc(10px + env(safe-area-inset-top))}
+.slot:active{scale:.96;transition:scale .08s}
+.btn,.b,.dock button,.chip{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.2;transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none;z-index:5}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+.slot.pre{opacity:0;transform:translateY(26px) scale(.92)}
+.slot.in{animation:cardIn .55s var(--ease) backwards;animation-delay:calc(var(--i,0)*45ms)}
+@keyframes flipIn{from{transform:perspective(900px) rotateY(-80deg);opacity:0}to{transform:none;opacity:1}}
+#view.sheet .v-sheet{animation:flipIn .45s var(--ease)}
+.v-card.settle{transition:transform .2s,translate .35s var(--ease),rotate .35s var(--ease)!important}
+.tg{opacity:.75}.tg.on{background:#fff;color:var(--red2);opacity:1}
+.cta{display:inline-block;margin-top:14px;padding:12px 22px;font-size:16px}
+.dock{display:none}
+@keyframes sheetIn{from{transform:translateY(100%)}}
+@keyframes sheetOut{to{transform:translateY(100%)}}
+@media(max-width:700px){
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .dock{display:flex;position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;gap:2px;padding:6px 8px;border-radius:30px;align-items:flex-end;
+    background:color-mix(in srgb,var(--card) 78%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.5);backdrop-filter:blur(16px) saturate(1.5);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.28);transition:transform .4s var(--ease),opacity .3s}
+  .dock.hide{transform:translate(-50%,150%);opacity:0}
+  .dock button{background:none;color:var(--ink);width:58px;height:52px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0}
+  .dock button .ic{font-size:21px;line-height:1;transition:transform .3s var(--ease)}
+  .dock button small{font-size:10px;font-weight:600;color:var(--mute)}
+  .dock button:active .ic{transform:scale(.8)}
+  .dock .main{width:64px;height:64px;margin:-26px 4px 0;border-radius:50%;background:linear-gradient(180deg,#ff5a68,var(--red2));color:#fff;box-shadow:0 8px 20px rgba(224,50,63,.55),inset 0 2px 0 rgba(255,255,255,.35);border:3px solid var(--card)}
+  .dock .main .ic{font-size:30px;font-weight:300}
+  #toasts{bottom:calc(104px + env(safe-area-inset-bottom))}
+  .fab{display:none}
+  dialog{max-width:100%;margin-block:auto 0;border-radius:26px 26px 0 0;max-height:calc(100dvh - 28px);will-change:transform}
+  dialog[open]{animation:sheetIn .42s var(--ease)}
+  dialog.closing{animation:sheetOut .22s ease-in forwards}
+  .dh{position:relative;padding-top:22px;touch-action:none}
+  .dh:before{content:"";position:absolute;top:8px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:rgba(255,255,255,.55)}
+  .actions{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+  .v-nav{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+}
 /* ---------- Retouche ---------- */
+.retouch[hidden]{display:none}
 .retouch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
 .seg2{display:flex;background:var(--card);border-radius:11px;padding:3px}
 .seg2 button{background:none;padding:5px 10px;border-radius:8px;font-weight:500;color:var(--ink)}
@@ -276,8 +314,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 .v-info .tchip{display:inline-block;color:#fff;font-size:12px;font-weight:600;font-size:12px;padding:1px 10px;border-radius:99px;margin:0 3px;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 #vgyro{width:auto;padding:0 11px;font-size:13px}#vgyro.on{background:var(--gold);color:#4a3300}
 .v-card img{width:100%;height:100%;object-fit:contain;display:block}
-.v-card{position:absolute;inset:6%;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .2s;
-  translate:var(--tx,0px) var(--ty,0px);filter:drop-shadow(calc(var(--sh)*1.5 + var(--sx,0px)) calc(var(--sh)*2 + var(--sy,0px)) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
+.v-card{position:absolute;inset:6%;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .2s;--dx:0px;--dy:0px;--rot:0deg;
+  translate:calc(var(--tx,0px) + var(--dx)) calc(var(--ty,0px) + var(--dy));rotate:var(--rot);filter:drop-shadow(calc(var(--sh)*1.5 + var(--sx,0px)) calc(var(--sh)*2 + var(--sy,0px)) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
 .v-card img.inR{animation:inR .4s var(--ease)}.v-card img.inL{animation:inL .4s var(--ease)}
 @keyframes inR{from{opacity:0;translate:60px 0;scale:.85}}@keyframes inL{from{opacity:0;translate:-60px 0;scale:.85}}
 .v-info{text-align:center;padding:0 16px 4px}
@@ -343,6 +381,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
       <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇</button>
       <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆</button>
       <input type="file" id="impf" accept=".pkdx,.json,application/json,application/octet-stream" hidden>
+      <button class="btn tg" id="tghap" title="Vibrations">📳 Vibrations</button><button class="btn tg" id="tgsfx" title="Sons">🔊 Sons</button>
       <div class="bkinfo prof-only" id="bkinfo"></div>
       </div>
     </div>
@@ -354,6 +393,13 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   <div class="empty-msg" id="none" hidden><b>🫥</b>Aucun Pokémon ne correspond.</div>
 </main>
 <button class="btn gold fab" id="top" title="Remonter">↑</button>
+<nav class="dock" id="dock" aria-label="Navigation">
+  <button id="dkmode" aria-label="Changer de mode"><span class="ic">🔭</span><small>Explorer</small></button>
+  <button id="dksearch" aria-label="Rechercher"><span class="ic">🔍</span><small>Chercher</small></button>
+  <button class="main" id="dkmain" aria-label="Ajouter"><span class="ic">＋</span></button>
+  <button id="dkopts" aria-label="Options"><span class="ic">⚙️</span><small>Options</small></button>
+  <button id="dktop" aria-label="Haut de page"><span class="ic">⬆️</span><small>Haut</small></button>
+</nav>
 <div class="dragveil" id="veil">📥 Lâche l'image pour l'ajouter</div>
 <div id="toasts"></div>
 <canvas id="fx"></canvas>
@@ -468,7 +514,7 @@ function toast(msg, action, fn, ms = 4500) {
   const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `<span>${msg}</span>`;
   const kill = () => { t.classList.add('out'); setTimeout(() => t.remove(), 300); };
   if (action) { const b = document.createElement('button'); b.textContent = action; b.onclick = () => { fn(); kill(); }; t.appendChild(b); }
-  $('#toasts').appendChild(t); setTimeout(kill, ms);
+  const tc = $('#toasts'); while (tc.children.length >= 3) tc.firstChild.remove(); tc.appendChild(t); setTimeout(kill, ms);
 }
 const fx = $('#fx'), fc = fx.getContext('2d'); let parts = [], raf = 0;
 function confetti(x, y, n = 36, big = false) {
@@ -552,11 +598,12 @@ function refresh(animate) {
     const have = store.items.has(id);
     const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have) && !(mode === 'explorer' && onlyHave && !have);
     c.el.hidden = !ok; shown += ok;
-    if (ok && animate && i < 48) { c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i); c.el.classList.add('in'); i++; }
+    if (ok && animate && i < 48) { c.el.classList.remove('pre'); c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i * .32); c.el.classList.add('in'); i++; }
   }
   const any = Object.keys(per).length > 0;
   $('#none').hidden = shown > 0 || !loaded;
-  $('#none').innerHTML = any ? '<b>🫥</b>Aucun Pokémon ne correspond.' : '<b>🥚</b>Ton Pokédex est vide.<br><small>Ajoute ta première image : sa génération se débloquera.</small>';
+  $('#none').innerHTML = any ? '<b>🫥</b>Aucun Pokémon ne correspond.' : '<b>🥚</b>Ton Pokédex est vide.<br><small>Ajoute ta première image : sa génération se débloquera.</small>' + (mode === 'prof' ? '<br><button class="btn gold cta" id="ctaadd">＋ Ajouter ma première image</button>' : '');
+  if ($('#ctaadd')) $('#ctaadd').onclick = () => $('#add').click();
   const n = store.items.size;
   tween($('#cn'), n);
   if (lastCount >= 0 && n > lastCount) { $('#counter').classList.remove('bump'); void $('#counter').offsetWidth; $('#counter').classList.add('bump'); }
@@ -930,15 +977,19 @@ async function save(next) {
   if (!lastCanvas || !curId) return;
   const id = curId;
   const b = await new Promise(r => lastCanvas.toBlob(r, 'image/png')); // PNG = sans aucune perte
-  const before = store.items.size, newGen = !genCounts()[P[id-1][3]]; const isAlt = curVer !== 'main'; await putV(verKey(), b, isAlt ? $('#vlabel').value.trim() : '');
+  const gN = P[id-1][3], wasFull = genCounts()[gN] === genTotal[gN], before = store.items.size, newGen = !genCounts()[gN]; const isAlt = curVer !== 'main'; await putV(verKey(), b, isAlt ? $('#vlabel').value.trim() : '');
   if (queue) { // lot : on enchaîne sans fermer la fenêtre
     paint(id, true); refresh(); queue.saved++; lastOpened = id;
-    if (newGen) { toast(`🔓 Génération ${GEN[P[id-1][3]-1]} débloquée !`); confetti(innerWidth / 2, innerHeight / 3, 120, true); }
+    hap([18, 40, 28]); sfx.pop();
+    if (newGen) { toast(`🔓 Génération ${GEN[P[id-1][3]-1]} débloquée !`); confetti(innerWidth / 2, innerHeight / 3, 120, true); hap([30, 60, 30, 60, 60]); sfx.win(); }
+    if (!wasFull && genCounts()[gN] === genTotal[gN]) { toast(`🏅 Génération ${GEN[gN-1]} complétée !`); confetti(innerWidth / 2, innerHeight / 3, 220, true); sfx.win(); }
     return advanceQueue();
   }
   closeDlg();
   setTimeout(() => {
+    hap([18, 40, 28]); sfx.pop(); if (newGen) { hap([30, 60, 30, 60, 60]); sfx.win(); }
     paint(id, true); refresh(); goTo(id); const r = cards.get(id).el.getBoundingClientRect();
+    if (!wasFull && genCounts()[gN] === genTotal[gN]) { setTimeout(() => { toast(`🏅 Génération ${GEN[gN-1]} complétée !`); confetti(innerWidth / 2, innerHeight / 3, 240, true); sfx.win(); hap([40, 60, 40, 60, 90]); }, 900); }
     setTimeout(() => confetti(r.left + r.width / 2, r.top + r.height / 2, 34), 250);
     const n = store.items.size;
     if (n > before && n % 100 === 0) { toast(`🏆 ${n} Pokémon !`); setTimeout(() => confetti(innerWidth / 2, innerHeight / 3, 160, true), 400); }
@@ -1009,10 +1060,14 @@ $('#sh').oninput = e => { setSh(e.target.value); ls.set('sh', e.target.value); }
 
 /* ---------- Modes Professeur / Explorateur ---------- */
 function setMode(m, notify) {
-  mode = m; ls.set('mode', m); document.body.dataset.mode = m;
-  document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
-  if (dlg.open) closeDlg();
-  if (notify) { toast(m === 'prof' ? '🎓 Mode Professeur : ajoute et modifie tes stickers' : '🔭 Mode Explorateur : observe ta collection'); refresh(true); }
+  const go = () => {
+    mode = m; ls.set('mode', m); document.body.dataset.mode = m;
+    document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    if (dlg.open) closeDlg(); if (typeof dockMode === 'function') dockMode();
+    if (notify) refresh(true);
+  };
+  if (notify && document.startViewTransition && !reduce) document.startViewTransition(go); else go();
+  if (notify) { hap(15); sfx.pop(); toast(m === 'prof' ? '🎓 Mode Professeur : ajoute et modifie tes stickers' : '🔭 Mode Explorateur : observe ta collection'); }
 }
 $('#mode').onclick = e => { const b = e.target.closest('button'); if (b && b.dataset.m !== mode) setMode(b.dataset.m, true); };
 
@@ -1041,12 +1096,17 @@ function showV(dir) {
   $('#vprev').disabled = $('#vnext').disabled = vIds.length < 2;
 }
 $('#vvers').onclick = e => { const b = e.target.closest('button'); if (!b) return; vv = +b.dataset.i; showV(1); };
-const vgo = d => { vv = 0; vi = (vi + d + vIds.length) % vIds.length; showV(d); };
+const vgo = d => { hap(6); vv = 0; vi = (vi + d + vIds.length) % vIds.length; showV(d); };
 $('#vprev').onclick = () => vgo(-1); $('#vnext').onclick = () => vgo(1);
 vw.addEventListener('keydown', e => { if (e.key === 'ArrowRight') vgo(1); if (e.key === 'ArrowLeft') vgo(-1); });
 let tx0 = null; const stg = $('#vstage');
-stg.addEventListener('touchstart', e => tx0 = e.touches[0].clientX, { passive: true });
-stg.addEventListener('touchend', e => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0; tx0 = null; if (Math.abs(dx) > 50) vgo(dx < 0 ? 1 : -1); });
+let ty0 = null; const vcard = $('.v-card');
+stg.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; vcard.classList.remove('settle'); }, { passive: true });
+stg.addEventListener('touchmove', e => { if (tx0 == null) return; const dx = e.touches[0].clientX - tx0, dy = e.touches[0].clientY - ty0;
+  vcard.style.setProperty('--dx', dx * .6 + 'px'); vcard.style.setProperty('--dy', dy * .35 + 'px'); vcard.style.setProperty('--rot', dx * .05 + 'deg'); }, { passive: true });
+stg.addEventListener('touchend', e => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0, dy = e.changedTouches[0].clientY - ty0; tx0 = ty0 = null;
+  vcard.classList.add('settle'); ['--dx', '--dy', '--rot'].forEach(k => vcard.style.removeProperty(k));
+  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) { hap(8); vgo(dx < 0 ? 1 : -1); } else if (dy > 90) closeD(vw); else if (dy < -90) { hap(10); setSheet(true); } });
 stg.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || reduce) return; const r = stg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   fxState.tx = (x - .5) * 2; fxState.ty = (y - .5) * 2; stg.style.setProperty('--ry', ((x - .5) * 16) + 'deg'); stg.style.setProperty('--rx', ((.5 - y) * 16) + 'deg'); stg.style.setProperty('--mx', x * 100 + '%'); stg.style.setProperty('--my', y * 100 + '%'); });
 /* ---------- Ambiance par type (mode Explorateur) ---------- */
@@ -1249,6 +1309,44 @@ async function renderSheet(id) {
   $('#shback').onclick = () => setSheet(false);
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = () => { const g = +a.dataset.go; if (g === id) return; if (store.items.has(g) && !cards.get(g).el.hidden) { vi = vIds.indexOf(g); if (vi < 0) { vIds.push(g); vi = vIds.length - 1; } vv = 0; showV(1); } else toast(store.items.has(g) ? 'Ce Pokémon est masqué par les filtres' : `${P[g - 1][1]} n’est pas encore dans ta collection`); });
 }
+/* ---------- Ressenti : vibrations, sons, ondulations, dock ---------- */
+const hap = p => { try { if (ls.get('hap', '1') === '1' && navigator.vibrate) navigator.vibrate(p); } catch {} };
+let ac; const tone = (f, t = .08, type = 'sine', v = .05, when = 0) => { if (ls.get('sfx', '0') !== '1') return; try { ac ||= new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(), t0 = ac.currentTime + when;
+  o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + t); o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + t + .02); } catch {} };
+const sfx = { tap: () => tone(520, .05, 'triangle', .04), pop: () => { tone(660, .08, 'triangle'); tone(990, .12, 'triangle', .05, .07); }, win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .2, 'triangle', .06, i * .09)) };
+for (const [id, key, lbl] of [['#tghap', 'hap', '📳 Vibrations'], ['#tgsfx', 'sfx', '🔊 Sons']]) {
+  const b = $(id), on = () => ls.get(key, key === 'hap' ? '1' : '0') === '1'; const paintT = () => { b.classList.toggle('on', on()); b.textContent = lbl + (on() ? ' : oui' : ' : non'); }; paintT();
+  b.onclick = () => { ls.set(key, on() ? '0' : '1'); paintT(); if (on()) { key === 'hap' ? hap(25) : sfx.pop(); } };
+}
+document.addEventListener('pointerdown', e => { // ondulation au toucher
+  const t = e.target.closest('.slot,.btn,.b,.dock button,.chip'); if (!t || reduce) return;
+  const r = t.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, sp = document.createElement('span'); sp.className = 'ripple';
+  sp.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`; t.appendChild(sp); setTimeout(() => sp.remove(), 650);
+  if (t.matches('.slot')) { hap(8); sfx.tap(); } else if (t.matches('.chip,.dock button')) hap(6);
+}, { passive: true });
+// dock (mobile) : se cache en descendant, revient en remontant
+const dock = $('#dock'); let lastY = scrollY;
+addEventListener('scroll', () => { const y = scrollY; if (Math.abs(y - lastY) > 10) { dock.classList.toggle('hide', y > lastY && y > 120); lastY = y; } }, { passive: true });
+function dockMode() { const prof = mode === 'prof'; $('#dkmode .ic').textContent = prof ? '🔭' : '🎓'; $('#dkmode small').textContent = prof ? 'Explorer' : 'Professeur'; $('#dkmain .ic').textContent = prof ? '＋' : '🎲'; $('#dkmain').setAttribute('aria-label', prof ? 'Ajouter des images' : 'Pokémon au hasard'); }
+$('#dkmode').onclick = () => setMode(mode === 'prof' ? 'explorer' : 'prof', true);
+$('#dksearch').onclick = () => { scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#q').focus(), 350); };
+$('#dkopts').onclick = () => { scrollTo({ top: 0, behavior: 'smooth' }); $('#moretoggle').click(); };
+$('#dktop').onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+$('#dkmain').onclick = () => { if (mode === 'prof') return $('#add').click(); const ids = [...store.items.keys()].filter(i => !cards.get(i).el.hidden); if (!ids.length) return toast('Rien à montrer pour le moment'); sfx.pop(); hap(15); openViewer(ids[Math.floor(Math.random() * ids.length)]); };
+// apparition des cartes au fil du défilement
+const io = 'IntersectionObserver' in window && !reduce ? new IntersectionObserver(es => { let k = 0; es.forEach(en => { if (en.isIntersecting) { const el = en.target; el.style.setProperty('--i', k++ % 8); el.classList.remove('pre'); el.classList.add('in'); io.unobserve(el); } }); }, { rootMargin: '60px' }) : null;
+function initReveal() { if (!io) return; for (const c of cards.values()) { c.el.classList.add('pre'); io.observe(c.el); } setTimeout(() => cards.forEach(c => c.el.classList.remove('pre')), 3000); }
+// feuilles du bas : glisser l'en-tête vers le bas pour fermer
+function sheetDrag(d) {
+  const h = d.querySelector('.dh'); let y0 = null, dy = 0, t0 = 0;
+  h.addEventListener('pointerdown', e => { if (!matchMedia('(max-width:700px)').matches || e.target.closest('button')) return; y0 = e.clientY; dy = 0; t0 = e.timeStamp; h.setPointerCapture(e.pointerId); d.style.transition = 'none'; });
+  h.addEventListener('pointermove', e => { if (y0 == null) return; dy = Math.max(0, e.clientY - y0); d.style.transform = `translateY(${dy}px)`; });
+  const end = e => { if (y0 == null) return; const v = dy / Math.max(1, e.timeStamp - t0); y0 = null; d.style.transition = '';
+    if (dy > 110 || v > .6) { d.style.transform = ''; closeD(d); hap(8); } else { d.style.transition = 'transform .3s cubic-bezier(.22,1.2,.36,1)'; d.style.transform = ''; setTimeout(() => d.style.transition = '', 320); } };
+  h.addEventListener('pointerup', end); h.addEventListener('pointercancel', end);
+}
+sheetDrag($('#dlg')); sheetDrag($('#view'));
+
 /* ---------- Appli installable, hors ligne, mises à jour ---------- */
 const BUILD = document.querySelector('meta[name=build]')?.content;
 async function checkUpdate() {
@@ -1268,7 +1366,7 @@ addEventListener('appinstalled', () => { $('#install').hidden = true; toast('�
 /* ---------- Démarrage ---------- */
 try { navigator.storage?.persist?.(); } catch {} // demande au navigateur de ne pas effacer les stickers automatiquement
 setMode(mode, false);
-buildGrid(); applySort(); refresh(true);
+buildGrid(); applySort(); initReveal(); refresh(true);
 store.load().then(() => { loaded = true; bk.startup(); for (const id of store.items.keys()) paint(id); refresh(true); });
 </script>
 </body>
