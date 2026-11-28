@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mon Pokédex</title>
-<meta name="build" content="2026-11-28.1">
+<meta name="build" content="2026-11-28.2">
 <meta name="theme-color" content="#e0323f">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pokédex"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -335,6 +335,23 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 .dragveil{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(224,50,63,.85);color:#fff;font-size:32px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
 .dragveil.on{opacity:1}
 @media(max-width:700px){header{position:relative}}
+.olbl{display:none}
+.fbadge[hidden],.dock .dot[hidden]{display:none}
+.fbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--gold);color:#4a3300;font-size:11px;font-weight:700}
+.fchips{flex-basis:100%;display:flex;gap:6px;flex-wrap:wrap;order:5}.fchips:empty{display:none}
+.fc{display:inline-flex;align-items:center;gap:6px;padding:3px 7px 3px 11px;border-radius:99px;background:rgba(255,255,255,.18);color:#fff;font-size:12.5px;font-weight:500;border:1px solid rgba(255,255,255,.28);animation:dIn .25s var(--ease)}
+.fc:hover{background:rgba(255,255,255,.3)}.fc u{text-decoration:none;opacity:.8;font-size:11px}
+#fdlg{max-width:min(560px,95vw)}
+.fbody{padding:14px 18px 4px;overflow-y:auto;flex:1;min-height:0}
+.fsec{margin-bottom:18px}.fsec h4{margin:0 0 8px;font-size:12.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--mute)}
+.fgrid{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{padding:6px 12px;border-radius:99px;background:var(--bg2);font-weight:500;display:inline-flex;gap:6px;align-items:center;font-size:14px;position:relative;overflow:hidden}
+.fchip em{font-style:normal;color:var(--mute);font-size:12px}
+.fchip.on{background:var(--red);color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2)}.fchip.on em{color:#ffffffcc}
+.fchip.t.on{background:var(--tc)}
+.fchip.full:after{content:"★";color:var(--gold2)}
+.ffoot{display:flex;gap:8px;padding:12px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);flex:none}
+.dock .dot{position:absolute;top:6px;right:12px;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--card)}
 .bkinfo{display:none;flex-basis:100%;font-size:12px;opacity:.85;color:#fff}
 #exp{position:relative}#exp.dirty:after{content:"";position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--red2)}
 .more{display:contents}#moretoggle{display:none}
@@ -349,10 +366,19 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   .lbl{display:none}#add .plus{font-size:18px;line-height:1}
   .search{flex:1 1 110px;max-width:none}.search kbd{display:none}.search input{padding-top:8px;padding-bottom:8px}
   #moretoggle{display:grid}#moretoggle.on{background:#fff;color:var(--red2)}
-  .more{display:none;flex-basis:100%;flex-wrap:wrap;gap:6px;padding:8px;background:rgba(0,0,0,.2);border-radius:14px;animation:dIn .25s var(--ease)}
-  .more.open{display:flex}
-  .more .bkinfo{display:block}
-  .more .range{display:flex}.more .sp{display:none}
+  .mode,#add,#moretoggle{display:none!important}
+  .more{display:none}
+  .more.open{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;flex-wrap:wrap;gap:8px;padding:26px 16px calc(22px + env(safe-area-inset-bottom));background:var(--card);color:var(--ink);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.4);max-height:72dvh;overflow:auto;animation:sheetIn .42s var(--ease)}
+  .more.open:before{content:"";position:absolute;top:9px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:var(--line)}
+  .more .btn{color:var(--ink);background:var(--bg2);border:1px solid var(--line);backdrop-filter:none}
+  .more .btn.on,.more .tg.on{background:var(--red);color:#fff;border-color:var(--red)}
+  .more .range{display:flex;color:var(--ink);width:100%}.more .range input{flex:1;width:auto}.more .sp{display:none}
+  .more .bkinfo{color:var(--mute);display:block}
+  .more .olbl{display:inline}.more .btn.icon{width:auto;padding:0 14px;height:40px}
+  .more .range{flex-wrap:wrap}
+  #obackdrop{position:fixed;inset:0;z-index:59;background:rgba(8,8,18,.5);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+  body.osheet #obackdrop{opacity:1;pointer-events:auto}
+  body.osheet .dock{transform:translate(-50%,150%);opacity:0}
   .chips{order:5;padding:0}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
@@ -360,6 +386,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 </head>
 <body>
 <header>
+  <div id="obackdrop"></div>
   <div class="bar">
     <div class="brand"><div class="lens"></div><h1>Mon Pokédex<small>Collection stickers</small></h1></div>
     <div class="counter" id="counter"><b id="cn">0</b><span id="ctot"></span></div>
@@ -367,25 +394,23 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
     <div class="controls">
     <div class="seg mode" id="mode"><button data-m="prof" title="Éditer : ajouter et modifier les stickers">🎓<span class="lbl"> Professeur</span></button><button data-m="explorer" title="Observer ta collection">🔭<span class="lbl"> Explorateur</span></button></div>
       <div class="search"><input type="search" id="q" placeholder="Nom ou numéro…" autocomplete="off"><kbd>/</kbd></div>
+      <button class="btn" id="fbtn" title="Filtrer et trier (génération, type, statut…)">🎚️<span class="lbl"> Filtres</span><span class="fbadge" id="fbadge" hidden></span></button>
       <button class="btn icon" id="moretoggle" title="Filtres et options" aria-expanded="false">⚙</button>
       <button class="btn gold prof-only" id="add"><span class="plus">＋</span><span class="lbl"> Ajouter des images</span></button>
       <div class="more" id="more">
-      <div class="seg" id="seg"><button data-v="all" class="on">Tous</button><button data-v="have">Obtenus</button><button data-v="miss">Manquants</button></div>
-      <div class="seg" id="sort" title="Ordre d'affichage"><button data-v="num" class="on">N°</button><button data-v="fam">👪 Familles</button></div>
-      <button class="btn explorer-only" id="onlyhave" title="Ne montrer que les Pokémon débloqués">👁 Débloqués seulement</button>
       <button class="btn prof-only" id="nextm" title="Aller au prochain Pokémon manquant">🎯 Prochain manquant</button>
       <span class="sp"></span>
-      <label class="range" title="Taille des cartes">▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
+      <label class="range" title="Taille des cartes"><span class="olbl">Taille des cartes&nbsp;</span>▫<input type="range" id="cs" min="96" max="230" value="132">▣</label>
       <button class="btn" id="install" hidden title="Installer comme une appli">📲 Installer</button>
-      <button class="btn icon" id="theme" title="Thème clair / sombre">🌓</button>
-      <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇</button>
-      <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆</button>
+      <button class="btn icon" id="theme" title="Thème clair / sombre">🌓<span class="olbl"> Thème</span></button>
+      <button class="btn icon prof-only" id="exp" title="Exporter ma collection (fichier .pkdx à importer dans un autre navigateur)">⬇<span class="olbl"> Sauvegarder</span></button>
+      <button class="btn icon prof-only" id="imp" title="Importer une sauvegarde (.pkdx)">⬆<span class="olbl"> Restaurer</span></button>
       <input type="file" id="impf" accept=".pkdx,.json,application/json,application/octet-stream" hidden>
       <button class="btn tg" id="tghap" title="Vibrations">📳 Vibrations</button><button class="btn tg" id="tgsfx" title="Sons">🔊 Sons</button>
       <div class="bkinfo prof-only" id="bkinfo"></div>
       </div>
     </div>
-    <div class="chips" id="chips"></div>
+    <div class="fchips" id="fchips"></div>
   </div>
 </header>
 <main>
@@ -395,7 +420,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <button class="btn gold fab" id="top" title="Remonter">↑</button>
 <nav class="dock" id="dock" aria-label="Navigation">
   <button id="dkmode" aria-label="Changer de mode"><span class="ic">🔭</span><small>Explorer</small></button>
-  <button id="dksearch" aria-label="Rechercher"><span class="ic">🔍</span><small>Chercher</small></button>
+  <button id="dkfilter" aria-label="Filtres"><span class="ic">🎚️</span><small>Filtres</small><i class="dot" hidden></i></button>
   <button class="main" id="dkmain" aria-label="Ajouter"><span class="ic">＋</span></button>
   <button id="dkopts" aria-label="Options"><span class="ic">⚙️</span><small>Options</small></button>
   <button id="dktop" aria-label="Haut de page"><span class="ic">⬆️</span><small>Haut</small></button>
@@ -411,6 +436,12 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
   <div class="vers" id="vvers" style="justify-content:center;padding:0 16px"></div>
   <div class="v-nav"><button class="b" id="vprev">←</button><em id="vcount"></em><button class="b" id="vnext">→</button></div>
+</dialog>
+
+<dialog id="fdlg">
+  <div class="dh"><h2>🎚️ Filtres &amp; tri</h2><button class="x" id="fclose">✕</button></div>
+  <div class="fbody" id="fbody"></div>
+  <div class="ffoot"><button class="b" id="freset">Réinitialiser</button><button class="b gold" id="fdone" style="flex:1">Voir les résultats</button></div>
 </dialog>
 
 <dialog id="dlg">
@@ -541,7 +572,7 @@ const TYPES = { 1:['Normal','#a8a77a'], 2:['Combat','#c22e28'], 3:['Vol','#a98ff
 const holoVars = (el, types) => { const c1 = TYPES[types[0]][1], c2 = TYPES[types[1] || types[0]][1]; el.style.setProperty('--h1', c1); el.style.setProperty('--h2', c2); };
 const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
 const genTotal = {}; P.forEach(p => genTotal[p[3]] = (genTotal[p[3]] || 0) + 1);
-let fGen = 0, fSt = 'all', mode = ls.get('mode', 'prof') === 'explorer' ? 'explorer' : 'prof';
+let fGen = 0, fSt = 'all', fTypes = new Set(), mode = ls.get('mode', 'prof') === 'explorer' ? 'explorer' : 'prof';
 
 function buildGrid() {
   const frag = document.createDocumentFragment();
@@ -553,15 +584,10 @@ function buildGrid() {
     el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
     el.style.setProperty('--fc', `hsl(${(chain * 137) % 360} 70% 55%)`);
     holoVars(el, types);
-    cards.set(id, { el, key: norm(fr + ' ' + en + ' ' + id + ' ' + pad(id)), gen });
+    cards.set(id, { el, key: norm(fr + ' ' + en + ' ' + id + ' ' + pad(id)), gen, types });
     frag.appendChild(el);
   }
   $('#grid').appendChild(frag);
-  // chips de génération
-  const ch = $('#chips');
-  ch.innerHTML = `<button class="chip on" data-g="0">Toutes</button>` + GEN.map((g, i) => `<button class="chip" data-g="${i+1}">Gén. ${g}<em></em></button>`).join('');
-  ch.onclick = e => { const b = e.target.closest('.chip'); if (!b) return; fGen = +b.dataset.g;
-    ch.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); refresh(true); };
 }
 function paint(id, animate) {
   const c = cards.get(id), it = store.items.get(id), pic = c.el.querySelector('.pic');
@@ -570,19 +596,16 @@ function paint(id, animate) {
     const nv = store.vers.get(id).length; if (nv > 1) { const bd = document.createElement('span'); bd.className = 'vbadge'; bd.textContent = '✦ ' + nv; bd.title = nv + ' versions'; pic.appendChild(bd); } }
   c.el.classList.toggle('empty', !it); c.el.classList.toggle('done', !!it);
 }
-let loaded = false, onlyHave = ls.get('onlyhave', '0') === '1';
-let sortMode = ls.get('sort', 'num') === 'fam' ? 'fam' : 'num', ordIdx = {};
+let loaded = false, shownCount = 0;
+let sortMode = ['num', 'fam', 'type', 'name'].includes(ls.get('sort', 'num')) ? ls.get('sort', 'num') : 'num', ordIdx = {};
 function applySort() {
   const famMin = {}; for (const p of P) famMin[p[4]] = Math.min(famMin[p[4]] ?? 1e9, p[0]);
-  const list = sortMode === 'fam' ? [...P].sort((a, b) => famMin[a[4]] - famMin[b[4]] || a[4] - b[4] || a[5] - b[5] || a[0] - b[0]) : P;
+  const list = sortMode === 'fam' ? [...P].sort((a, b) => famMin[a[4]] - famMin[b[4]] || a[4] - b[4] || a[5] - b[5] || a[0] - b[0])
+    : sortMode === 'type' ? [...P].sort((a, b) => a[6][0] - b[6][0] || (a[6][1] || 0) - (b[6][1] || 0) || a[0] - b[0])
+    : sortMode === 'name' ? [...P].sort((a, b) => a[1].localeCompare(b[1], 'fr')) : P;
   list.forEach((p, i) => { ordIdx[p[0]] = i; cards.get(p[0]).el.style.order = i; });
   document.body.classList.toggle('fam', sortMode === 'fam');
-  document.querySelectorAll('#sort button').forEach(b => b.classList.toggle('on', b.dataset.v === sortMode));
 }
-$('#onlyhave').classList.toggle('on', onlyHave);
-$('#onlyhave').onclick = () => { onlyHave = !onlyHave; ls.set('onlyhave', onlyHave ? '1' : '0'); $('#onlyhave').classList.toggle('on', onlyHave); refresh(true); toast(onlyHave ? '👁 Seuls les Pokémon débloqués sont affichés' : '👁 Tous les slots sont affichés'); };
-$('#sort').onclick = e => { const b = e.target.closest('button'); if (!b || b.dataset.v === sortMode) return; sortMode = b.dataset.v; ls.set('sort', sortMode); applySort(); refresh(true);
-  toast(sortMode === 'fam' ? '👪 Regroupés par famille d\'évolution' : '🔢 Triés par numéro'); };
 function genCounts() { const per = {}; for (const [id, c] of cards) if (store.items.has(id)) per[c.gen] = (per[c.gen] || 0) + 1; return per; }
 function tween(el, to) { // compteur animé
   const from = +el.dataset.v || 0; el.dataset.v = to; if (reduce || from === to) { el.textContent = to; return; }
@@ -596,11 +619,11 @@ function refresh(animate) {
   if (fGen && !per[fGen]) { fGen = 0; }
   for (const [id, c] of cards) {
     const have = store.items.has(id);
-    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (fSt === 'all' || (fSt === 'have') === have) && !(mode === 'explorer' && onlyHave && !have);
+    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (!fTypes.size || c.types.some(t => fTypes.has(t))) && (fSt === 'all' || (fSt === 'have') === have);
     c.el.hidden = !ok; shown += ok;
     if (ok && animate && i < 48) { c.el.classList.remove('pre'); c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i * .32); c.el.classList.add('in'); i++; }
   }
-  const any = Object.keys(per).length > 0;
+  shownCount = shown; const any = Object.keys(per).length > 0;
   $('#none').hidden = shown > 0 || !loaded;
   $('#none').innerHTML = any ? '<b>🫥</b>Aucun Pokémon ne correspond.' : '<b>🥚</b>Ton Pokédex est vide.<br><small>Ajoute ta première image : sa génération se débloquera.</small>' + (mode === 'prof' ? '<br><button class="btn gold cta" id="ctaadd">＋ Ajouter ma première image</button>' : '');
   if ($('#ctaadd')) $('#ctaadd').onclick = () => $('#add').click();
@@ -611,13 +634,38 @@ function refresh(animate) {
   const total = Object.keys(per).reduce((a, g) => a + genTotal[g], 0);
   $('#ctot').textContent = total ? '/ ' + total : '';
   $('#bar').style.width = (total ? 100 * n / total : 0) + '%';
-  document.querySelectorAll('.chip[data-g]').forEach(ch => { const g = +ch.dataset.g;
-    ch.hidden = g ? !per[g] : !any; if (!g) return;
-    ch.querySelector('em').textContent = `${per[g] || 0}/${genTotal[g]}`; ch.classList.toggle('full', per[g] === genTotal[g]); });
+  renderFchips(); if (fdlg.open) renderFilters();
 }
 let qt; $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => refresh(true), 120); });
-$('#seg').onclick = e => { const b = e.target.closest('button'); if (!b) return; fSt = b.dataset.v;
-  $('#seg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); refresh(true); };
+/* ---------- Filtres & tri (discrets : une seule fenêtre + puces des filtres actifs) ---------- */
+const fdlg = $('#fdlg'), SORTS = { num: '🔢 N°', fam: '👪 Familles', type: '🔥 Type', name: '🔤 Nom A→Z' }, STATUS = { all: 'Tous', have: '✅ Obtenus', miss: '⬜ Manquants' };
+const nFilters = () => (fGen ? 1 : 0) + fTypes.size + (fSt !== 'all' ? 1 : 0);
+function renderFchips() {
+  const chips = []; if (fGen) chips.push(['g', 'Gén. ' + GEN[fGen - 1]]); fTypes.forEach(t => chips.push(['t' + t, TEMOJI[t] + ' ' + TYPES[t][0]]));
+  if (fSt !== 'all') chips.push(['s', STATUS[fSt]]); if (sortMode !== 'num') chips.push(['o', '↕ ' + SORTS[sortMode].slice(2)]);
+  $('#fchips').innerHTML = chips.map(([k, l]) => `<button class="fc" data-k="${k}">${l}<u>✕</u></button>`).join('');
+  const n = nFilters(); $('#fbadge').hidden = !n; $('#fbadge').textContent = n; $('#dkfilter .dot').hidden = !n;
+}
+$('#fchips').onclick = e => { const b = e.target.closest('.fc'); if (!b) return; const k = b.dataset.k; hap(6);
+  if (k === 'g') fGen = 0; else if (k === 's') fSt = 'all'; else if (k === 'o') { sortMode = 'num'; ls.set('sort', 'num'); applySort(); } else fTypes.delete(+k.slice(1)); refresh(true); };
+function renderFilters() {
+  const per = genCounts(), tc = {}; for (const [id, c] of cards) if (per[c.gen]) for (const t of c.types) { (tc[t] ||= [0, 0])[1]++; if (store.items.has(id)) tc[t][0]++; }
+  const keep = $('#fbody').scrollTop, gens = Object.keys(per).map(Number).sort((a, b) => a - b);
+  $('#fbody').innerHTML = `
+    <div class="fsec"><h4>Génération</h4><div class="fgrid"><button class="fchip ${!fGen ? 'on' : ''}" data-g="0">Toutes</button>${gens.map(g => `<button class="fchip ${fGen === g ? 'on' : ''} ${per[g] === genTotal[g] ? 'full' : ''}" data-g="${g}">Gén. ${GEN[g - 1]} <em>${per[g]}/${genTotal[g]}</em></button>`).join('')}</div></div>
+    <div class="fsec"><h4>Type <small style="text-transform:none;letter-spacing:0">(plusieurs possibles)</small></h4><div class="fgrid">${Object.keys(TYPES).filter(t => tc[t]).map(t => `<button class="fchip t ${fTypes.has(+t) ? 'on' : ''}" data-t="${t}" style="--tc:${TYPES[t][1]}">${TEMOJI[t]} ${TYPES[t][0]} <em>${tc[t][0]}/${tc[t][1]}</em></button>`).join('')}</div></div>
+    <div class="fsec"><h4>Statut</h4><div class="fgrid">${Object.entries(STATUS).map(([k, l]) => `<button class="fchip ${fSt === k ? 'on' : ''}" data-s="${k}">${l}</button>`).join('')}</div></div>
+    <div class="fsec"><h4>Trier par</h4><div class="fgrid">${Object.entries(SORTS).map(([k, l]) => `<button class="fchip ${sortMode === k ? 'on' : ''}" data-o="${k}">${l}</button>`).join('')}</div></div>`;
+  $('#fbody').scrollTop = keep; $('#fdone').textContent = shownCount ? `Voir ${shownCount} Pokémon` : 'Aucun résultat';
+}
+$('#fbody').onclick = e => { const b = e.target.closest('.fchip'); if (!b) return; hap(6);
+  if (b.dataset.g != null) fGen = +b.dataset.g; else if (b.dataset.t) { const t = +b.dataset.t; fTypes.has(t) ? fTypes.delete(t) : fTypes.add(t); }
+  else if (b.dataset.s) fSt = b.dataset.s; else if (b.dataset.o) { sortMode = b.dataset.o; ls.set('sort', sortMode); applySort(); }
+  refresh(true); };
+function resetFilters(noRefresh) { fGen = 0; fSt = 'all'; fTypes.clear(); $('#q').value = ''; if (!noRefresh) refresh(true); }
+$('#freset').onclick = () => { resetFilters(); sortMode = 'num'; ls.set('sort', 'num'); applySort(); refresh(true); };
+$('#fdone').onclick = () => closeD(fdlg); $('#fclose').onclick = () => closeD(fdlg);
+$('#fbtn').onclick = () => { renderFilters(); fdlg.showModal(); };
 $('#moretoggle').onclick = () => { const o = $('#more').classList.toggle('open'); $('#moretoggle').classList.toggle('on', o); $('#moretoggle').setAttribute('aria-expanded', o); };
 $('#cs').value = ls.get('cs', 132); document.documentElement.style.setProperty('--cs', $('#cs').value + 'px');
 $('#cs').oninput = e => { document.documentElement.style.setProperty('--cs', e.target.value + 'px'); ls.set('cs', e.target.value); };
@@ -634,7 +682,7 @@ $('#grid').addEventListener('pointerout', e => { const el = e.target.closest('.s
 
 function goTo(id) {
   const c = cards.get(id); if (!c) return;
-  if (c.el.hidden) { fGen = 0; fSt = 'all'; $('#q').value = ''; $('#chips .chip').click(); $('#seg button').click(); }
+  if (c.el.hidden) { resetFilters(true); refresh(); }
   c.el.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
   c.el.classList.remove('flash'); void c.el.offsetWidth; c.el.classList.add('flash');
 }
@@ -1319,18 +1367,19 @@ for (const [id, key, lbl] of [['#tghap', 'hap', '📳 Vibrations'], ['#tgsfx', '
   b.onclick = () => { ls.set(key, on() ? '0' : '1'); paintT(); if (on()) { key === 'hap' ? hap(25) : sfx.pop(); } };
 }
 document.addEventListener('pointerdown', e => { // ondulation au toucher
-  const t = e.target.closest('.slot,.btn,.b,.dock button,.chip'); if (!t || reduce) return;
+  const t = e.target.closest('.slot,.btn,.b,.dock button,.fchip,.fc'); if (!t || reduce) return;
   const r = t.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, sp = document.createElement('span'); sp.className = 'ripple';
   sp.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`; t.appendChild(sp); setTimeout(() => sp.remove(), 650);
-  if (t.matches('.slot')) { hap(8); sfx.tap(); } else if (t.matches('.chip,.dock button')) hap(6);
+  if (t.matches('.slot')) { hap(8); sfx.tap(); } else if (t.matches('.dock button')) hap(6);
 }, { passive: true });
 // dock (mobile) : se cache en descendant, revient en remontant
 const dock = $('#dock'); let lastY = scrollY;
 addEventListener('scroll', () => { const y = scrollY; if (Math.abs(y - lastY) > 10) { dock.classList.toggle('hide', y > lastY && y > 120); lastY = y; } }, { passive: true });
 function dockMode() { const prof = mode === 'prof'; $('#dkmode .ic').textContent = prof ? '🔭' : '🎓'; $('#dkmode small').textContent = prof ? 'Explorer' : 'Professeur'; $('#dkmain .ic').textContent = prof ? '＋' : '🎲'; $('#dkmain').setAttribute('aria-label', prof ? 'Ajouter des images' : 'Pokémon au hasard'); }
 $('#dkmode').onclick = () => setMode(mode === 'prof' ? 'explorer' : 'prof', true);
-$('#dksearch').onclick = () => { scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#q').focus(), 350); };
-$('#dkopts').onclick = () => { scrollTo({ top: 0, behavior: 'smooth' }); $('#moretoggle').click(); };
+$('#dkfilter').onclick = () => $('#fbtn').click();
+const toggleOptions = on => { const o = on ?? !$('#more').classList.contains('open'); $('#more').classList.toggle('open', o); document.body.classList.toggle('osheet', o); };
+$('#dkopts').onclick = () => toggleOptions(); $('#obackdrop').onclick = () => toggleOptions(false);
 $('#dktop').onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
 $('#dkmain').onclick = () => { if (mode === 'prof') return $('#add').click(); const ids = [...store.items.keys()].filter(i => !cards.get(i).el.hidden); if (!ids.length) return toast('Rien à montrer pour le moment'); sfx.pop(); hap(15); openViewer(ids[Math.floor(Math.random() * ids.length)]); };
 // apparition des cartes au fil du défilement
@@ -1345,7 +1394,8 @@ function sheetDrag(d) {
     if (dy > 110 || v > .6) { d.style.transform = ''; closeD(d); hap(8); } else { d.style.transition = 'transform .3s cubic-bezier(.22,1.2,.36,1)'; d.style.transform = ''; setTimeout(() => d.style.transition = '', 320); } };
   h.addEventListener('pointerup', end); h.addEventListener('pointercancel', end);
 }
-sheetDrag($('#dlg')); sheetDrag($('#view'));
+sheetDrag($('#dlg')); sheetDrag($('#view')); sheetDrag(fdlg);
+fdlg.addEventListener('cancel', e => { e.preventDefault(); closeD(fdlg); }); fdlg.addEventListener('click', e => { if (e.target === fdlg) closeD(fdlg); });
 
 /* ---------- Appli installable, hors ligne, mises à jour ---------- */
 const BUILD = document.querySelector('meta[name=build]')?.content;
