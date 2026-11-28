@@ -283,6 +283,12 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
   .actions{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   .v-nav{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 }
+/* ---------- Favoris ---------- */
+.slot>.fav{position:absolute;top:4px;right:5px;z-index:4;width:30px;height:30px;padding:0;border-radius:50%;background:none;color:var(--mute);font-size:19px;line-height:1;opacity:.55;display:grid;place-items:center;overflow:visible}
+.slot.isfav>.fav{color:var(--gold2);opacity:1;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+.slot>.fav:hover{opacity:1;transform:scale(1.2)}
+.fav.pop{animation:favPop .5s var(--ease)}
+@keyframes favPop{0%{transform:scale(.3) rotate(-40deg)}60%{transform:scale(1.5) rotate(10deg)}100%{transform:none}}
 /* ---------- Retouche ---------- */
 .retouch[hidden]{display:none}
 .retouch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -430,7 +436,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <canvas id="fx"></canvas>
 
 <dialog id="view">
-  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨ FX</button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
+  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vfav" title="Favori" style="width:34px;font-size:18px">☆</button><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨ FX</button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭 3D</button><button class="x" id="vx">✕</button></div>
   <div class="v-stage" id="vstage"><div class="v-holo"></div><canvas id="vfxb" class="vfx"></canvas><div class="v-card"><img id="vimg" alt=""><div class="v-glare"></div></div><canvas id="vfxf" class="vfx" style="z-index:1"></canvas><button class="v-logo" id="vlogo" title="Fiche Pokédex" aria-label="Fiche Pokédex"><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="2.5" width="18" height="19" rx="3.5" fill="#e0323f" stroke="#1b1d25" stroke-width="1.6"/><circle cx="8.2" cy="7.4" r="2.1" fill="#59d4ff" stroke="#1b1d25" stroke-width="1.2"/><rect x="6" y="12" width="12" height="2" rx="1" fill="#fff"/><rect x="6" y="16" width="8" height="2" rx="1" fill="#fff"/></svg></button></div>
   <div class="v-sheet" id="vsheet"></div>
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
@@ -567,11 +573,15 @@ function loop() {
 /* ---------- Grille ---------- */
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const cards = new Map();
-const TEMOJI = { 1:'⚪', 2:'🥊', 3:'🕊️', 4:'☠️', 5:'🏜️', 6:'🪨', 7:'🐛', 8:'👻', 9:'⚙️', 10:'🔥', 11:'💧', 12:'🍃', 13:'⚡', 14:'🔮', 15:'❄️', 16:'🐉', 17:'🌑', 18:'✨' };
+const emojiOK = e => { try { const c = document.createElement('canvas').getContext('2d'); c.font = '32px sans-serif'; const w = c.measureText(e).width; return w > 0 && w !== c.measureText('\u{10FFFF}').width; } catch { return true; } };
+const em = (e, alt) => emojiOK(e) ? e : alt;
+const TEMOJI = { 1:'☀️', 2:'💢', 3:em('🪽','🕊️'), 4:em('🫟','🧪'), 5:'🏜️', 6:'🪨', 7:em('🪲','🐛'), 8:'👻', 9:'🔩', 10:'🔥', 11:'💧', 12:'🌿', 13:'⚡', 14:'🔮', 15:'🧊', 16:'🐉', 17:'🌙', 18:'✨' };
 const TYPES = { 1:['Normal','#a8a77a'], 2:['Combat','#c22e28'], 3:['Vol','#a98ff3'], 4:['Poison','#a33ea1'], 5:['Sol','#e2bf65'], 6:['Roche','#b6a136'], 7:['Insecte','#a6b91a'], 8:['Spectre','#735797'], 9:['Acier','#b7b7ce'], 10:['Feu','#ee8130'], 11:['Eau','#6390f0'], 12:['Plante','#7ac74c'], 13:['Électrik','#f7d02c'], 14:['Psy','#f95587'], 15:['Glace','#96d9d6'], 16:['Dragon','#6f35fc'], 17:['Ténèbres','#705746'], 18:['Fée','#d685ad'] };
 const holoVars = (el, types) => { const c1 = TYPES[types[0]][1], c2 = TYPES[types[1] || types[0]][1]; el.style.setProperty('--h1', c1); el.style.setProperty('--h2', c2); };
 const GEN = ['I','II','III','IV','V','VI','VII','VIII','IX'];
 const genTotal = {}; P.forEach(p => genTotal[p[3]] = (genTotal[p[3]] || 0) + 1);
+const favs = new Set((() => { try { return JSON.parse(ls.get('favs', '[]')); } catch { return []; } })());
+const saveFavs = () => ls.set('favs', JSON.stringify([...favs]));
 let fGen = 0, fSt = 'all', fTypes = new Set(), mode = ls.get('mode', 'prof') === 'explorer' ? 'explorer' : 'prof';
 
 function buildGrid() {
@@ -579,15 +589,23 @@ function buildGrid() {
   for (const [id, fr, en, gen, chain, , types] of P) {
     const el = document.createElement('div');
     el.className = 'slot empty'; el.dataset.id = id;
-    el.innerHTML = `<div class="tbar"></div><div class="num">#${pad(id)} <span class="te">${types.map(t => TEMOJI[t]).join('')}</span></div><div class="pic"></div><div class="name">${fr}</div>`;
+    el.innerHTML = `<button class="fav" aria-label="Favori">☆</button><div class="tbar"></div><div class="num">#${pad(id)} <span class="te">${types.map(t => TEMOJI[t]).join('')}</span></div><div class="pic"></div><div class="name">${fr}</div>`;
     el.title = (fr === en ? fr : `${fr} (${en})`) + ' · ' + types.map(t => TYPES[t][0]).join(' / ');
     el.onclick = () => mode === 'prof' ? openDialog(id) : openViewer(id);
     el.style.setProperty('--fc', `hsl(${(chain * 137) % 360} 70% 55%)`);
-    holoVars(el, types);
+    holoVars(el, types); el.querySelector('.fav').onclick = e => { e.stopPropagation(); toggleFav(id); };
+    if (favs.has(id)) { el.classList.add('isfav'); el.querySelector('.fav').textContent = '★'; }
     cards.set(id, { el, key: norm(fr + ' ' + en + ' ' + id + ' ' + pad(id)), gen, types });
     frag.appendChild(el);
   }
   $('#grid').appendChild(frag);
+}
+function toggleFav(id, silent) {
+  const on = !favs.has(id); on ? favs.add(id) : favs.delete(id); saveFavs(); if (typeof bk !== 'undefined') bk.touch();
+  const el = cards.get(id).el, b = el.querySelector('.fav'); el.classList.toggle('isfav', on); b.textContent = on ? '★' : '☆';
+  if (on && !reduce) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+  hap(on ? [10, 30, 14] : 6); if (on) sfx.pop(); if (!silent) toast(on ? `⭐ ${P[id-1][1]} ajouté aux favoris` : `${P[id-1][1]} retiré des favoris`, null, null, 1800);
+  if (fSt === 'fav') refresh(); else renderFchips(); const vb = $('#vfav'); if (vb && vIds[vi] === id) vb.textContent = on ? '★' : '☆'; return on;
 }
 function paint(id, animate) {
   const c = cards.get(id), it = store.items.get(id), pic = c.el.querySelector('.pic');
@@ -619,7 +637,7 @@ function refresh(animate) {
   if (fGen && !per[fGen]) { fGen = 0; }
   for (const [id, c] of cards) {
     const have = store.items.has(id);
-    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (!fTypes.size || c.types.some(t => fTypes.has(t))) && (fSt === 'all' || (fSt === 'have') === have);
+    const ok = !!per[c.gen] && (!q || c.key.includes(q)) && (!fGen || c.gen === fGen) && (!fTypes.size || c.types.some(t => fTypes.has(t))) && (fSt === 'all' || (fSt === 'fav' ? favs.has(id) : (fSt === 'have') === have));
     c.el.hidden = !ok; shown += ok;
     if (ok && animate && i < 48) { c.el.classList.remove('pre'); c.el.classList.remove('in'); void c.el.offsetWidth; c.el.style.setProperty('--i', i * .32); c.el.classList.add('in'); i++; }
   }
@@ -638,7 +656,7 @@ function refresh(animate) {
 }
 let qt; $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => refresh(true), 120); });
 /* ---------- Filtres & tri (discrets : une seule fenêtre + puces des filtres actifs) ---------- */
-const fdlg = $('#fdlg'), SORTS = { num: '🔢 N°', fam: '👪 Familles', type: '🔥 Type', name: '🔤 Nom A→Z' }, STATUS = { all: 'Tous', have: '✅ Obtenus', miss: '⬜ Manquants' };
+const fdlg = $('#fdlg'), SORTS = { num: '🔢 N°', fam: '👪 Familles', type: '🔥 Type', name: '🔤 Nom A→Z' }, STATUS = { all: 'Tous', have: '✅ Obtenus', miss: '⬜ Manquants', fav: '⭐ Favoris' };
 const nFilters = () => (fGen ? 1 : 0) + fTypes.size + (fSt !== 'all' ? 1 : 0);
 function renderFchips() {
   const chips = []; if (fGen) chips.push(['g', 'Gén. ' + GEN[fGen - 1]]); fTypes.forEach(t => chips.push(['t' + t, TEMOJI[t] + ' ' + TYPES[t][0]]));
@@ -1074,7 +1092,7 @@ async function doExport() {
   if (!store.vers.size) { toast('Rien à sauvegarder pour le moment'); return; }
   const entries = [], parts = [];
   for (const vs of store.vers.values()) for (const v of vs) { entries.push({ key: v.key, label: v.label || '', size: v.blob.size, type: v.blob.type || 'image/png' }); parts.push(v.blob); }
-  const head = new TextEncoder().encode(JSON.stringify({ v: 3, date: new Date().toISOString(), entries })), len = new Uint8Array(4); new DataView(len.buffer).setUint32(0, head.length, true);
+  const head = new TextEncoder().encode(JSON.stringify({ v: 3, date: new Date().toISOString(), entries, favs: [...favs] })), len = new Uint8Array(4); new DataView(len.buffer).setUint32(0, head.length, true);
   const blob = new Blob([MAGIC, len, head, ...parts], { type: 'application/octet-stream' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `pokedex-sauvegarde-${new Date().toISOString().slice(0, 10)}.pkdx`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
@@ -1090,6 +1108,7 @@ $('#impf').onchange = async e => {
     if (first === MAGIC) {
       const hl = new DataView(await f.slice(MAGIC.length, MAGIC.length + 4).arrayBuffer()).getUint32(0, true), off0 = MAGIC.length + 4;
       const head = JSON.parse(new TextDecoder().decode(new Uint8Array(await f.slice(off0, off0 + hl).arrayBuffer()))); let off = off0 + hl;
+      if (head.favs) { head.favs.forEach(i => favs.add(i)); saveFavs(); cards.forEach((c, i) => { const f = favs.has(i); c.el.classList.toggle('isfav', f); c.el.querySelector('.fav').textContent = f ? '★' : '☆'; }); }
       for (const en of head.entries) { const blob = f.slice(off, off + en.size, en.type); off += en.size; const key = /^\d+$/.test(String(en.key)) ? +en.key : String(en.key);
         await putV(key, blob, en.label || ''); touched.add(+String(key).split(':')[0]); n++; }
     } else { // anciennes sauvegardes .json
@@ -1138,12 +1157,13 @@ function showV(dir) {
   im.src = cur.url; stg.style.setProperty('--img', `url("${cur.url}")`); im.className = ''; void im.offsetWidth; if (dir) im.className = dir > 0 ? 'inR' : 'inL';
   $('#vtitle').innerHTML = `<span>#${pad(id)}</span>${fr}`; $('#vname').textContent = fr;
   $('#vsub').innerHTML = P[id - 1][6].map(t => `<span class="tchip" style="background:${TYPES[t][1]}">${TYPES[t][0]}</span>`).join('') + '<br>' + (fr !== en ? en + ' · ' : '') + 'Génération ' + GEN[g - 1];
-  holoVars(stg, P[id - 1][6]); if (vw.open) fxSet(P[id - 1][6]);
+  holoVars(stg, P[id - 1][6]); $('#vfav').textContent = favs.has(id) ? '★' : '☆'; if (vw.open) fxSet(P[id - 1][6]);
   $('#vcount').textContent = `${vi + 1} / ${vIds.length}`;
   if (vw.classList.contains('sheet')) renderSheet(id);
   $('#vprev').disabled = $('#vnext').disabled = vIds.length < 2;
 }
 $('#vvers').onclick = e => { const b = e.target.closest('button'); if (!b) return; vv = +b.dataset.i; showV(1); };
+$('#vfav').onclick = () => toggleFav(vIds[vi]);
 const vgo = d => { hap(6); vv = 0; vi = (vi + d + vIds.length) % vIds.length; showV(d); };
 $('#vprev').onclick = () => vgo(-1); $('#vnext').onclick = () => vgo(1);
 vw.addEventListener('keydown', e => { if (e.key === 'ArrowRight') vgo(1); if (e.key === 'ArrowLeft') vgo(-1); });
