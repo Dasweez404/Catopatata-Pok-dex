@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mon Pokédex</title>
-<meta name="build" content="2026-11-28.7">
+<meta name="build" content="2026-11-28.8">
 <meta name="theme-color" content="#e0323f">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pokédex"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -220,7 +220,18 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
 #view.sheet .v-sheet{display:block;animation:dIn .3s var(--ease)}
 .sh-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .sh-top img{width:72px;height:72px;object-fit:contain;filter:drop-shadow(2px 3px 2px rgba(0,0,0,.35))}
-.sh-top h3{margin:0;font-size:20px}.sh-top small{color:var(--mute);display:block}
+.sh-top .tchip{display:inline-block;color:#fff;font-size:12px;font-weight:600;padding:2px 11px;border-radius:99px;margin:5px 5px 0 0;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.sh-top small{color:var(--mute);display:block}.sh-top .gn{font-size:15px;font-weight:600;color:var(--ink)}
+.v-tools{position:absolute;top:10px;right:10px;z-index:4;display:flex;flex-direction:column;gap:8px}
+.vtool{width:40px;height:40px;border-radius:50%;background:rgba(20,22,30,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-size:17px;display:grid;place-items:center;padding:0;border:1px solid rgba(255,255,255,.28)}
+.vtool[hidden]{display:none}
+.vtool.on,#vfxbtn.on,#vgyro.on{background:var(--gold);color:#4a3300;border-color:#fff}
+@keyframes swapIn{from{opacity:0;transform:translateY(10px)}}
+.v-sheet.swap>*{animation:swapIn .35s var(--ease) backwards}
+.v-sheet.swap>*:nth-child(2){animation-delay:.05s}.v-sheet.swap>*:nth-child(3){animation-delay:.1s}.v-sheet.swap>*:nth-child(4){animation-delay:.15s}.v-sheet.swap>*:nth-child(5){animation-delay:.2s}
+#vstage .v-card{view-transition-name:vsticker}.sh-top img{view-transition-name:vsticker}
+::view-transition-group(vsticker){animation-duration:.5s;animation-timing-function:cubic-bezier(.22,1.15,.36,1)}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.28s}
 .sh-top .b{margin-left:auto;white-space:nowrap}
 .v-sheet section{margin:14px 0}
 .v-sheet h4{margin:0 0 6px;font-size:14px;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
@@ -255,7 +266,7 @@ body.fam .slot{border-bottom:6px solid var(--fc)}
 .slot.pre{opacity:0;transform:translateY(26px) scale(.92)}
 .slot.in{animation:cardIn .55s var(--ease) backwards;animation-delay:calc(var(--i,0)*45ms)}
 @keyframes flipIn{from{transform:perspective(900px) rotateY(-80deg);opacity:0}to{transform:none;opacity:1}}
-#view.sheet .v-sheet{animation:flipIn .45s var(--ease)}
+@supports not (view-transition-name:none){#view.sheet .v-sheet{animation:flipIn .45s var(--ease)}}
 .v-card.settle{transition:transform .2s,translate .35s var(--ease),rotate .35s var(--ease)!important}
 .tg{opacity:.75}.tg.on{background:#fff;color:var(--red2);opacity:1}
 .cta{display:inline-block;margin-top:14px;padding:12px 22px;font-size:16px}
@@ -349,7 +360,7 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 .vfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #vfxbtn.on{background:var(--gold);color:#4a3300}
 .v-info .tchip{display:inline-block;color:#fff;font-size:12px;font-weight:600;font-size:12px;padding:1px 10px;border-radius:99px;margin:0 3px;text-shadow:0 1px 1px rgba(0,0,0,.35)}
-#vgyro{width:auto;padding:0 11px;font-size:13px}#vgyro.on{background:var(--gold);color:#4a3300}
+#vgyro.on{background:var(--gold);color:#4a3300}
 .v-card img{width:100%;height:100%;object-fit:contain;display:block}
 .v-card{position:absolute;inset:6%;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .2s;--dx:0px;--dy:0px;--rot:0deg;
   translate:calc(var(--tx,0px) + var(--dx)) calc(var(--ty,0px) + var(--dy));rotate:var(--rot);filter:drop-shadow(calc(var(--sh)*1.5 + var(--sx,0px)) calc(var(--sh)*2 + var(--sy,0px)) calc(var(--sh)*1.5) rgba(0,0,0,.4))}
@@ -470,8 +481,8 @@ body[data-mode=explorer] .slot.empty:hover{transform:none;border-color:var(--lin
 <canvas id="fx"></canvas>
 
 <dialog id="view">
-  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vshare" title="Partager une carte" style="width:34px;font-size:16px">📤</button><button class="x" id="vfav" title="Favori" style="width:34px;font-size:18px">☆</button><button class="x" id="vfxbtn" title="Ambiance du type (particules)" style="width:auto;padding:0 11px;font-size:13px">✨<span class="btxt"> FX</span></button><button class="x" id="vgyro" hidden title="Effet 3D au gyroscope">🧭<span class="btxt"> 3D</span></button><button class="x" id="vx">✕</button></div>
-  <div class="v-stage" id="vstage"><div class="v-holo"></div><canvas id="vfxb" class="vfx"></canvas><div class="v-card"><img id="vimg" alt=""><div class="v-glare"></div></div><canvas id="vfxf" class="vfx" style="z-index:1"></canvas><button class="v-logo" id="vlogo" title="Fiche Pokédex" aria-label="Fiche Pokédex"><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="2.5" width="18" height="19" rx="3.5" fill="#e0323f" stroke="#1b1d25" stroke-width="1.6"/><circle cx="8.2" cy="7.4" r="2.1" fill="#59d4ff" stroke="#1b1d25" stroke-width="1.2"/><rect x="6" y="12" width="12" height="2" rx="1" fill="#fff"/><rect x="6" y="16" width="8" height="2" rx="1" fill="#fff"/></svg></button></div>
+  <div class="dh"><h2 id="vtitle"></h2><button class="x" id="vx">✕</button></div>
+  <div class="v-stage" id="vstage"><div class="v-holo"></div><canvas id="vfxb" class="vfx"></canvas><div class="v-card"><img id="vimg" alt=""><div class="v-glare"></div></div><canvas id="vfxf" class="vfx" style="z-index:1"></canvas><div class="v-tools"><button class="vtool" id="vfav" title="Favori">☆</button><button class="vtool" id="vshare" title="Partager une carte">📤</button><button class="vtool" id="vfxbtn" title="Ambiance du type (particules)">✨</button><button class="vtool" id="vgyro" hidden title="Effet 3D au gyroscope">🧭</button></div><button class="v-logo" id="vlogo" title="Fiche Pokédex" aria-label="Fiche Pokédex"><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="2.5" width="18" height="19" rx="3.5" fill="#e0323f" stroke="#1b1d25" stroke-width="1.6"/><circle cx="8.2" cy="7.4" r="2.1" fill="#59d4ff" stroke="#1b1d25" stroke-width="1.2"/><rect x="6" y="12" width="12" height="2" rx="1" fill="#fff"/><rect x="6" y="16" width="8" height="2" rx="1" fill="#fff"/></svg></button></div>
   <div class="v-sheet" id="vsheet"></div>
   <div class="v-info"><b id="vname"></b><span id="vsub"></span></div>
   <div class="vers" id="vvers" style="justify-content:center;padding:0 16px"></div>
@@ -1397,7 +1408,11 @@ stg.addEventListener('pointerleave', () => { stg.style.setProperty('--rx', '0deg
 let INFO = null, infoP = null;
 const loadInfo = () => infoP ||= fetch('pokedex-info.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(j => INFO = j);
 const esc = t => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-function setSheet(on) { vw.classList.toggle('sheet', on); if (on) renderSheet(vIds[vi]); }
+async function setSheet(on) {
+  if (on) { try { await loadInfo(); } catch {} }
+  const go = () => { vw.classList.toggle('sheet', on); if (on) renderSheet(vIds[vi]); };
+  if (document.startViewTransition && !reduce) { hap(8); const t = document.startViewTransition(go); try { await t.finished; } catch {} } else go();
+}
 $('#vlogo').onclick = () => setSheet(true);
 vw.addEventListener('close', () => vw.classList.remove('sheet'));
 vw.addEventListener('keydown', e => { if (e.key === 'i' || e.key === 'I') setSheet(!vw.classList.contains('sheet')); });
@@ -1416,13 +1431,13 @@ async function renderSheet(id) {
   const edges = INFO.chains[d.ch] || [], nm = i => `<a data-go="${i}" class="${i === id ? 'cur' : ''}">${esc(P[i - 1][1])}</a>`;
   const evo = edges.length ? edges.map(([a, b, c]) => `<div>${nm(a)} → ${nm(b)} <em>(${esc(c)})</em></div>`).join('') : '<div><em>Ne possède aucune évolution ni pré-évolution.</em></div>';
   box.innerHTML = `
-    <div class="sh-top">${it ? `<img src="${it.turl || it.url}" alt="">` : ''}<div><h3>#${pad(id)} ${esc(fr)}</h3><small>${esc(d.g)}${fr !== en ? ' · ' + esc(en) : ''}</small><div>${tch}</div></div><div style="margin-left:auto;display:grid;gap:6px"><button class="b" id="shback">← Sticker</button><button class="b" id="shcmp">⚖️ Comparer</button></div></div>
+    <div class="sh-top">${it ? `<img src="${it.turl || it.url}" alt="">` : ''}<div><small class="gn">${esc(d.g)}</small>${fr !== en ? `<small>${esc(en)}</small>` : ''}<div>${tch}</div></div><div style="margin-left:auto;display:grid;gap:6px"><button class="b" id="shback">← Sticker</button><button class="b" id="shcmp">⚖️ Comparer</button></div></div>
     <section class="sh-desc"><h4>📖 Description du Pokédex</h4>
       <p>${d.r ? esc(d.r) : d.m.map(esc).join(' ')}</p>
       <details><summary>Voir le détail jeu par jeu</summary>${d.d.map(([vs, t]) => `<div class="gt">${vs.map(v => `<span class="gchip">${esc(gname(v))}</span>`).join('')}<p>${esc(t)}</p></div>`).join('')}</details></section>
     ${d.bi && d.bi.length ? `<section class="biome"><h4>🌍 Biome idéal</h4><div class="bchips">${d.bi.map((b, i) => `<span class="bchip ${i ? '' : 'main'}"><i>${BIOMES[b][1]}</i>${BIOMES[b][0]}${i ? '' : ' <em>habitat principal</em>'}</span>`).join('')}</div></section>` : ''}
     <section><h4>Informations</h4><div class="facts">
-      ${F('Catégorie', esc(d.g))}${F('Génération', GEN[gen - 1])}${F('Taille', pct(d.h / 10) + ' m')}${F('Poids', pct(d.w / 10) + ' kg')}
+      ${F('Génération', GEN[gen - 1])}${F('Taille', pct(d.h / 10) + ' m')}${F('Poids', pct(d.w / 10) + ' kg')}
       ${F('Talents', d.ab.map(([n, h]) => esc(n) + (h ? ' <em>(caché)</em>' : '')).join('<br>'))}${F('Sexe', sex)}
       ${F('Groupes d’œufs', d.eg.map(esc).join(', '))}${F('Éclosion', `≈ ${(d.hc + 1) * 255} pas`)}${F('Habitat', esc(d.hab))}${F('Couleur', esc(d.col))}${F('Forme', esc(d.shp))}
       ${F('Taux de capture', `${d.cr} / 255`)}${F('Bonheur de base', d.bh)}${F('EXP de base', d.xp || '')}${F('Courbe de croissance', esc(d.gw))}
@@ -1430,6 +1445,7 @@ async function renderSheet(id) {
     <section><h4>Statistiques de base</h4><div class="bars">${bars}</div></section>
     <section><h4>Évolutions</h4><div class="evo">${evo}</div></section>
     ${d.dx.length ? `<section><h4>Numéros dans les Pokédex régionaux</h4><div class="dexn">${d.dx.map(([n, k]) => `<span>${esc(n)} <b>#${String(k).padStart(3, '0')}</b></span>`).join('')}</div></section>` : ''}`;
+  box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap');
   $('#shback').onclick = () => setSheet(false); $('#shcmp').onclick = () => openCompare(id);
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = () => { const g = +a.dataset.go; if (g === id) return; if (store.items.has(g) && !cards.get(g).el.hidden) { vi = vIds.indexOf(g); if (vi < 0) { vIds.push(g); vi = vIds.length - 1; } vv = 0; showV(1); } else toast(store.items.has(g) ? 'Ce Pokémon est masqué par les filtres' : `${P[g - 1][1]} n’est pas encore dans ta collection`); });
 }
